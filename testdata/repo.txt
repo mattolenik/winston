@@ -1,0 +1,12 @@
+{
+  "Name": "Local Test",
+  "Description": "Not much",
+  "Maintainer": "Matt",
+  "Packages": [
+	{ 
+	  "Name": "plink",
+	  "Description": "plink cmd line",
+	  "FetchUrl": "https://www.dropbox.com/s/v0oaqkt3fxrg1fe/plink.zip?dl=1"
+	}
+  ]
+}
