@@ -3,19 +3,12 @@
 
 #include "stdafx.h"
 
-
-// trim from end
-static inline std::wstring &rtrim(std::wstring &s) {
-	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-	return s;
-}
-
 #pragma pack(push, 1)
 struct Options {
 	const _TCHAR magic[33];
 	const _TCHAR appPath[128];
 	const _TCHAR workingDir[128];
-	BOOL cmdline;
+	BOOL WaitForCompletion;
 };
 #pragma pack(pop)
 
@@ -30,8 +23,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	std::wstring appPath(Opts.appPath);
 	std::wstring workingDir(Opts.workingDir);
-	rtrim(appPath);
-	rtrim(workingDir);
 	_TCHAR* space = _T(" ");
 
 	for (int i = 1; i < argc; i++)
@@ -59,8 +50,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	_tprintf(_T("err is null: %d\n"), si.hStdError == NULL);
 	_tprintf(_T("in is null: %d\n"), si.hStdInput == NULL);
 
+	// TODO: error handling
 	PROCESS_INFORMATION pi;
 	CreateProcessW(NULL, appPathFinal, NULL, &sa, TRUE, 0, NULL, workingDir.c_str(), &si, &pi);
-	WaitForSingleObject(pi.hProcess, INFINITE);
+	if (Opts.WaitForCompletion)
+	{
+		WaitForSingleObject(pi.hProcess, INFINITE);
+	}
 	return 0;
 }

@@ -21,7 +21,7 @@ namespace Winston
             public string WorkingDir;
 
             [MarshalAs(UnmanagedType.Bool)]
-            public bool CommandLine;
+            public bool WaitForCompletion;
 
         }
 
@@ -36,7 +36,7 @@ namespace Winston
                 Magic = "24cf2af931624d70b7972221e1fa1dfc",
                 AppPath = appPath,
                 WorkingDir = workingDir,
-                CommandLine = true
+                WaitForCompletion = true
             };
             var key = Encoding.Unicode.GetBytes(opts.Magic);
             var optsData = RawSerialize(opts);
@@ -53,7 +53,6 @@ namespace Winston
             stream.Position = pos;
             stream.Write(data, 0, data.Length);
         }
-
 
         static byte[] RawSerialize(object anything)
         {
