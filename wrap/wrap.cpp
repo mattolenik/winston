@@ -6,12 +6,18 @@
 #pragma pack(push, 1)
 struct Options {
 	const _TCHAR magic[33];
+	// Fixed lengths to keep things simple. 128 characters
+	// should be more than enough given that the paths are relative.
 	const _TCHAR appPath[128];
 	const _TCHAR workingDir[128];
 	BOOL WaitForCompletion;
 };
 #pragma pack(pop)
 
+// This stuct gets filled by winston during the linking stage.
+// This program serves as a template. Winston looks for the location
+// of the magic number and then writes a new struct into the binary
+// with the correct data prepopulated.
 static const struct Options Opts = {
 	_T("24cf2af931624d70b7972221e1fa1dfc"),
 	_T("                                                                                                                               "),
@@ -20,7 +26,6 @@ static const struct Options Opts = {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-
 	std::wstring appPath(Opts.appPath);
 	std::wstring workingDir(Opts.workingDir);
 	_TCHAR* space = _T(" ");
