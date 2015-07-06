@@ -27,8 +27,8 @@ namespace Winston
                 var verb = args.First().ToLowerInvariant();
                 var verbArgs = args.Skip(1);
 
-                var repos = new Repos();
-                repos.Add(@"D:\Dev\Projects\Winston\testdata\repo.txt");
+                var repos = new Cache();
+                repos.Add(Path.GetFullPath(@"..\..\..\testdata\repo.txt"));
                 var cellar = new Cellar(Paths.WinstonDir);
 
                 switch (verb)
@@ -36,9 +36,9 @@ namespace Winston
                     case "add":
                         await repos.InstallApps(cellar, verbArgs.ToArray());
                         break;
-                    //case "remove":
-                    //    cellar.Remove(verbArgs);
-                    //    break;
+                    case "remove":
+                        await repos.RemoveApps(cellar, verbArgs.ToArray());
+                        break;
                     //case "search":
                     //    cellar.Search(verbArgs);
                     //    break;
@@ -47,7 +47,10 @@ namespace Winston
                     //    break;
                     case "help":
                         Help();
-                        break;
+                        return;
+                    default:
+                        PrintUsage();
+                        return;
                 }
             }
         }

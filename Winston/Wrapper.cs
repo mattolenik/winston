@@ -26,23 +26,21 @@ namespace Winston
         }
 
         readonly Stream wrapExe;
+        readonly Options opts;
 
-        public Wrapper(Stream exe)
+        public Wrapper(Stream exe, string appPath, string workingDir, bool waitForCompletion)
         {
             wrapExe = exe;
-        }
-
-        public void Wrap(string appPath, string workingDir)
-        {
-
-
-            var opts = new Options
+            opts = new Options
             {
                 Magic = "24cf2af931624d70b7972221e1fa1dfc",
                 AppPath = appPath,
                 WorkingDir = workingDir,
-                WaitForCompletion = true
+                WaitForCompletion = waitForCompletion
             };
+        }
+        public void Wrap()
+        {
             var key = Encoding.Unicode.GetBytes(opts.Magic);
             var optsData = RawSerialize(opts);
             ReplaceAtKey(wrapExe, key, optsData);

@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -45,33 +46,60 @@ namespace Winston
                 throw new InvalidDataException("Hash of remote file {0} did not match expected {1}".Fmt(hash, pkg.Sha1));
             }
 
-            var name = pkg.Name.ToLowerInvariant();
-            var installPath = Path.Combine(cellarPath, name, hash);
+            var installPath = Path.Combine(cellarPath, pkg.Name, hash);
             Directory.CreateDirectory(installPath);
             using (var file = File.OpenRead(tmpFile))
             {
                 Unzip(file, installPath);
             }
 
+            await Link(pkg);
+        }
+
+        public async Task Link(Package pkg)
+        {
+            var installPath = Path.Combine(cellarPath, pkg.Name, pkg.Sha1);
             var appPath = Path.Combine(installPath, pkg.Exec);
             var relAppPath = GetRelativePath(binPath, appPath);
             var relWorkingDir = GetRelativePath(binPath, installPath);
             var alias = Path.GetFileNameWithoutExtension(appPath);
-            await Link(relAppPath, relWorkingDir, alias);
-        }
-
-        public async Task Link(string relativeAppPath, string relativeWorkingDir, string alias)
-        {
             var aliasPath = Path.Combine(binPath, alias + ".exe");
+
             using (var wrap = new MemoryStream(Resources.wrap, 0, Resources.wrap.Length, true, true))
-            using (var wrapper = new Wrapper(wrap))
+            using (var wrapper = new Wrapper(wrap, relAppPath, relWorkingDir, pkg.Shell))
             using (var file = File.Create(aliasPath))
             {
-                wrapper.Wrap(relativeAppPath, relativeWorkingDir);
+                wrapper.Wrap();
                 wrap.Position = 0;
                 var buf = wrap.GetBuffer();
                 await file.WriteAsync(buf, 0, buf.Length);
             }
+        }
+
+        public async Task Remove(Package pkg)
+        {
+            await Unlink(pkg);
+            var installPath = Path.Combine(cellarPath, pkg.Name, pkg.Sha1);
+            var appPath = Path.Combine(cellarPath, pkg.Name);
+            await Task.Run(() =>
+            {
+                Directory.Delete(installPath, true);
+                // Clean up the app path if there are no other versions
+                if (!Directory.GetFiles(appPath).Any())
+                {
+                    Directory.Delete(appPath);
+                }
+            });
+        }
+
+        public async Task Unlink(Package pkg)
+        {
+            await Task.Run(() =>
+            {
+                var alias = Path.GetFileNameWithoutExtension(pkg.Exec);
+                var aliasPath = Path.Combine(binPath, alias + ".exe");
+                File.Delete(aliasPath);
+            });
         }
 
         void Unzip(Stream stream, string destination)

@@ -39,6 +39,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	_TCHAR* appPathFinal = new _TCHAR[appPathLength];
 	_tcscpy_s(appPathFinal, appPathLength, appPath.c_str());
 
+	//
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES) };
 	sa.nLength = sizeof(sa);
 	sa.bInheritHandle = TRUE;
@@ -46,21 +47,24 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	STARTUPINFOW si = { sizeof(STARTUPINFOW) };
 	si.cb = sizeof(si);
-	si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-	si.dwFlags |= STARTF_USESTDHANDLES;
+	//if (Opts.WaitForCompletion)
+	{
+		si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+		si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+		si.dwFlags |= STARTF_USESTDHANDLES;
+	}
 
-	_tprintf(_T("out is null: %d\n"), si.hStdOutput == NULL);
-	_tprintf(_T("err is null: %d\n"), si.hStdError == NULL);
-	_tprintf(_T("in is null: %d\n"), si.hStdInput == NULL);
+	//_tprintf(_T("out is null: %d\n"), si.hStdOutput == NULL);
+	//_tprintf(_T("err is null: %d\n"), si.hStdError == NULL);
+	//_tprintf(_T("in is null: %d\n"), si.hStdInput == NULL);
 
 	// TODO: error handling
 	PROCESS_INFORMATION pi;
 	CreateProcessW(NULL, appPathFinal, NULL, &sa, TRUE, 0, NULL, workingDir.c_str(), &si, &pi);
 	if (Opts.WaitForCompletion)
 	{
-		WaitForSingleObject(pi.hProcess, INFINITE);
+		//WaitForSingleObject(pi.hProcess, INFINITE);
 	}
 	return 0;
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Winston
 {
-    public class Repos
+    public class Cache
     {
         readonly HashSet<Repo> repos = new HashSet<Repo>();
 
@@ -32,6 +32,15 @@ namespace Winston
             {
                 var app = repos.SelectMany(r => r.Packages).Single(p => string.Equals(appName, p.Name, StringComparison.OrdinalIgnoreCase));
                 await cellar.Add(app);
+            }));
+        }
+
+        public async Task RemoveApps(Cellar cellar, params string[] apps)
+        {
+            await Task.WhenAll(apps.Select(async appName =>
+            {
+                var app = repos.SelectMany(r => r.Packages).Single(p => string.Equals(appName, p.Name, StringComparison.OrdinalIgnoreCase));
+                await cellar.Remove(app);
             }));
         }
     }
