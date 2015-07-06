@@ -23,21 +23,22 @@ namespace Winston
             Directory.CreateDirectory(Paths.WinstonDir);
 
             using (var cfgProvider = new ConfigProvider())
+            using (var cache = new Cache(Paths.WinstonDir))
             {
                 var verb = args.First().ToLowerInvariant();
                 var verbArgs = args.Skip(1);
 
-                var repos = new Cache();
-                repos.Add(Path.GetFullPath(@"..\..\..\testdata\repo.txt"));
                 var cellar = new Cellar(Paths.WinstonDir);
+                cache.AddRepo(Path.GetFullPath(@"..\..\..\testdata\repo.txt"));
+                cache.Reload();
 
                 switch (verb)
                 {
                     case "add":
-                        await repos.InstallApps(cellar, verbArgs.ToArray());
+                        cellar.AddApps(cache, verbArgs.ToArray());
                         break;
                     case "remove":
-                        await repos.RemoveApps(cellar, verbArgs.ToArray());
+                        await cellar.RemoveApps(verbArgs.ToArray());
                         break;
                     //case "search":
                     //    cellar.Search(verbArgs);

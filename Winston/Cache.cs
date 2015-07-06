@@ -2,46 +2,75 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Winston
 {
-    public class Cache
+    public class Cache : IDisposable
     {
-        readonly HashSet<Repo> repos = new HashSet<Repo>();
+        readonly string sourcesPath;
+        readonly string cachePath;
 
-        public void Add(string uriOrPath)
+        Dictionary<string, Package> cache;
+
+        // TODO: worry about concurrent access here?
+        HashSet<string> sources;
+
+        public Cache(string cellarPath)
         {
-            if (LocalFileRepo.CanLoad(uriOrPath))
+            sourcesPath = Path.Combine(cellarPath, "sources.yml");
+            cachePath = Path.Combine(cellarPath, "cache.yml");
+            Load();
+        }
+
+        void Load()
+        {
+            Yml.TryLoad(sourcesPath, out sources, () => new HashSet<string>(StringComparer.InvariantCultureIgnoreCase));
+            Yml.TryLoad(cachePath, out cache, () => new Dictionary<string, Package>(StringComparer.InvariantCultureIgnoreCase));
+        }
+
+        void Save()
+        {
+            Yml.Save(sources, sourcesPath);
+            Yml.Save(cache, cachePath);
+        }
+
+        public void AddRepo(string uriOrPath)
+        {
+            sources.Add(uriOrPath);
+        }
+
+        void Put(string uriOrPath)
+        {
+            if (!LocalFileRepo.CanLoad(uriOrPath)) throw new Exception("Can't load repo " + uriOrPath);
+
+            Repo r;
+            if (!LocalFileRepo.TryLoad(uriOrPath, out r))
             {
-                Repo r;
-                if (LocalFileRepo.TryLoad(uriOrPath, out r))
-                {
-                    repos.Add(r);
-                    r.Url = uriOrPath;
-                    return;
-                }
                 throw new Exception("Unable to load repo with URI: {0}".Fmt(uriOrPath));
+            }
+            foreach (var pkg in r.Packages)
+            {
+                cache[pkg.Name] = pkg;
             }
         }
 
-        public async Task InstallApps(Cellar cellar, params string[] apps)
+
+        public void Reload()
         {
-            await Task.WhenAll(apps.Select(async appName =>
+            foreach (var source in sources)
             {
-                var app = repos.SelectMany(r => r.Packages).Single(p => string.Equals(appName, p.Name, StringComparison.OrdinalIgnoreCase));
-                await cellar.Add(app);
-            }));
+                Put(source);
+            }
         }
 
-        public async Task RemoveApps(Cellar cellar, params string[] apps)
+        public Package ByName(string pkgName)
         {
-            await Task.WhenAll(apps.Select(async appName =>
-            {
-                var app = repos.SelectMany(r => r.Packages).Single(p => string.Equals(appName, p.Name, StringComparison.OrdinalIgnoreCase));
-                await cellar.Remove(app);
-            }));
+            return cache[pkgName];
+        }
+
+        public void Dispose()
+        {
+            Save();
         }
     }
 

@@ -46,12 +46,22 @@ namespace Winston
                 throw new InvalidDataException("Hash of remote file {0} did not match expected {1}".Fmt(hash, pkg.Sha1));
             }
 
+            // Save package information to disk first. Other actions can use this
+            // to interact with a package without having to load whole repos into memory.
+            var pkgPath = Path.Combine(cellarPath, pkg.Name, "pkg.yml");
+            Yml.Save(pkg, pkgPath);
+
             var installPath = Path.Combine(cellarPath, pkg.Name, hash);
-            Directory.CreateDirectory(installPath);
-            using (var file = File.OpenRead(tmpFile))
+            await Task.Run(() =>
             {
-                Unzip(file, installPath);
-            }
+                Directory.CreateDirectory(installPath);
+                using (var file = File.OpenRead(tmpFile))
+                {
+                    Unzip(file, installPath);
+                }
+            });
+
+            File.Delete(tmpFile);
 
             await Link(pkg);
         }
@@ -59,6 +69,10 @@ namespace Winston
         public async Task Link(Package pkg)
         {
             var installPath = Path.Combine(cellarPath, pkg.Name, pkg.Sha1);
+            if (!Directory.Exists(installPath))
+            {
+                throw new InvalidOperationException("Cannot link app {0} because it is not installed".Fmt(pkg.Name));
+            }
             var appPath = Path.Combine(installPath, pkg.Exec);
             var relAppPath = GetRelativePath(binPath, appPath);
             var relWorkingDir = GetRelativePath(binPath, installPath);
@@ -76,20 +90,17 @@ namespace Winston
             }
         }
 
-        public async Task Remove(Package pkg)
+        public async Task Remove(string name)
         {
-            await Unlink(pkg);
-            var installPath = Path.Combine(cellarPath, pkg.Name, pkg.Sha1);
-            var appPath = Path.Combine(cellarPath, pkg.Name);
-            await Task.Run(() =>
+            var appPath = Path.Combine(cellarPath, name);
+            if (!Directory.Exists(appPath))
             {
-                Directory.Delete(installPath, true);
-                // Clean up the app path if there are no other versions
-                if (!Directory.GetFiles(appPath).Any())
-                {
-                    Directory.Delete(appPath);
-                }
-            });
+                return;
+            }
+            var pkg = Yml.Load<Package>(Path.Combine(appPath, "pkg.yml"));
+            await Unlink(pkg);
+
+            await Task.Run(() => Directory.Delete(appPath, true));
         }
 
         public async Task Unlink(Package pkg)
@@ -124,6 +135,11 @@ namespace Winston
             var path2 = new Uri(to);
             var diff = path1.MakeRelativeUri(path2);
             return diff.OriginalString;
+        }
+
+        public async Task RemoveApps(params string[] apps)
+        {
+            await Task.WhenAll(apps.Select(async appName => await Remove(appName)));
         }
     }
 
