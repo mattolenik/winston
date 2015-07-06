@@ -1,10 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Winston
 {
@@ -61,6 +61,7 @@ namespace Winston
         public async Task Refresh()
         {
             cache.Clear();
+            // TODO: repos with colliding app names will clobber each other here
             var tasks = sources.Select(s => Task.Run(() => Put(s)));
             await Task.WhenAll(tasks);
         }
