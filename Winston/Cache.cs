@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +13,7 @@ namespace Winston
         readonly string sourcesPath;
         readonly string cachePath;
 
-        Dictionary<string, Package> cache;
+        ConcurrentDictionary<string, Package> cache;
 
         // TODO: worry about concurrent access here?
         HashSet<string> sources;
@@ -24,8 +27,9 @@ namespace Winston
 
         void Load()
         {
+            // TODO: fix improper default values
             Yml.TryLoad(sourcesPath, out sources, () => new HashSet<string>(StringComparer.InvariantCultureIgnoreCase));
-            Yml.TryLoad(cachePath, out cache, () => new Dictionary<string, Package>(StringComparer.InvariantCultureIgnoreCase));
+            Yml.TryLoad(cachePath, out cache, () => new ConcurrentDictionary<string, Package>(StringComparer.InvariantCultureIgnoreCase));
         }
 
         void Save()
@@ -54,13 +58,11 @@ namespace Winston
             }
         }
 
-
-        public void Reload()
+        public async Task Refresh()
         {
-            foreach (var source in sources)
-            {
-                Put(source);
-            }
+            cache.Clear();
+            var tasks = sources.Select(s => Task.Run(() => Put(s)));
+            await Task.WhenAll(tasks);
         }
 
         public Package ByName(string pkgName)

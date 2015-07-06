@@ -115,19 +115,19 @@ namespace Winston
             });
         }
 
-        public IEnumerable<Package> List()
+        public async Task<Package[]> List()
         {
             var pkgFiles = Directory.GetFiles(cellarPath, "pkg.yml", SearchOption.AllDirectories);
-            var tasks = pkgFiles.Select(p => Task.Run(() =>
+            var tasks = pkgFiles.Select(async p => await Task.Run(() =>
             {
                 var deserializer = new Deserializer();
                 using (var reader = new StreamReader(p))
                 {
                     return deserializer.Deserialize<Package>(reader);
                 }
-            })).ToArray();
-            Task.WaitAll(tasks);
-            return tasks.Select(t => t.Result);
+            }));
+            var res = await Task.WhenAll(tasks);
+            return res;
         }
 
         void Unzip(Stream stream, string destination)
