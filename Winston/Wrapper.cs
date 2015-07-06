@@ -27,9 +27,14 @@ namespace Winston
 
         readonly Stream wrapExe;
 
-        public Wrapper(Stream exe, string appPath, string workingDir)
+        public Wrapper(Stream exe)
         {
             wrapExe = exe;
+        }
+
+        public void Wrap(string appPath, string workingDir)
+        {
+
 
             var opts = new Options
             {
@@ -40,7 +45,7 @@ namespace Winston
             };
             var key = Encoding.Unicode.GetBytes(opts.Magic);
             var optsData = RawSerialize(opts);
-            ReplaceAtKey(exe, key, optsData);
+            ReplaceAtKey(wrapExe, key, optsData);
         }
 
         void ReplaceAtKey(Stream stream, byte[] key, byte[] data)

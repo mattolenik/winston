@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Winston.Properties;
 
 namespace Winston
 {
@@ -56,16 +57,20 @@ namespace Winston
             var relAppPath = GetRelativePath(binPath, appPath);
             var relWorkingDir = GetRelativePath(binPath, installPath);
             var alias = Path.GetFileNameWithoutExtension(appPath);
-            Link(relAppPath, relWorkingDir, alias);
+            await Link(relAppPath, relWorkingDir, alias);
         }
 
-        public void Link(string relativeAppPath, string relativeWorkingDir, string alias)
+        public async Task Link(string relativeAppPath, string relativeWorkingDir, string alias)
         {
             var aliasPath = Path.Combine(binPath, alias + ".exe");
-            File.Copy(@"D:\Dev\Projects\winston\wrap\Debug\wrap.exe", aliasPath, true);
-            using (var file = File.Open(aliasPath, FileMode.Open, FileAccess.ReadWrite))
-            using (var wrap = new Wrapper(file, relativeAppPath, relativeWorkingDir))
+            using (var wrap = new MemoryStream(Resources.wrap, 0, Resources.wrap.Length, true, true))
+            using (var wrapper = new Wrapper(wrap))
+            using (var file = File.Create(aliasPath))
             {
+                wrapper.Wrap(relativeAppPath, relativeWorkingDir);
+                wrap.Position = 0;
+                var buf = wrap.GetBuffer();
+                await file.WriteAsync(buf, 0, buf.Length);
             }
         }
 
