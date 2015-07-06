@@ -6,15 +6,12 @@ namespace Winston
 {
     public class Config
     {
-        public string Cellar { get; private set; }
-
         public static Config Default
         {
             get
             {
                 return new Config
                 {
-                    Cellar = Path.Combine(Paths.WinstonDir, "cellar")
                 };
             }
         }

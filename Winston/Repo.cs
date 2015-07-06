@@ -64,9 +64,13 @@ namespace Winston
 
         public string FetchUrl { get; set; }
 
+        public string Exec { get; set; }
+
+        public string Sha1 { get; set; }
+
         public override string ToString()
         {
-            return string.Format("Name: {0}, Description: {1}, FetchUrl: {2}", Name, Description, FetchUrl);
+            return string.Format("Name: {0}, Description: {1}, Exec: {2}, FetchUrl: {3}", Name, Description, Exec, FetchUrl);
         }
     }
 }

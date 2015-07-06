@@ -29,12 +29,12 @@ namespace Winston
 
                 var repos = new Repos();
                 repos.Add(@"D:\Dev\Projects\Winston\testdata\repo.txt");
-                var cellar = new Cellar(cfgProvider.Config.Cellar);
+                var cellar = new Cellar(Paths.WinstonDir);
 
                 switch (verb)
                 {
                     case "add":
-                        await repos.InstallApp(cellar, verbArgs.First());
+                        await repos.InstallApps(cellar, verbArgs.ToArray());
                         break;
                     //case "remove":
                     //    cellar.Remove(verbArgs);

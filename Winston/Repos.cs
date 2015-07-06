@@ -26,10 +26,13 @@ namespace Winston
             }
         }
 
-        public async Task InstallApp(Cellar cellar, string appName)
+        public async Task InstallApps(Cellar cellar, params string[] apps)
         {
-            var app = repos.SelectMany(r => r.Packages).Single(p => string.Equals(appName, p.Name, StringComparison.OrdinalIgnoreCase));
-            await cellar.Add(app);
+            await Task.WhenAll(apps.Select(async appName =>
+            {
+                var app = repos.SelectMany(r => r.Packages).Single(p => string.Equals(appName, p.Name, StringComparison.OrdinalIgnoreCase));
+                await cellar.Add(app);
+            }));
         }
     }
 
