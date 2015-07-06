@@ -68,6 +68,23 @@ namespace Winston
             return cache[pkgName];
         }
 
+        public IEnumerable<Package> Search(string query)
+        {
+            query = query.ToLowerInvariant();
+            if (cache.ContainsKey(query))
+            {
+                yield return cache[query];
+                yield break;
+            }
+            foreach (var pkg in cache.Values)
+            {
+                if (pkg.Name.Contains(query) || pkg.Description.Contains(query))
+                {
+                    yield return pkg;
+                }
+            }
+        }
+
         public void Dispose()
         {
             Save();

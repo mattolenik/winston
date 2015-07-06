@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Winston.Properties;
+using YamlDotNet.Serialization;
 
 namespace Winston
 {
@@ -113,6 +115,21 @@ namespace Winston
             });
         }
 
+        public IEnumerable<Package> List()
+        {
+            var pkgFiles = Directory.GetFiles(cellarPath, "pkg.yml", SearchOption.AllDirectories);
+            var tasks = pkgFiles.Select(p => Task.Run(() =>
+            {
+                var deserializer = new Deserializer();
+                using (var reader = new StreamReader(p))
+                {
+                    return deserializer.Deserialize<Package>(reader);
+                }
+            })).ToArray();
+            Task.WaitAll(tasks);
+            return tasks.Select(t => t.Result);
+        }
+
         void Unzip(Stream stream, string destination)
         {
             Directory.Delete(destination, true);
@@ -129,17 +146,13 @@ namespace Winston
             hash = sha.ComputeHash(stream);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
+
         static string GetRelativePath(string from, string to)
         {
             var path1 = new Uri(from);
             var path2 = new Uri(to);
             var diff = path1.MakeRelativeUri(path2);
             return diff.OriginalString;
-        }
-
-        public async Task RemoveApps(params string[] apps)
-        {
-            await Task.WhenAll(apps.Select(async appName => await Remove(appName)));
         }
     }
 

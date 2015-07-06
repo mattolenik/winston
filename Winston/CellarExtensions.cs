@@ -9,5 +9,10 @@ namespace Winston
         {
             Task.WaitAll(appNames.Select(cache.ByName).Select(async pkg => await cellar.Add(pkg)).ToArray());
         }
+
+        public static async Task RemoveApps(this Cellar cellar, params string[] apps)
+        {
+            await Task.WhenAll(apps.Select(async appName => await cellar.Remove(appName)));
+        }
     }
 }

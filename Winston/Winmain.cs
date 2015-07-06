@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace Winston
 {
@@ -35,23 +36,39 @@ namespace Winston
                 switch (verb)
                 {
                     case "add":
+                    {
                         cellar.AddApps(cache, verbArgs.ToArray());
                         break;
+                    }
                     case "remove":
+                    {
                         await cellar.RemoveApps(verbArgs.ToArray());
                         break;
-                    //case "search":
-                    //    cellar.Search(verbArgs);
-                    //    break;
-                    //case "list":
-                    //    cellar.List(verbArgs);
-                    //    break;
+                    }
+                    case "search":
+                    {
+                        var pkgs = cache.Search(verbArgs.First());
+                        var serializer = new Serializer();
+                        serializer.Serialize(Console.Out, pkgs);
+                        break;
+                    }
+                    case "list":
+                    {
+                        var pkgs = cellar.List();
+                        var serializer = new Serializer();
+                        serializer.Serialize(Console.Out, pkgs);
+                        break;
+                    }
                     case "help":
+                    {
                         Help();
                         return;
+                    }
                     default:
+                    {
                         PrintUsage();
                         return;
+                    }
                 }
             }
         }
