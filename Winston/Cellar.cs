@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -130,7 +129,7 @@ namespace Winston
             return res;
         }
 
-        void Unzip(Stream stream, string destination)
+        static void Unzip(Stream stream, string destination)
         {
             Directory.Delete(destination, true);
             using (var zip = new ZipArchive(stream))
@@ -139,11 +138,10 @@ namespace Winston
             }
         }
 
-        string GetSha1(Stream stream)
+        static string GetSha1(Stream stream)
         {
             var sha = new SHA1CryptoServiceProvider();
-            byte[] hash;
-            hash = sha.ComputeHash(stream);
+            var hash = sha.ComputeHash(stream);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 

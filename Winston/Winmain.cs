@@ -31,7 +31,7 @@ namespace Winston
 
                 var cellar = new Cellar(Paths.WinstonDir);
                 cache.AddRepo(Path.GetFullPath(@"..\..\..\testdata\repo.txt"));
-                cache.Refresh();
+                await cache.Refresh();
 
                 switch (verb)
                 {
@@ -61,7 +61,7 @@ namespace Winston
                         }
                     case "refresh":
                         {
-                            cache.Refresh();
+                            await cache.Refresh();
                             break;
                         }
                     case "help":
