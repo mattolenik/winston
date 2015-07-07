@@ -5,11 +5,15 @@
 
 #pragma pack(push, 1)
 struct Options {
+	// Unicode isn't needed here but is used to keep .NET interop simple.
 	const _TCHAR magic[33];
+
 	// Fixed lengths to keep things simple. 128 characters
 	// should be more than enough given that the paths are relative.
 	const _TCHAR appPath[128];
 	const _TCHAR workingDir[128];
+
+	// Must be 4 byte bool for easy .NET interop
 	BOOL WaitForCompletion;
 };
 #pragma pack(pop)
@@ -26,8 +30,20 @@ static const struct Options Opts = {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	TCHAR modulePath[MAX_PATH];
+
+	// Gets the full filename of this exe
+	GetModuleFileName(NULL, modulePath, MAX_PATH);
+
+	// Trims the filename and appends a trailing directory slash
+	std::wstring binDir(modulePath);
+	binDir = binDir.substr(0, binDir.rfind(_T("\\"))) + _T("\\");
+
 	std::wstring appPath(Opts.appPath);
 	std::wstring workingDir(Opts.workingDir);
+	appPath.insert(0, binDir);
+	workingDir.insert(0, binDir);
+
 	_TCHAR* space = _T(" ");
 
 	for (int i = 1; i < argc; i++)
@@ -47,7 +63,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	STARTUPINFOW si = { sizeof(STARTUPINFOW) };
 	si.cb = sizeof(si);
-	//if (Opts.WaitForCompletion)
+	if (Opts.WaitForCompletion)
 	{
 		si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
@@ -64,7 +80,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	CreateProcessW(NULL, appPathFinal, NULL, &sa, TRUE, 0, NULL, workingDir.c_str(), &si, &pi);
 	if (Opts.WaitForCompletion)
 	{
-		//WaitForSingleObject(pi.hProcess, INFINITE);
+		WaitForSingleObject(pi.hProcess, INFINITE);
 	}
 	return 0;
 }
