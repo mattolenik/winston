@@ -1,5 +1,8 @@
 ﻿
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
+using System.Collections.Generic;
 
 namespace Winston
 {
@@ -11,25 +14,25 @@ namespace Winston
 
         public string Maintainer { get; set; }
 
-        public string Url { get; set; }
+        public string URL { get; set; }
 
-        public Package[] Packages { get; set; }
+        public List<Package> Packages { get; set; }
 
         public Repo(string url)
         {
-            Url = url;
+            URL = url;
         }
 
         public override string ToString()
         {
-            return string.Format("Name: {0}, Description: {1}, Maintainer: {2}", Name, Description, Maintainer);
+            return string.Format("Name: {0}, Description: {1}, Maintainer: {2}, URL: {3}", Name, Description, Maintainer, URL);
         }
 
         public bool Equals(Repo other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Url, other.Url, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(URL, other.URL, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)
@@ -42,7 +45,7 @@ namespace Winston
 
         public override int GetHashCode()
         {
-            return Url.GetHashCode();
+            return URL.GetHashCode();
         }
 
         public static bool operator ==(Repo left, Repo right)
@@ -56,23 +59,46 @@ namespace Winston
         }
     }
 
+    public enum PackageType
+    {
+        UI, Shell
+    }
+
     public class Package
     {
         public string Name { get; set; }
 
         public string Description { get; set; }
 
-        public string FetchUrl { get; set; }
+        public string Maintainer { get; set; }
 
-        public string Exec { get; set; }
+        public string URL { get; set; }
+        public string SHA1 { get; set; }
 
-        public bool Shell { get; set; }
+        public string Run { get; set; }
 
-        public string Sha1 { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public PackageType Type { get; set; }
 
-        public override string ToString()
-        {
-            return string.Format("Name: {0}, Description: {1}, Exec: {2}, Shell: {3}, FetchUrl: {4}", Name, Description, Exec, Shell, FetchUrl);
-        }
+        public List<string> Preserve { get; set; }
+
+        public List<string> Ignore { get; set; }
+
+        public List<PackageInfo> Releases { get; set; }
+    }
+
+    public class PackageInfo
+    {
+        public string URL { get; set; }
+
+        public string Version { get; set; }
+
+        public string Run { get; set; }
+
+        public List<string> Preserve { get; set; }
+
+        public List<string> Ignore { get; set; }
+
+        public string SHA1 { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace Winston
         public async Task Add(Package pkg)
         {
             var c = new HttpClient();
-            var res = await c.GetAsync(pkg.FetchUrl);
+            var res = await c.GetAsync(pkg.URL);
             var tmpFile = Path.GetTempFileName();
             using (var body = await res.Content.ReadAsStreamAsync())
             using (var file = File.OpenWrite(tmpFile))
@@ -42,9 +42,9 @@ namespace Winston
                 hash = GetSha1(file);
             }
 
-            if (!string.Equals(pkg.Sha1, hash, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(pkg.SHA1, hash, StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException("Hash of remote file {0} did not match expected {1}".Fmt(hash, pkg.Sha1));
+                throw new InvalidDataException("Hash of remote file {0} did not match expected {1}".Fmt(hash, pkg.SHA1));
             }
 
             // Save package information to disk first. Other actions can use this
@@ -69,19 +69,19 @@ namespace Winston
 
         public async Task Link(Package pkg)
         {
-            var installPath = Path.Combine(cellarPath, pkg.Name, pkg.Sha1);
+            var installPath = Path.Combine(cellarPath, pkg.Name, pkg.SHA1);
             if (!Directory.Exists(installPath))
             {
                 throw new InvalidOperationException("Cannot link app {0} because it is not installed".Fmt(pkg.Name));
             }
-            var appPath = Path.Combine(installPath, pkg.Exec);
+            var appPath = Path.Combine(installPath, pkg.Run);
             var relAppPath = GetRelativePath(binPath, appPath);
             var relWorkingDir = GetRelativePath(binPath, installPath);
             var alias = Path.GetFileNameWithoutExtension(appPath);
             var aliasPath = Path.Combine(binPath, alias + ".exe");
 
             using (var wrap = new MemoryStream(Resources.wrap, 0, Resources.wrap.Length, true, true))
-            using (var wrapper = new Wrapper(wrap, relAppPath, relWorkingDir, pkg.Shell))
+            using (var wrapper = new Wrapper(wrap, relAppPath, relWorkingDir, pkg.Type == PackageType.Shell))
             using (var file = File.Create(aliasPath))
             {
                 wrapper.Wrap();
@@ -108,7 +108,7 @@ namespace Winston
         {
             await Task.Run(() =>
             {
-                var alias = Path.GetFileNameWithoutExtension(pkg.Exec);
+                var alias = Path.GetFileNameWithoutExtension(pkg.Run);
                 var aliasPath = Path.Combine(binPath, alias + ".exe");
                 File.Delete(aliasPath);
             });

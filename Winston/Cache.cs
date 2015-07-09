@@ -68,6 +68,7 @@ namespace Winston
 
         public Package ByName(string pkgName)
         {
+            // TODO: Handle unknown package case. Use option types
             return cache[pkgName];
         }
 
@@ -115,7 +116,7 @@ namespace Winston
                 if (File.Exists(path.LocalPath))
                 {
                     repo = JsonConvert.DeserializeObject<Repo>(File.ReadAllText(path.LocalPath));
-                    repo.Url = uriOrPath;
+                    repo.URL = uriOrPath;
                     return true;
                 }
             }
