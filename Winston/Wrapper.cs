@@ -11,7 +11,7 @@ namespace Winston
         [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Unicode)]
         struct Options
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
             public string Magic;
 
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
@@ -33,7 +33,7 @@ namespace Winston
             wrapExe = exe;
             opts = new Options
             {
-                Magic = "24cf2af931624d70b7972221e1fa1dfc",
+                Magic = "24cf2af931624d70b7972221e1fa1df",
                 AppPath = appPath,
                 WorkingDir = workingDir,
                 WaitForCompletion = waitForCompletion

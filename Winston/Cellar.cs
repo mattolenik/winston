@@ -42,15 +42,17 @@ namespace Winston
                 hash = GetSha1(file);
             }
 
-            if (!string.Equals(pkg.SHA1, hash, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(pkg.SHA1) &&
+                !string.Equals(pkg.SHA1, hash, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException("Hash of remote file {0} did not match expected {1}".Fmt(hash, pkg.SHA1));
             }
 
             // Save package information to disk first. Other actions can use this
             // to interact with a package without having to load whole repos into memory.
-            var pkgPath = Path.Combine(cellarPath, pkg.Name, "pkg.yml");
-            Yml.Save(pkg, pkgPath);
+            var pkgDir = Path.Combine(cellarPath, pkg.Name);
+            Directory.CreateDirectory(pkgDir);
+            Yml.Save(pkg, Path.Combine(pkgDir, "pkg.yml"));
 
             var installPath = Path.Combine(cellarPath, pkg.Name, hash);
             await Task.Run(() =>
@@ -64,12 +66,11 @@ namespace Winston
 
             File.Delete(tmpFile);
 
-            await Link(pkg);
+            await Link(pkg, installPath);
         }
 
-        public async Task Link(Package pkg)
+        public async Task Link(Package pkg, string installPath)
         {
-            var installPath = Path.Combine(cellarPath, pkg.Name, pkg.SHA1);
             if (!Directory.Exists(installPath))
             {
                 throw new InvalidOperationException("Cannot link app {0} because it is not installed".Fmt(pkg.Name));

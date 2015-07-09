@@ -6,7 +6,7 @@
 #pragma pack(push, 1)
 struct Options {
 	// Unicode isn't needed here but is used to keep .NET interop simple.
-	const _TCHAR magic[33];
+	const _TCHAR magic[32];
 
 	// Fixed lengths to keep things simple. 128 characters
 	// should be more than enough given that the paths are relative.
@@ -23,7 +23,7 @@ struct Options {
 // of the magic number and then writes a new struct into the binary
 // with the correct data prepopulated.
 static const struct Options Opts = {
-	_T("24cf2af931624d70b7972221e1fa1dfc"),
+	_T("24cf2af931624d70b7972221e1fa1df"),
 	_T("                                                                                                                               "),
 	_T("                                                                                                                               "),
 	true };
@@ -55,7 +55,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	_TCHAR* appPathFinal = new _TCHAR[appPathLength];
 	_tcscpy_s(appPathFinal, appPathLength, appPath.c_str());
 
-	//
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES) };
 	sa.nLength = sizeof(sa);
 	sa.bInheritHandle = TRUE;
@@ -77,7 +76,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	// TODO: error handling
 	PROCESS_INFORMATION pi;
-	CreateProcessW(NULL, appPathFinal, NULL, &sa, TRUE, 0, NULL, workingDir.c_str(), &si, &pi);
+	CreateProcessW(NULL, appPathFinal, NULL, &sa, Opts.WaitForCompletion, 0, NULL, workingDir.c_str(), &si, &pi);
 	if (Opts.WaitForCompletion)
 	{
 		WaitForSingleObject(pi.hProcess, INFINITE);
