@@ -59,6 +59,7 @@
     <Compile Include="CellarExtensions.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="PackageClient.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -68,6 +69,7 @@
     <Compile Include="Cache.cs" />
     <Compile Include="Cellar.cs" />
     <Compile Include="Repo.cs" />
+    <Compile Include="TempFile.cs" />
     <Compile Include="Winmain.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Wrapper.cs" />

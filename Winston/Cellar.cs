@@ -28,44 +28,9 @@ namespace Winston
 
         public async Task Add(Package pkg)
         {
-            var c = new HttpClient();
-            var res = await c.GetAsync(pkg.URL);
-            var tmpFile = Path.GetTempFileName();
-            using (var body = await res.Content.ReadAsStreamAsync())
-            using (var file = File.OpenWrite(tmpFile))
-            {
-                await body.CopyToAsync(file);
-            }
-            string hash;
-            using (var file = File.OpenRead(tmpFile))
-            {
-                hash = GetSha1(file);
-            }
 
-            if (!string.IsNullOrWhiteSpace(pkg.SHA1) &&
-                !string.Equals(pkg.SHA1, hash, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidDataException("Hash of remote file {0} did not match expected {1}".Fmt(hash, pkg.SHA1));
-            }
-
-            // Save package information to disk first. Other actions can use this
-            // to interact with a package without having to load whole repos into memory.
-            var pkgDir = Path.Combine(cellarPath, pkg.Name);
-            Directory.CreateDirectory(pkgDir);
-            Yml.Save(pkg, Path.Combine(pkgDir, "pkg.yml"));
-
-            var installPath = Path.Combine(cellarPath, pkg.Name, hash);
-            await Task.Run(() =>
-            {
-                Directory.CreateDirectory(installPath);
-                using (var file = File.OpenRead(tmpFile))
-                {
-                    Unzip(file, installPath);
-                }
-            });
-
-            File.Delete(tmpFile);
-
+            var client = new PackageClient();
+            var installPath = await client.Install(pkg, Path.Combine(cellarPath, pkg.Name));
             await Link(pkg, installPath);
         }
 
@@ -128,22 +93,6 @@ namespace Winston
             }));
             var res = await Task.WhenAll(tasks);
             return res;
-        }
-
-        static void Unzip(Stream stream, string destination)
-        {
-            Directory.Delete(destination, true);
-            using (var zip = new ZipArchive(stream))
-            {
-                zip.ExtractToDirectory(destination);
-            }
-        }
-
-        static string GetSha1(Stream stream)
-        {
-            var sha = new SHA1CryptoServiceProvider();
-            var hash = sha.ComputeHash(stream);
-            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
         static string GetRelativePath(string from, string to)
