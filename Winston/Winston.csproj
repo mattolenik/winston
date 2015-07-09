@@ -91,6 +91,7 @@
   -->
   <Target Name="BeforeBuild">
     <Copy SourceFiles="..\wrap\$(Configuration)\wrap.exe" DestinationFolder="Resources\" />
+    <Message Text="Copying wrap.exe to resources before build" Importance="high" />
   </Target>
   <!--
   <Target Name="AfterBuild">
