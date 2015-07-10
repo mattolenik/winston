@@ -13,7 +13,7 @@ namespace Winston.Installers
         public static ExePackageInstaller TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
         {
             var result = new ExePackageInstaller { packageFile = packageFile };
-            var cdFilename = Content.MatchContentDispositionFileExt("exe", headers);
+            var cdFilename = Content.MatchContentDispositionFileExt(headers, "exe");
             var uriFilename = Content.MatchUriFileExt(uri, "exe");
             var pkgFilename = Path.GetExtension(pkg.Filename).EqualsOrdIgnoreCase("exe") ? pkg.Filename : null;
             var filename = pkgFilename ?? cdFilename ?? uriFilename;

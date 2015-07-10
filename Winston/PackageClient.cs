@@ -43,8 +43,8 @@ namespace Winston
 
                 var uri = new Uri(pkg.URL);
 
-                var zip = ZipPackageInstaller.TryCreate(pkg, appDir, tmpFile, res.Content.Headers, uri);
-                if (zip != null) return zip;
+                var archive = ArchivePackageInstaller.TryCreate(pkg, appDir, tmpFile, res.Content.Headers, uri);
+                if (archive != null) return archive;
 
                 var exe = ExePackageInstaller.TryCreate(pkg, appDir, tmpFile, res.Content.Headers, uri);
                 if (exe != null) return exe;

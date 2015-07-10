@@ -15,11 +15,11 @@ namespace Winston.Installers
         public static ZipPackageInstaller TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
         {
             var result = new ZipPackageInstaller { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
-            if (Content.ContentTypeIs("application/zip", headers))
+            if (Content.ContentTypeMatches(headers, "application/zip"))
             {
                 return result;
             }
-            var filename = Content.MatchContentDispositionFileExt("zip", headers);
+            var filename = Content.MatchContentDispositionFileExt(headers, "zip");
             if (!string.IsNullOrWhiteSpace(filename))
             {
                 result.filename = filename;

@@ -7,7 +7,7 @@ namespace Winston.Installers
 {
     static class Content
     {
-        public static string MatchContentDispositionFileExt(string ext, HttpContentHeaders headers)
+        public static string MatchContentDispositionFileExt(HttpContentHeaders headers, params string[] extensions)
         {
             if (!headers.Contains("Content-Disposition")) return null;
 
@@ -15,22 +15,22 @@ namespace Winston.Installers
             if (string.IsNullOrWhiteSpace(disposition)) return null;
 
             var cd = new ContentDisposition(disposition);
-            var fn = cd.FileName;
 
-            if (string.IsNullOrWhiteSpace(fn)) return null;
-            return fn.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase) ? fn : null;
+            if (string.IsNullOrWhiteSpace(cd.FileName)) return null;
+
+            return extensions.Any(ext => cd.FileName.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase)) ? cd.FileName : null;
         }
 
-        public static bool ContentTypeIs(string contentType, HttpContentHeaders headers)
+        public static bool ContentTypeMatches(HttpContentHeaders headers, params string[] contentTypes)
         {
             var ct = headers.GetValues("Content-Type").SingleOrDefault() ?? "";
-            return string.Equals(ct, contentType, StringComparison.OrdinalIgnoreCase);
+            return contentTypes.Any(contentType => string.Equals(ct, contentType, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static string MatchUriFileExt(Uri uri, string ext)
+        public static string MatchUriFileExt(Uri uri, params string[] extensions)
         {
             var filename = uri.Segments.Last();
-            return filename.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase) ? filename : null;
+            return extensions.Any(ext => filename.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase)) ? filename : null;
         }
     }
 }
