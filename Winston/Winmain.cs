@@ -8,6 +8,8 @@ namespace Winston
 {
     class Winmain
     {
+        static readonly Serializer serializer = new Serializer();
+
         static void Main(string[] args)
         {
             Task.Run(async () => await AsyncMain(args)).Wait();
@@ -48,14 +50,18 @@ namespace Winston
                     case "search":
                         {
                             var pkgs = cache.Search(verbArgs.First());
-                            var serializer = new Serializer();
                             serializer.Serialize(Console.Out, pkgs);
                             break;
                         }
                     case "list":
                         {
                             var pkgs = await cellar.List();
-                            var serializer = new Serializer();
+                            serializer.Serialize(Console.Out, pkgs);
+                            break;
+                        }
+                    case "available":
+                        {
+                            var pkgs = cache.All;
                             serializer.Serialize(Console.Out, pkgs);
                             break;
                         }
@@ -85,15 +91,16 @@ namespace Winston
         static void PrintUsage()
         {
             var message = @"
-To add an app, type:            winston add nameOfApp
-To remove an app, type:         winston remove nameOfApp
+To add an app:                  winston add nameOfApp
+To remove an app:               winston remove nameOfApp
 
-To search for apps, type:       winston search someNameOrDescription
-To list all apps, type:         winston list
+To search for apps:             winston search someNameOrDescription
+To list all available apps:     winston available
+To list installed apps:         winston list
 
-To refresh app repos, type:     winston refresh
+To refresh app repos:           winston refresh
 
-For anything else, type: winston help
+For anything else:              winston help
             
 ";
             Console.WriteLine(message);

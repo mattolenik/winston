@@ -59,6 +59,10 @@
     <Compile Include="CellarExtensions.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Installers\Content.cs" />
+    <Compile Include="Installers\ExePackageInstaller.cs" />
+    <Compile Include="Installers\IPackageInstaller.cs" />
+    <Compile Include="Installers\ZipPackageInstaller.cs" />
     <Compile Include="PackageClient.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

@@ -1,10 +1,7 @@
 ﻿
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net.Http;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Winston.Properties;
 using YamlDotNet.Serialization;
@@ -28,22 +25,30 @@ namespace Winston
 
         public async Task Add(Package pkg)
         {
-
-            var client = new PackageClient();
-            var installPath = await client.Install(pkg, Path.Combine(cellarPath, pkg.Name));
-            await Link(pkg, installPath);
+            using (var client = new PackageClient(pkg, Path.Combine(cellarPath, pkg.Name)))
+            {
+                var installPath = await client.Install();
+                await Link(pkg, installPath);
+            }
         }
 
         public async Task Link(Package pkg, string installPath)
         {
-            if (!Directory.Exists(installPath))
+            // If the package installer extracted an EXE, the installPath will be the full path to that EXE.
+            // If the installer extracted a ZIP file, the installPath will be the directory, and the full
+            // path will have to be constructed using pkg.Filename
+            if (!File.Exists(installPath))
             {
-                throw new InvalidOperationException("Cannot link app {0} because it is not installed".Fmt(pkg.Name));
+                installPath = Path.Combine(installPath, pkg.Filename);
             }
-            var appPath = Path.Combine(installPath, pkg.Run);
-            var relAppPath = GetRelativePath(binPath, appPath);
-            var relWorkingDir = GetRelativePath(binPath, installPath);
-            var alias = Path.GetFileNameWithoutExtension(appPath);
+            if (!File.Exists(installPath))
+            {
+                throw new InvalidDataException("Package '{0}' does not seem to be installed".Fmt(pkg));
+            }
+            var appDir = Path.GetDirectoryName(installPath);
+            var relAppPath = GetRelativePath(binPath, installPath);
+            var relWorkingDir = GetRelativePath(binPath, appDir);
+            var alias = Path.GetFileNameWithoutExtension(installPath);
             var aliasPath = Path.Combine(binPath, alias + ".exe");
 
             using (var wrap = new MemoryStream(Resources.wrap, 0, Resources.wrap.Length, true, true))

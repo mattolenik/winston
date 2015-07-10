@@ -72,6 +72,14 @@ namespace Winston
             return cache[pkgName];
         }
 
+        public IEnumerable<Package> All
+        {
+            get
+            {
+                return cache.Values;
+            }
+        }
+
         public IEnumerable<Package> Search(string query)
         {
             query = query.ToLowerInvariant();

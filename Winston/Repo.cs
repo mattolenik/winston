@@ -73,6 +73,8 @@ namespace Winston
         public string Maintainer { get; set; }
 
         public string URL { get; set; }
+        public string Filename { get; set; }
+
         public string SHA1 { get; set; }
 
         public string Run { get; set; }
