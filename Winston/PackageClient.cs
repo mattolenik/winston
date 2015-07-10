@@ -1,25 +1,27 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Threading.Tasks;
+using Winston.Installers;
 
 namespace Winston
 {
-    public class PackageClient
+    public class PackageClient : IDisposable
     {
-        public PackageClient()
+        readonly Package pkg;
+        readonly string pkgDir;
+        readonly TempFile tmpFile;
+
+        public PackageClient(Package pkg, string pkgDir)
         {
+            this.pkg = pkg;
+            this.pkgDir = pkgDir;
+            tmpFile = new TempFile();
         }
 
-        public async Task<string> Install(Package pkg, string pkgDir)
+        async Task<IPackageInstaller> Get()
         {
-            using (var tmpFile = new TempFile())
             using (var client = new HttpClient())
             using (var res = await client.GetAsync(pkg.URL))
             using (var body = await res.Content.ReadAsStreamAsync())
@@ -36,82 +38,31 @@ namespace Winston
                 Yml.Save(pkg, Path.Combine(pkgDir, "pkg.yml"));
 
                 // TODO: replace hash with version resolution
-                var installPath = Path.Combine(pkgDir, hash);
-                Directory.CreateDirectory(installPath);
+                var appDir = Path.Combine(pkgDir, hash);
+                Directory.CreateDirectory(appDir);
 
-                var handler = GetHandler(res.Content.Headers, pkg.URL);
-                await handler(tmpFile, installPath);
+                var uri = new Uri(pkg.URL);
 
+                var zip = ZipPackageInstaller.TryCreate(pkg, appDir, tmpFile, res.Content.Headers, uri);
+                if (zip != null) return zip;
 
-                return installPath;
+                var exe = ExePackageInstaller.TryCreate(pkg, appDir, tmpFile, res.Content.Headers, uri);
+                if (exe != null) return exe;
+
+                throw new NotSupportedException("Unable to identify type of package at URL: " + pkg.URL);
             }
         }
 
-        static Func<string, string, Task> GetHandler(HttpContentHeaders headers, string url)
+        public async Task<string> Install()
         {
-            // We'll consider MIME type to be the most authoritative answer on what kind of
-            // package this file is.
-            var contentType = headers.GetValues("Content-Type").SingleOrDefault() ?? "";
-            switch (contentType.ToLowerInvariant())
+            var installer = await Get();
+            var installPath = await installer.Install();
+            var error = await installer.Validate();
+            if (error != null)
             {
-                case "application/zip":
-                    return HandleZIP;
-                case "application/x-ms-dos-program":
-                    return HandleEXE;
+                throw error;
             }
-
-            // Followed by checking file extension in Content-Disposition filename header
-            var disposition = headers.GetValues("Content-Disposition").SingleOrDefault();
-            if (!string.IsNullOrWhiteSpace(disposition))
-            {
-                var cd = new ContentDisposition(disposition);
-                var filename = cd.FileName;
-                if (!string.IsNullOrWhiteSpace(filename))
-                {
-                    var ext = Path.GetExtension(filename).ToLowerInvariant();
-                    switch (ext)
-                    {
-                        case "zip":
-                            return HandleZIP;
-                        case "exe":
-                            return HandleEXE;
-                    }
-                }
-            }
-
-            // Followed by checking file extension in the URL
-            var uri = new Uri(url);
-            if (uri.IsFile)
-            {
-                var localPath = uri.LocalPath;
-                var ext = Path.GetExtension(localPath).ToLowerInvariant();
-                switch (ext)
-                {
-                    case "zip":
-                        return HandleZIP;
-                    case "exe":
-                        return HandleEXE;
-                }
-            }
-
-            throw new NotSupportedException("Package at URL is not a supported format: " + url);
-        }
-
-        static async Task HandleEXE(string file, string installPath)
-        {
-            // TODO: implement exe handling
-            throw new NotImplementedException();
-        }
-
-        static async Task HandleZIP(string file, string installPath)
-        {
-            await Task.Run(() =>
-            {
-                using (var f = File.OpenRead(file))
-                {
-                    Unzip(f, installPath);
-                }
-            });
+            return installPath;
         }
 
         static string ValidateSHA1(string sha1, string file)
@@ -130,20 +81,19 @@ namespace Winston
             return hash;
         }
 
-        static void Unzip(Stream stream, string destination)
-        {
-            Directory.Delete(destination, true);
-            using (var zip = new ZipArchive(stream))
-            {
-                zip.ExtractToDirectory(destination);
-            }
-        }
-
         static string GetSha1(Stream stream)
         {
             var sha = new SHA1CryptoServiceProvider();
             var hash = sha.ComputeHash(stream);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+
+        public void Dispose()
+        {
+            if (tmpFile != null)
+            {
+                tmpFile.Dispose();
+            }
         }
     }
 }

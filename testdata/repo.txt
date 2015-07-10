@@ -6,7 +6,7 @@
 		{
 			"Name": "testapp",
 			"URL": "https://www.dropbox.com/s/8tfjdtzlxqkbqc0/TestApp.zip?dl=1",
-			"Run": "TestApp.exe",
+			"Filename": "TestApp.exe",
 			"Preserve": [
 				"testapp.ini"
 			],
@@ -20,7 +20,12 @@
 		{
 			"Name": "cmder",
 			"URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder.zip",
-			"Run": "cmder.exe"
+			"Filename": "cmder.exe"
+		},
+		{
+			"Name": "plink",
+			"URL": "http://the.earth.li/~sgtatham/putty/latest/x86/plink.exe",
+			"Type": "Shell"
 		}
 	]
 }

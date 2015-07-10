@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 
 namespace Winston
 {
@@ -16,6 +12,11 @@ namespace Winston
         public static string Fmt(this string format, params object[] args)
         {
             return string.Format(format, args);
+        }
+
+        public static bool EqualsOrdIgnoreCase(this string str, string other)
+        {
+            return string.Equals(str, other, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
