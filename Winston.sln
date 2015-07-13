@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winston", "Winston\Winston.csproj", "{A9C75236-1DCD-4C2A-B975-9121CEE9F256}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -44,6 +44,7 @@ Global
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Release|Win32.ActiveCfg = Release|Any CPU
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Win32.ActiveCfg = Debug|Win32
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Win32.Build.0 = Debug|Win32
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Release|Any CPU.ActiveCfg = Release|Win32
