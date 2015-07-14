@@ -76,7 +76,7 @@ namespace Winston
             if (!string.IsNullOrWhiteSpace(sha1) &&
                 !string.Equals(sha1, hash, StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException("Hash of remote file {0} did not match expected {1}".Fmt(hash, sha1));
+                throw new InvalidDataException($"Hash of remote file {hash} did not match expected {sha1}");
             }
             return hash;
         }
@@ -88,12 +88,6 @@ namespace Winston
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
-        public void Dispose()
-        {
-            if (tmpFile != null)
-            {
-                tmpFile.Dispose();
-            }
-        }
+        public void Dispose() => tmpFile?.Dispose();
     }
 }

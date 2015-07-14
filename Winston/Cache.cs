@@ -50,7 +50,7 @@ namespace Winston
             Repo r;
             if (!LocalFileRepo.TryLoad(uriOrPath, out r))
             {
-                throw new Exception("Unable to load repo with URI: {0}".Fmt(uriOrPath));
+                throw new Exception($"Unable to load repo with URI: {uriOrPath}");
             }
             foreach (var pkg in r.Packages)
             {
@@ -72,14 +72,6 @@ namespace Winston
             return cache[pkgName];
         }
 
-        public IEnumerable<Package> All
-        {
-            get
-            {
-                return cache.Values;
-            }
-        }
-
         public IEnumerable<Package> Search(string query)
         {
             query = query.ToLowerInvariant();
@@ -97,10 +89,9 @@ namespace Winston
             }
         }
 
-        public void Dispose()
-        {
-            Save();
-        }
+        public IEnumerable<Package> All => cache.Values;
+
+        public void Dispose() => Save();
     }
 
     static class LocalFileRepo

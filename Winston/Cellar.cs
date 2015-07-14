@@ -12,13 +12,12 @@ namespace Winston
     {
         readonly string cellarPath;
         readonly string binPath;
-        string tmp;
 
         public Cellar(string winstonDir)
         {
             cellarPath = Path.Combine(winstonDir, @"cellar\");
             binPath = Path.Combine(winstonDir, @"bin\");
-            tmp = Path.GetTempPath();
+            Path.GetTempPath();
             Directory.CreateDirectory(cellarPath);
             Directory.CreateDirectory(binPath);
         }
@@ -43,7 +42,7 @@ namespace Winston
             }
             if (!File.Exists(installPath))
             {
-                throw new InvalidDataException("Package '{0}' does not seem to be installed".Fmt(pkg));
+                throw new InvalidDataException($"Package '{pkg}' does not seem to be installed");
             }
             var appDir = Path.GetDirectoryName(installPath);
             var relAppPath = GetRelativePath(binPath, installPath);

@@ -6,15 +6,7 @@ namespace Winston
 {
     public class Config
     {
-        public static Config Default
-        {
-            get
-            {
-                return new Config
-                {
-                };
-            }
-        }
+        public static Config Default => new Config();
     }
 
     public interface IConfigProvider : IDisposable
@@ -25,7 +17,7 @@ namespace Winston
     {
         public Config Config { get; private set; }
 
-        readonly String path = Path.Combine(Paths.WinstonDir, "config.yml");
+        readonly string path = Path.Combine(Paths.WinstonDir, "config.yml");
 
         public ConfigProvider()
         {

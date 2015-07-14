@@ -47,14 +47,11 @@ namespace Winston.Installers
             return null;
         }
 
-        public async Task<string> Install()
+        public async Task<string> Install() => await Task.Run(() =>
         {
-            return await Task.Run(() =>
-            {
-                Extract(packageFile, appDir);
-                return Path.Combine(appDir, filename);
-            });
-        }
+            Extract(packageFile, appDir);
+            return Path.Combine(appDir, filename);
+        });
 
         public Task<Exception> Validate()
         {
@@ -68,7 +65,7 @@ namespace Winston.Installers
             var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             using (var proc = new ProcessHost("7za.exe", workingDir))
             {
-                var args = "x \"{0}\" -o{1} -y".Fmt(filename, destination);
+                var args = $"x \"{filename}\" -o{destination} -y";
                 proc.Start(args);
 
                 // TODO: make config value
@@ -84,7 +81,7 @@ namespace Winston.Installers
                 {
                     // TODO: better exception type
                     throw new Exception(
-                        "Failed to extract archive '0'. 7zip stdout:\n{1}\n\n7zip stderr:{2}\n".Fmt(filename, stdout, stderr));
+                        $"Failed to extract archive '{filename}'. 7zip stdout:\n{stdout}\n\n7zip stderr:{stderr}\n");
                 }
             }
         }

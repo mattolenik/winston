@@ -68,7 +68,7 @@ namespace Winston
             return rawDatas;
         }
 
-        long FindPosition(Stream stream, byte[] byteSequence)
+        static long FindPosition(Stream stream, byte[] byteSequence)
         {
             if (byteSequence.Length > stream.Length)
             {
@@ -107,12 +107,6 @@ namespace Winston
             return i;
         }
 
-        public void Dispose()
-        {
-            if (wrapExe != null)
-            {
-                wrapExe.Dispose();
-            }
-        }
+        public void Dispose() => wrapExe?.Dispose();
     }
 }

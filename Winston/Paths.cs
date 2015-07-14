@@ -5,12 +5,6 @@ namespace Winston
 {
     public static class Paths
     {
-        public static string WinstonDir
-        {
-            get
-            {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "winston");
-            }
-        }
+        public static string WinstonDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "winston");
     }
 }

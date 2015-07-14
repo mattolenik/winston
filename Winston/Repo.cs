@@ -1,5 +1,4 @@
-﻿
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ namespace Winston
 
         public override string ToString()
         {
-            return string.Format("Name: {0}, Description: {1}, Maintainer: {2}, URL: {3}", Name, Description, Maintainer, URL);
+            return $"Name: {Name}, Description: {Description}, Maintainer: {Maintainer}, URL: {URL}";
         }
 
         public bool Equals(Repo other)
@@ -73,6 +72,7 @@ namespace Winston
         public string Maintainer { get; set; }
 
         public string URL { get; set; }
+
         public string Filename { get; set; }
 
         public string SHA1 { get; set; }
