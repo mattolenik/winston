@@ -30,14 +30,14 @@
 		{
 			"Name": "7zip",
 			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
-			"Platform": {
-				"x64": {
-					"Link": { "File":, "x64\7za.exe"
-				},
-				"x86": {
-					"Link": "7za.exe"
-				},
-			}
+			"Filename": "x64/7za.exe",
+			"Platform": "x64"
+		},
+		{
+			"Name": "7zip",
+			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
+			"Filename": "7za.exe",
+			"Platform": "x86"
 		}
 	]
 }

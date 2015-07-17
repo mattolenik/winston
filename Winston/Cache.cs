@@ -13,7 +13,8 @@ namespace Winston
         readonly string sourcesPath;
         readonly string cachePath;
 
-        ConcurrentDictionary<string, Package> cache;
+        // TODO: concurrent collection unneeded? reexamine
+        ConcurrentDictionary<string, List<Package>> cache;
 
         // TODO: worry about concurrent access here?
         HashSet<string> sources;
@@ -29,7 +30,7 @@ namespace Winston
         {
             // TODO: fix improper default values
             Yml.TryLoad(sourcesPath, out sources, () => new HashSet<string>(StringComparer.InvariantCultureIgnoreCase));
-            Yml.TryLoad(cachePath, out cache, () => new ConcurrentDictionary<string, Package>(StringComparer.InvariantCultureIgnoreCase));
+            Yml.TryLoad(cachePath, out cache, () => new ConcurrentDictionary<string, List<Package>>(StringComparer.InvariantCultureIgnoreCase));
         }
 
         void Save()
@@ -45,6 +46,7 @@ namespace Winston
 
         void Put(string uriOrPath)
         {
+            // TODO: non-crash handling of missing or failed repos
             if (!LocalFileRepo.CanLoad(uriOrPath)) throw new Exception("Can't load repo " + uriOrPath);
 
             Repo r;
@@ -54,7 +56,11 @@ namespace Winston
             }
             foreach (var pkg in r.Packages)
             {
-                cache[pkg.Name] = pkg;
+                if (!cache.ContainsKey(pkg.Name))
+                {
+                    cache[pkg.Name] = new List<Package>();
+                }
+                cache[pkg.Name].Add(pkg);
             }
         }
 
@@ -66,10 +72,12 @@ namespace Winston
             await Task.WhenAll(tasks);
         }
 
-        public Package ByName(string pkgName)
+        public IEnumerable<Package> ByName(string pkgName)
         {
             // TODO: Handle unknown package case. Use option types
-            return cache[pkgName];
+            List<Package> matches;
+            cache.TryGetValue(pkgName, out matches);
+            return matches;
         }
 
         public IEnumerable<Package> Search(string query)
@@ -77,10 +85,13 @@ namespace Winston
             query = query.ToLowerInvariant();
             if (cache.ContainsKey(query))
             {
-                yield return cache[query];
+                foreach (var match in cache[query])
+                {
+                    yield return match;
+                }
                 yield break;
             }
-            foreach (var pkg in cache.Values)
+            foreach (var pkg in cache.Values.SelectMany(p=>p))
             {
                 if (pkg.Name.Contains(query) || pkg.Description.Contains(query))
                 {
@@ -89,11 +100,12 @@ namespace Winston
             }
         }
 
-        public IEnumerable<Package> All => cache.Values;
+        public IEnumerable<Package> All => cache.Values.SelectMany(p => p);
 
         public void Dispose() => Save();
     }
 
+    // TODO: find a better way to do this
     static class LocalFileRepo
     {
         public static bool CanLoad(string uriOrPath)

@@ -32,7 +32,7 @@ namespace Winston
                 var verbArgs = args.Skip(1);
 
                 var cellar = new Cellar(Paths.WinstonDir);
-                cache.AddRepo(Path.GetFullPath(@"..\..\..\testdata\repo.txt"));
+                cache.AddRepo(Path.GetFullPath(@"..\..\..\testdata\repo.json"));
                 await cache.Refresh();
 
                 switch (verb)

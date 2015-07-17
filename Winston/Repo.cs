@@ -63,6 +63,11 @@ namespace Winston
         UI, Shell
     }
 
+    public enum Platform
+    {
+        Any, x64, x86
+    }
+
     public class Package
     {
         public string Name { get; set; }
@@ -86,8 +91,11 @@ namespace Winston
 
         public List<string> Ignore { get; set; }
 
-        public List<PackageInfo> Releases { get; set; }
-    }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public Platform Platform { get; set; }
+
+        //public List<PackageInfo> Releases { get; set; }
+        }
 
     public class PackageInfo
     {
