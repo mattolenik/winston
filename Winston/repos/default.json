@@ -31,12 +31,14 @@
 			"Name": "7zip",
 			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
 			"Filename": "x64/7za.exe",
+			"Type": "Shell",
 			"Platform": "x64"
 		},
 		{
 			"Name": "7zip",
 			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
 			"Filename": "7za.exe",
+			"Type": "Shell",
 			"Platform": "x86"
 		}
 	]

@@ -63,7 +63,7 @@ namespace Winston.Installers
         {
             Directory.Delete(destination, true);
             var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            using (var proc = new ProcessHost("7za.exe", workingDir))
+            using (var proc = new ProcessHost(@"tools\7za.exe", workingDir))
             {
                 var args = $"x \"{filename}\" -o{destination} -y";
                 proc.Start(args);

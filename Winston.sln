@@ -17,23 +17,32 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Package|Any CPU = Package|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A9C75236-1DCD-4C2A-B975-9121CEE9F256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9C75236-1DCD-4C2A-B975-9121CEE9F256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9C75236-1DCD-4C2A-B975-9121CEE9F256}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{A9C75236-1DCD-4C2A-B975-9121CEE9F256}.Package|Any CPU.Build.0 = Package|Any CPU
 		{A9C75236-1DCD-4C2A-B975-9121CEE9F256}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9C75236-1DCD-4C2A-B975-9121CEE9F256}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Package|Any CPU.Build.0 = Package|Any CPU
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Any CPU.Build.0 = Debug|Win32
+		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Package|Any CPU.ActiveCfg = Package|Win32
+		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Package|Any CPU.Build.0 = Package|Win32
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Release|Any CPU.ActiveCfg = Release|Win32
 		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Release|Any CPU.Build.0 = Release|Win32
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Package|Any CPU.Build.0 = Package|Any CPU
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

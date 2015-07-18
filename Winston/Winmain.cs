@@ -34,8 +34,13 @@ namespace Winston
                 var verbArgs = args.Skip(1);
 
                 var cellar = new Cellar(Paths.WinstonDir);
-                cache.AddRepo(Path.GetFullPath(@"..\..\..\testdata\repo.json"));
-                //await cache.Refresh();
+                // TODO: find a better way to setup repos
+                // Set up default repo
+                if (verb != "selfinstall" && cache.Empty())
+                {
+                    cache.AddRepo(@"repos\default.json");
+                    await cache.Refresh();
+                }
 
                 switch (verb)
                 {

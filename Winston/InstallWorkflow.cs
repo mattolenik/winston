@@ -75,6 +75,8 @@ namespace Winston
                 Version = ver.FileVersion // "0.1.0.0"
             };
             await cellar.Add(pkg);
+            // Save the package metadata, just like other packages
+            Yml.Save(pkg, Path.Combine(fullDir, "pkg.yml"));
             FS.UpdatePath(cellar.BinPath);
         }
     }

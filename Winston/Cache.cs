@@ -28,6 +28,7 @@ namespace Winston
 
         void Load()
         {
+            // TODO: use binary serialization instead
             // TODO: fix improper default values
             Yml.TryLoad(sourcesPath, out sources, () => new HashSet<string>(StringComparer.InvariantCultureIgnoreCase));
             Yml.TryLoad(cachePath, out cache, () => new ConcurrentDictionary<string, List<Package>>(StringComparer.InvariantCultureIgnoreCase));
@@ -103,6 +104,8 @@ namespace Winston
         public IEnumerable<Package> All => cache.Values.SelectMany(p => p);
 
         public void Dispose() => Save();
+
+        public bool Empty() => !sources.Any();
     }
 
     // TODO: find a better way to do this
@@ -111,7 +114,7 @@ namespace Winston
         public static bool CanLoad(string uriOrPath)
         {
             Uri p;
-            return Uri.TryCreate(uriOrPath, UriKind.Absolute, out p);
+            return Uri.TryCreate(uriOrPath, UriKind.RelativeOrAbsolute, out p);
         }
 
         public static bool TryLoad(string uriOrPath, out Repo repo)
@@ -119,14 +122,15 @@ namespace Winston
             try
             {
                 Uri path;
-                if (!Uri.TryCreate(uriOrPath, UriKind.Absolute, out path))
+                if (!Uri.TryCreate(uriOrPath, UriKind.RelativeOrAbsolute, out path))
                 {
                     repo = null;
                     return false;
                 }
-                if (File.Exists(path.LocalPath))
+                var resolvedPath = path.IsAbsoluteUri ? path.LocalPath : uriOrPath;
+                if (File.Exists(resolvedPath))
                 {
-                    repo = JsonConvert.DeserializeObject<Repo>(File.ReadAllText(path.LocalPath));
+                    repo = JsonConvert.DeserializeObject<Repo>(File.ReadAllText(resolvedPath));
                     repo.URL = uriOrPath;
                     return true;
                 }

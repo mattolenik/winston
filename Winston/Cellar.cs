@@ -77,8 +77,16 @@ namespace Winston
             {
                 return;
             }
-            var pkg = Yml.Load<Package>(Path.Combine(appPath, "pkg.yml"));
-            await Unlink(pkg);
+            try
+            {
+                // Make best attempt to unlink. If it fails, it won't prevent linking during a future reinstall.
+                var pkg = Yml.Load<Package>(Path.Combine(appPath, "pkg.yml"));
+                await Unlink(pkg);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
+            }
 
             await Task.Run(() => Directory.Delete(appPath, true));
         }
