@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 using static Winston.InstallWorkflow;
@@ -67,8 +69,8 @@ namespace Winston
                             break;
                         }
                     case "available":
-                        {
-                            var pkgs = cache.All;
+                    {
+                            var pkgs = cache.All.Select(p => p.Name).Distinct(StringComparer.InvariantCultureIgnoreCase);
                             serializer.Serialize(Console.Out, pkgs);
                             break;
                         }
@@ -102,7 +104,9 @@ namespace Winston
 
         static void PrintUsage()
         {
-            var message = @"
+            var assembly = Assembly.GetExecutingAssembly();
+            var ver = FileVersionInfo.GetVersionInfo(assembly.Location);
+            var message = $@"
 To add an app:                  winston add nameOfApp
 To remove an app:               winston remove nameOfApp
 
@@ -114,7 +118,7 @@ To refresh app repos:           winston refresh
 
 For anything else:              winston help
             
-";
+Winston v{ver.ProductVersion}";
             Console.WriteLine(message);
         }
     }
