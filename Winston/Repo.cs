@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Winston
 {
@@ -95,7 +97,7 @@ namespace Winston
         public Platform Platform { get; set; }
 
         //public List<PackageInfo> Releases { get; set; }
-        }
+    }
 
     public class PackageInfo
     {

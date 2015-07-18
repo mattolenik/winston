@@ -25,9 +25,30 @@ namespace Winston
                 while (!cancel.Token.IsCancellationRequested)
                 {
                     var q = await buf.ReceiveAsync(cancel.Token);
-                    await q.answerBlock.SendAsync(q.Answers.FirstOrDefault());
+                    var answer = DoAsk(q);
+                    await q.answerBlock.SendAsync(answer);
                 }
             });
+        }
+
+        // TODO: abstract out into cmd/GUI implementations
+        string DoAsk(Question question)
+        {
+            Console.WriteLine(question.Preamble);
+            bool match = false;
+            string response = null;
+            while (!match)
+            {
+                Console.WriteLine(question.Query);
+                response = Console.ReadLine()?.Trim();
+                match = question.Answers.Any(a => a.EqualsOrdIgnoreCase(response));
+                if (!match)
+                {
+                    var answers = string.Join(", ", question.Answers);
+                    Console.WriteLine($"\nAnswer must be one of these values: {answers}");
+                }
+            }
+            return response;
         }
 
         public async Task<string> Ask(Question question)
@@ -44,13 +65,21 @@ namespace Winston
 
     struct Question
     {
+        public string Preamble { get; set; }
+
         public string Query { get; }
         public IEnumerable<string> Answers { get; }
         internal WriteOnceBlock<string> answerBlock;
 
-        public Question(string query, params string[] answer)
+        public Question(string preamble, string query, params string[] answers) :
+            this(preamble, query, answers as IEnumerable<string>)
         {
-            Answers = answer;
+        }
+
+        public Question(string preamble, string query, IEnumerable<string> answers)
+        {
+            Preamble = preamble;
+            Answers = answers;
             Query = query;
             answerBlock = null;
         }

@@ -64,7 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CellarExtensions.cs" />
+    <Compile Include="InstallWorkflow.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Installers\ArchivePackageInstaller.cs" />
@@ -82,6 +82,7 @@
     <Compile Include="Cache.cs" />
     <Compile Include="Cellar.cs" />
     <Compile Include="QuestionQueue.cs" />
+    <Compile Include="Reflect.cs" />
     <Compile Include="Repo.cs" />
     <Compile Include="TempFile.cs" />
     <Compile Include="Winmain.cs" />

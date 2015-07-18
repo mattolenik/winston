@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
+using static Winston.InstallWorkflow;
 
 namespace Winston
 {
@@ -27,6 +28,7 @@ namespace Winston
 
             using (var cfgProvider = new ConfigProvider())
             using (var cache = new Cache(Paths.WinstonDir))
+            using (var queue = new QuestionQueue())
             {
                 var verb = args.First().ToLowerInvariant();
                 var verbArgs = args.Skip(1);
@@ -39,12 +41,12 @@ namespace Winston
                 {
                     case "add":
                         {
-                            cellar.AddApps(cache, verbArgs.ToArray());
+                            await AddApps(cellar, queue, cache, verbArgs);
                             break;
                         }
                     case "remove":
                         {
-                            await cellar.RemoveApps(verbArgs.ToArray());
+                            await RemoveApps(cellar, verbArgs);
                             break;
                         }
                     case "search":
