@@ -75,6 +75,7 @@ namespace Winston
                 Version = ver.FileVersion // "0.1.0.0"
             };
             await cellar.Add(pkg);
+            FS.UpdatePath(cellar.BinPath);
         }
     }
 }

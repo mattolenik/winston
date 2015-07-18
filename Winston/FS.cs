@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace Winston
 {
@@ -41,5 +42,21 @@ namespace Winston
         }
 
         public static Task CopyDirectory(string source, string destination) => Task.Run(() => CopyDir(source, destination));
+
+        public static void UpdatePath(string path)
+        {
+            using (var cu = Registry.CurrentUser)
+            {
+                path = path.Trim().Trim('\\', '/', '.');
+                var env = cu.OpenSubKey("Environment", true);
+                var pathVar = env.GetValue("PATH", "") as string;
+                if (pathVar.ContainsInvIgnoreCase(path))
+                {
+                    return;
+                }
+                var newPath = $"{path};{pathVar}";
+                env.SetValue("PATH", newPath);
+            }
+        }
     }
 }

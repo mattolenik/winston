@@ -10,21 +10,22 @@ namespace Winston
 {
     public class Cellar
     {
-        readonly string cellarPath;
-        readonly string binPath;
+        public string CellarPath { get; }
+
+        public string BinPath { get; }
 
         public Cellar(string winstonDir)
         {
-            cellarPath = Path.Combine(winstonDir, @"cellar\");
-            binPath = Path.Combine(winstonDir, @"bin\");
+            CellarPath = Path.Combine(winstonDir, @"cellar\");
+            BinPath = Path.Combine(winstonDir, @"bin\");
             Path.GetTempPath();
-            Directory.CreateDirectory(cellarPath);
-            Directory.CreateDirectory(binPath);
+            Directory.CreateDirectory(CellarPath);
+            Directory.CreateDirectory(BinPath);
         }
 
         public async Task Add(Package pkg)
         {
-            using (var client = new PackageClient(pkg, cellarPath))
+            using (var client = new PackageClient(pkg, CellarPath))
             {
                 var installPath = await client.Install();
                 await Link(pkg, installPath);
@@ -45,15 +46,15 @@ namespace Winston
                 throw new InvalidDataException($"Package '{pkg}' does not seem to be installed");
             }
             var appDir = Path.GetDirectoryName(installPath);
-            var relAppPath = GetRelativePath(binPath, installPath);
-            var relWorkingDir = GetRelativePath(binPath, appDir);
+            var relAppPath = GetRelativePath(BinPath, installPath);
+            var relWorkingDir = GetRelativePath(BinPath, appDir);
             var alias = Path.GetFileNameWithoutExtension(installPath);
-            var aliasPath = Path.Combine(binPath, $"{alias}.exe");
+            var aliasPath = Path.Combine(BinPath, $"{alias}.exe");
 
             if (File.Exists(aliasPath))
             {
                 var dt = DateTime.Now.ToString("yyyyMMddHHmmss");
-                var oldAlias = Path.Combine(binPath, $"{alias}.old_{dt}");
+                var oldAlias = Path.Combine(BinPath, $"{alias}.old_{dt}");
                 // Works even if the process is running, gives us upgrade for free
                 File.Move(aliasPath, oldAlias);
             }
@@ -71,7 +72,7 @@ namespace Winston
 
         public async Task Remove(string name)
         {
-            var appPath = Path.Combine(cellarPath, name);
+            var appPath = Path.Combine(CellarPath, name);
             if (!Directory.Exists(appPath))
             {
                 return;
@@ -87,14 +88,14 @@ namespace Winston
             await Task.Run(() =>
             {
                 var alias = Path.GetFileNameWithoutExtension(pkg.Run);
-                var aliasPath = Path.Combine(binPath, alias + ".exe");
+                var aliasPath = Path.Combine(BinPath, alias + ".exe");
                 File.Delete(aliasPath);
             });
         }
 
         public async Task<Package[]> List()
         {
-            var pkgFiles = Directory.GetFiles(cellarPath, "pkg.yml", SearchOption.AllDirectories);
+            var pkgFiles = Directory.GetFiles(CellarPath, "pkg.yml", SearchOption.AllDirectories);
             var tasks = pkgFiles.Select(async p => await Task.Run(() =>
             {
                 var deserializer = new Deserializer();
