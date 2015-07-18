@@ -35,7 +35,7 @@ namespace Winston
 
                 var cellar = new Cellar(Paths.WinstonDir);
                 cache.AddRepo(Path.GetFullPath(@"..\..\..\testdata\repo.json"));
-                await cache.Refresh();
+                //await cache.Refresh();
 
                 switch (verb)
                 {
@@ -75,6 +75,11 @@ namespace Winston
                     case "help":
                         {
                             Help();
+                            return;
+                        }
+                    case "selfinstall":
+                        {
+                            await SelfInstall(cellar, verbArgs.FirstOrDefault() ?? ".");
                             return;
                         }
                     default:

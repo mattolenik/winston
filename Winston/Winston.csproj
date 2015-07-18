@@ -64,6 +64,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FS.cs" />
+    <Compile Include="Installers\LocalDirectoryInstaller.cs" />
     <Compile Include="InstallWorkflow.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions.cs" />

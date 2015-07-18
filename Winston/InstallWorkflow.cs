@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +30,7 @@ namespace Winston
             await Task.WhenAll(apps.Select(async appName => await cellar.Remove(appName)));
         }
 
+        // TODO: abstract away from text/console
         static async Task<Package> Disambiguate(QuestionQueue queue, IEnumerable<Package> choices)
         {
             var sb = new StringBuilder();
@@ -56,6 +59,22 @@ namespace Winston
             var answer = await queue.Ask(q);
             var ansInt = int.Parse(answer) - 1;
             return choicesArray[ansInt];
+        }
+
+        public static async Task SelfInstall(Cellar cellar, string installFromDir)
+        {
+            var fullDir = Path.GetFullPath(installFromDir);
+            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winston.exe"));
+            var pkg = new Package
+            {
+                Name = ver.ProductName, // "Winston"
+                Description = ver.Comments, // "Winston app manager."
+                URL = fullDir,
+                Filename = "winston.exe",
+                Type = PackageType.Shell,
+                Version = ver.FileVersion // "0.1.0.0"
+            };
+            await cellar.Add(pkg);
         }
     }
 }

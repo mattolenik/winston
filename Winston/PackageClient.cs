@@ -10,20 +10,32 @@ namespace Winston
     public class PackageClient : IDisposable
     {
         readonly Package pkg;
-        readonly string pkgDir;
+        readonly string appRootDir;
         readonly TempFile tmpFile;
 
-        public PackageClient(Package pkg, string pkgDir)
+        public PackageClient(Package pkg, string appRootDir)
         {
             this.pkg = pkg;
-            this.pkgDir = pkgDir;
+            this.appRootDir = appRootDir;
             tmpFile = new TempFile();
         }
 
         async Task<IPackageInstaller> Get()
         {
+            // TODO: the dual purpose logic in this code is weird, refactor?
+            var absUri = new Uri(pkg.URL);
+            var pkgDir = Path.Combine(appRootDir, pkg.Name);
+            // Must be a local directory package
+            if (Directory.Exists(absUri.AbsolutePath))
+            {
+                if (!string.IsNullOrWhiteSpace(pkg.Version))
+                {
+                    pkgDir = Path.Combine(pkgDir, pkg.Version);
+                }
+                return new LocalDirectoryInstaller(absUri.AbsolutePath, pkgDir, pkg.Filename);
+            }
             using (var client = new HttpClient())
-            using (var res = await client.GetAsync(pkg.URL))
+            using (var res = await client.GetAsync(absUri.AbsoluteUri))
             using (var body = await res.Content.ReadAsStreamAsync())
             {
                 using (var file = File.OpenWrite(tmpFile))

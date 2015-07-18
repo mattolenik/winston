@@ -24,7 +24,7 @@ namespace Winston
 
         public async Task Add(Package pkg)
         {
-            using (var client = new PackageClient(pkg, Path.Combine(cellarPath, pkg.Name)))
+            using (var client = new PackageClient(pkg, cellarPath))
             {
                 var installPath = await client.Install();
                 await Link(pkg, installPath);
@@ -48,7 +48,15 @@ namespace Winston
             var relAppPath = GetRelativePath(binPath, installPath);
             var relWorkingDir = GetRelativePath(binPath, appDir);
             var alias = Path.GetFileNameWithoutExtension(installPath);
-            var aliasPath = Path.Combine(binPath, alias + ".exe");
+            var aliasPath = Path.Combine(binPath, $"{alias}.exe");
+
+            if (File.Exists(aliasPath))
+            {
+                var dt = DateTime.Now.ToString("yyyyMMddHHmmss");
+                var oldAlias = Path.Combine(binPath, $"{alias}.old_{dt}");
+                // Works even if the process is running, gives us upgrade for free
+                File.Move(aliasPath, oldAlias);
+            }
 
             using (var wrap = new MemoryStream(Resources.wrap, 0, Resources.wrap.Length, true, true))
             using (var wrapper = new Wrapper(wrap, relAppPath, relWorkingDir, pkg.Type == PackageType.Shell))

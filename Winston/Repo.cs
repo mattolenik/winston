@@ -86,17 +86,19 @@ namespace Winston
 
         public string Run { get; set; }
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof (StringEnumConverter))]
         public PackageType Type { get; set; }
 
         public List<string> Preserve { get; set; }
 
         public List<string> Ignore { get; set; }
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof (StringEnumConverter))]
         public Platform Platform { get; set; }
 
         //public List<PackageInfo> Releases { get; set; }
+
+        public string Version { get; set; }
     }
 
     public class PackageInfo
