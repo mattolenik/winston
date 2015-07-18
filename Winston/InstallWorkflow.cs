@@ -11,15 +11,15 @@ namespace Winston
         public static async Task AddApps(Cellar cellar, QuestionQueue queue, Cache cache, params string[] appNames) => await AddApps(cellar, queue, cache, appNames as IEnumerable<string>);
 
         public static async Task AddApps(Cellar cellar, QuestionQueue queue, Cache cache, IEnumerable<string> appNames) => await Task.Run(() =>
-       {
-           var pkgs = appNames.Select(cache.ByName);
-           var pkgsList = pkgs as List<IEnumerable<Package>> ?? pkgs.ToList();
-           var unique = pkgsList.Where(p => p.Count() == 1).SelectMany(p => p);
-           var ambiguous = pkgsList.Where(p => p.Count() > 1);
-           var choiceTasks = ambiguous.Select(async choices => await Disambiguate(queue, choices));
-           var chosen = Task.WhenAll(choiceTasks).Result;
-           Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.Add(p)).ToArray());
-       });
+        {
+            var pkgs = appNames.Select(cache.ByName);
+            var pkgsList = pkgs as List<IEnumerable<Package>> ?? pkgs.ToList();
+            var unique = pkgsList.Where(p => p.Count() == 1).SelectMany(p => p);
+            var ambiguous = pkgsList.Where(p => p.Count() > 1);
+            var choiceTasks = ambiguous.Select(async choices => await Disambiguate(queue, choices));
+            var chosen = Task.WhenAll(choiceTasks).Result;
+            Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.Add(p)).ToArray());
+        });
 
         public static async Task RemoveApps(Cellar cellar, IEnumerable<string> apps) => await RemoveApps(cellar, apps.ToArray());
 
