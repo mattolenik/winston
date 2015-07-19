@@ -22,7 +22,7 @@ namespace Winston.Installers
 
         public async Task<string> Install()
         {
-            await FS.CopyDirectory(installFromDir, pkgDir);
+            await OS.CopyDirectory(installFromDir, pkgDir);
             return finalPath;
         }
 

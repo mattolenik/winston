@@ -60,6 +60,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -90,7 +91,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FS.cs" />
+    <Compile Include="OS.cs" />
     <Compile Include="Installers\LocalDirectoryInstaller.cs" />
     <Compile Include="InstallWorkflow.cs" />
     <Compile Include="Config.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Reflect.cs" />
     <Compile Include="Repo.cs" />
     <Compile Include="TempFile.cs" />
+    <Compile Include="WinApi.cs" />
     <Compile Include="Winmain.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Wrapper.cs" />

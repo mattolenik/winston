@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace Winston
 {
-    static class FS
+    static class OS
     {
         // From http://stackoverflow.com/questions/677221/copy-folders-in-c-sharp-using-system-io
         //
@@ -56,6 +58,33 @@ namespace Winston
                 }
                 var newPath = $"{path};{pathVar}";
                 env.SetValue("PATH", newPath);
+            }
+            IntPtr lParamA = Marshal.StringToHGlobalAnsi("Environment");
+            IntPtr lParamU = Marshal.StringToHGlobalUni("Environment");
+            try
+            {
+                IntPtr result;
+                WinApi.SendMessageTimeout(
+                    WinApi.HWND_BROADCAST,
+                    WinApi.WM_SETTINGCHANGE,
+                    UIntPtr.Zero,
+                    lParamA,
+                    WinApi.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
+                    5000,
+                    out result);
+                WinApi.SendMessageTimeout(
+                    WinApi.HWND_BROADCAST,
+                    WinApi.WM_SETTINGCHANGE,
+                    UIntPtr.Zero,
+                    lParamU,
+                    WinApi.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
+                    5000,
+                    out result);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(lParamA);
+                Marshal.FreeHGlobal(lParamU);
             }
         }
     }
