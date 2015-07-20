@@ -59,6 +59,13 @@ namespace Winston
                 var newPath = $"{path};{pathVar}";
                 env.SetValue("PATH", newPath);
             }
+            BroadcastSettingsChange();
+        }
+
+        static void BroadcastSettingsChange()
+        {
+            // Send WM_SETTINGCHANGE message to all windows. Explorer will pick this up and new
+            // cmd processes will see the new PATH variable.
             IntPtr lParamA = Marshal.StringToHGlobalAnsi("Environment");
             IntPtr lParamU = Marshal.StringToHGlobalUni("Environment");
             try
