@@ -78,7 +78,7 @@ namespace Winston
                     UIntPtr.Zero,
                     lParamA,
                     WinApi.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
-                    5000,
+                    50,
                     out result);
                 WinApi.SendMessageTimeout(
                     WinApi.HWND_BROADCAST,
@@ -86,7 +86,7 @@ namespace Winston
                     UIntPtr.Zero,
                     lParamU,
                     WinApi.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
-                    5000,
+                    50,
                     out result);
             }
             finally
