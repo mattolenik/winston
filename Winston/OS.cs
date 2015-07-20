@@ -63,6 +63,7 @@ namespace Winston
             IntPtr lParamU = Marshal.StringToHGlobalUni("Environment");
             try
             {
+                // Be sure to send both Unicode and ANSI messages
                 IntPtr result;
                 WinApi.SendMessageTimeout(
                     WinApi.HWND_BROADCAST,
