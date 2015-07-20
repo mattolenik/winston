@@ -14,8 +14,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wrap", "wrap\wrap.vcxproj",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winston.Test", "Winston.Test\Winston.Test.csproj", "{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Winston.Setup", "Winston.Setup\Winston.Setup.wixproj", "{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,16 +72,6 @@ Global
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Release|x86.ActiveCfg = Release|Any CPU
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Release|x86.Build.0 = Release|Any CPU
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Debug|x86.ActiveCfg = Debug|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Debug|x86.Build.0 = Debug|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Package|Any CPU.ActiveCfg = Release|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Package|Any CPU.Build.0 = Release|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Package|x86.ActiveCfg = Release|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Package|x86.Build.0 = Release|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Release|Any CPU.ActiveCfg = Release|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Release|x86.ActiveCfg = Release|x86
-		{35F671D3-1D17-434E-AC9B-2CAA0C1F179C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
