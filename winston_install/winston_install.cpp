@@ -7,6 +7,7 @@
 
 #include "MmioChainer.h"
 #include "IProgressObserver.h"
+#include "winston_tar.h"
 
 /*
 The classes:
@@ -43,12 +44,12 @@ class Server : public ChainerSample::MmioChainer, public ChainerSample::IProgres
 public:
     // Mmio chainer will create section with given name. You should make this and the event name unique.
     // Event is also created by the Mmio chainer and name is saved in the mapped data structure.
-    Server():ChainerSample::MmioChainer(L"TheSectionName", L"TheEventName") //customize for your event names
+    Server():ChainerSample::MmioChainer(L"winston-install-net46", L"winston-install-event") //customize for your event names
     {}
 
     bool Launch(const CString& args)
     {
-        CString cmdline = L"NDP46-KB3033092-Web.exe /pipe TheSectionName" + args; // Customize with name and location of setup .exe that you want to run
+        CString cmdline = L"NDP46-KB3033092-Web.exe /pipe winston-install-net46 " + args; // Customize with name and location of setup .exe that you want to run
         STARTUPINFO si = {0};
         si.cb = sizeof(si);
         PROCESS_INFORMATION pi = {0};
@@ -198,15 +199,7 @@ private:
 // Main entry point for program
 int __cdecl main(int argc, _In_count_(argc) char **_argv)
 {
-    CString args;
-    if (argc > 1)
-    {
-        args = CString(_argv[1]);
-    }
-	else
-	{
-		args = "/q /norestart";
-	}
+    CString args = "/q /norestart";
 
     return Server().Launch(args);
 }
