@@ -25,24 +25,38 @@ namespace Winston
 
         public async Task Add(Package pkg)
         {
-            using (var client = new PackageClient(pkg, CellarPath))
+            var pkgDir = Path.Combine(CellarPath, pkg.Name);
+            using (var client = new PackageClient(pkg, pkgDir))
             {
                 var installPath = await client.Install();
-                //await Link(pkg, installPath);
-                PathLink(installPath);
+                var installDir = Paths.GetDirectory(installPath);
+                var junctionPath = CreateCurrentJunction(pkgDir, installDir);
+                PathLink(junctionPath);
             }
         }
 
-        void PathLink(string installPath)
+        static string CreateCurrentJunction(string pkgDir, string installDir)
+        {
+            var junction = Path.Combine(pkgDir, "latest");
+            JunctionPoint.Create(junction, installDir, true);
+            return junction;
+        }
+
+        static string RemoveCurrentJunction(string pkgDir)
+        {
+            var junction = Path.Combine(pkgDir, "latest");
+            if (!JunctionPoint.Exists(junction)) return null;
+            JunctionPoint.Delete(junction);
+            return junction;
+        }
+
+        static void PathLink(string installPath)
         {
             var dir = Paths.GetDirectory(installPath);
-            if (dir != null)
-            {
-                OS.AddToPath(dir);
-            }
+            OS.AddToPath(dir);
         }
 
-        void PathUnlink(string installPath)
+        static void PathUnlink(string installPath)
         {
             OS.RemoveFromPath(installPath);
         }
@@ -87,24 +101,24 @@ namespace Winston
 
         public async Task Remove(string name)
         {
-            var appPath = Path.Combine(CellarPath, name);
-            if (!Directory.Exists(appPath))
+            var pkgDir = Path.Combine(CellarPath, name);
+            if (!Directory.Exists(pkgDir))
             {
                 return;
             }
             try
             {
                 // Make best attempt to unlink. If it fails, it won't prevent linking during a future reinstall.
-                var pkg = Yml.Load<Package>(Path.Combine(appPath, "pkg.yml"));
-                //await Unlink(pkg);
-                PathUnlink(appPath);
+                var pkg = Yml.Load<Package>(Path.Combine(pkgDir, "pkg.yml"));
+                var junction = RemoveCurrentJunction(pkgDir);
+                if (junction != null) PathUnlink(junction);
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e);
             }
 
-            await Task.Run(() => Directory.Delete(appPath, true));
+            await Task.Run(() => Directory.Delete(pkgDir, true));
         }
 
         public async Task Unlink(Package pkg)

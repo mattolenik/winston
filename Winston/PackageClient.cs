@@ -10,13 +10,13 @@ namespace Winston
     public class PackageClient : IDisposable
     {
         readonly Package pkg;
-        readonly string appRootDir;
+        readonly string pkgDir;
         readonly TempFile tmpFile;
 
-        public PackageClient(Package pkg, string appRootDir)
+        public PackageClient(Package pkg, string pkgDir)
         {
             this.pkg = pkg;
-            this.appRootDir = appRootDir;
+            this.pkgDir = pkgDir;
             tmpFile = new TempFile();
         }
 
@@ -24,15 +24,12 @@ namespace Winston
         {
             // TODO: the dual purpose logic in this code is weird, refactor?
             var absUri = new Uri(pkg.URL);
-            var pkgDir = Path.Combine(appRootDir, pkg.Name);
             // Must be a local directory package
             if (Directory.Exists(absUri.AbsolutePath))
             {
-                if (!string.IsNullOrWhiteSpace(pkg.Version))
-                {
-                    pkgDir = Path.Combine(pkgDir, pkg.Version);
-                }
-                return new LocalDirectoryInstaller(absUri.AbsolutePath, pkgDir, pkg.Filename);
+                // TODO: use version resolution
+                var versionDir = Path.Combine(pkgDir, pkg.Version ?? "default");
+                return new LocalDirectoryInstaller(absUri.AbsolutePath, versionDir, pkg.Filename);
             }
             using (var client = new HttpClient())
             using (var res = await client.GetAsync(absUri.AbsoluteUri))
@@ -50,15 +47,15 @@ namespace Winston
                 Yml.Save(pkg, Path.Combine(pkgDir, "pkg.yml"));
 
                 // TODO: replace hash with version resolution
-                var appDir = Path.Combine(pkgDir, hash);
-                Directory.CreateDirectory(appDir);
+                var versionDir = Path.Combine(pkgDir, hash);
+                Directory.CreateDirectory(versionDir);
 
                 var uri = new Uri(pkg.URL);
 
-                var archive = ArchivePackageInstaller.TryCreate(pkg, appDir, tmpFile, res.Content.Headers, uri);
+                var archive = ArchivePackageInstaller.TryCreate(pkg, versionDir, tmpFile, res.Content.Headers, uri);
                 if (archive != null) return archive;
 
-                var exe = ExePackageInstaller.TryCreate(pkg, appDir, tmpFile, res.Content.Headers, uri);
+                var exe = ExePackageInstaller.TryCreate(pkg, versionDir, tmpFile, res.Content.Headers, uri);
                 if (exe != null) return exe;
 
                 throw new NotSupportedException("Unable to identify type of package at URL: " + pkg.URL);
