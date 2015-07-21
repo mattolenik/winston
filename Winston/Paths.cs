@@ -2,12 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Winston
 {
     public static class Paths
     {
         public static string WinstonDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "winston");
+
+        public static string AppRelative(string path)
+        {
+            var result = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase), path);
+            return result;
+        }
 
         public static string NormalizePath(string path)
         {
@@ -43,5 +50,11 @@ namespace Winston
         }
 
         public static IEqualityComparer<string> NormalizedPathComparer => NormPathComparer.instance;
+
+        public static string GetDirectory(string path)
+        {
+            if (path == null) return null;
+            return Directory.Exists(path) ? path : Path.GetDirectoryName(path);
+        }
     }
 }

@@ -28,8 +28,23 @@ namespace Winston
             using (var client = new PackageClient(pkg, CellarPath))
             {
                 var installPath = await client.Install();
-                await Link(pkg, installPath);
+                //await Link(pkg, installPath);
+                PathLink(installPath);
             }
+        }
+
+        void PathLink(string installPath)
+        {
+            var dir = Paths.GetDirectory(installPath);
+            if (dir != null)
+            {
+                OS.AddToPath(dir);
+            }
+        }
+
+        void PathUnlink(string installPath)
+        {
+            OS.RemoveFromPath(installPath);
         }
 
         public async Task Link(Package pkg, string installPath)
@@ -81,7 +96,8 @@ namespace Winston
             {
                 // Make best attempt to unlink. If it fails, it won't prevent linking during a future reinstall.
                 var pkg = Yml.Load<Package>(Path.Combine(appPath, "pkg.yml"));
-                await Unlink(pkg);
+                //await Unlink(pkg);
+                PathUnlink(appPath);
             }
             catch (Exception e)
             {
