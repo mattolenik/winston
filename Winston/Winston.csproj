@@ -49,6 +49,7 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>false</DebugSymbols>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>Winston.Winmain</StartupObject>
@@ -150,8 +151,12 @@
     <Copy SourceFiles="..\wrap\$(Configuration)\wrap.exe" DestinationFolder="Resources\" />
     <Message Text="Copying wrap.exe to resources before build" Importance="high" />
   </Target>
-  <!--
-  <Target Name="AfterBuild">
+  <!-- Remove files not needed for distribution -->
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
+	<CallTarget Targets="DistCleanup" />
   </Target>
-  -->
+  <Target Name="DistCleanup">
+	<Exec Command="del $(OutputPath)\*.pdb" />
+	<Exec Command="del $(OutputPath)\*.xml" />
+  </Target>
 </Project>
