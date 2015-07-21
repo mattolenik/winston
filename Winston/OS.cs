@@ -49,17 +49,29 @@ namespace Winston
         {
             using (var cu = Registry.CurrentUser)
             {
-                path = path.Trim().Trim('\\', '/', '.');
                 var env = cu.OpenSubKey("Environment", true);
                 var pathVar = env.GetValue("PATH", "") as string;
-                if (pathVar.ContainsInvIgnoreCase(path))
-                {
-                    return;
-                }
-                var newPath = $"{path};{pathVar}";
+                var paths = ParsePaths(pathVar);
+
+                // Bail if the path is already there
+                if (paths.Contains(path, Paths.NormalizedPathComparer)) return;
+
+                paths.Insert(0, path);
+                var newPath = BuildPathVar(paths);
                 env.SetValue("PATH", newPath);
+                BroadcastSettingsChange();
             }
-            BroadcastSettingsChange();
+        }
+
+        static IList<string> ParsePaths(string pathVar)
+        {
+            var split = pathVar.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+            return split.ToList();
+        }
+
+        static string BuildPathVar(IEnumerable<string> paths)
+        {
+            return string.Join(";", paths);
         }
 
         static void BroadcastSettingsChange()
