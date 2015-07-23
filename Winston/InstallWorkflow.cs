@@ -10,15 +10,19 @@ namespace Winston
 {
     static class InstallWorkflow
     {
-        public static async Task AddApps(Cellar cellar, QuestionQueue queue, Cache cache, params string[] appNames) => await AddApps(cellar, queue, cache, appNames as IEnumerable<string>);
+        public static async Task AddApps(Cellar cellar, UserProxy user, Cache cache, params string[] appNames) => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
 
-        public static async Task AddApps(Cellar cellar, QuestionQueue queue, Cache cache, IEnumerable<string> appNames) => await Task.Run(() =>
+        public static async Task AddApps(Cellar cellar, UserProxy user, Cache cache, IEnumerable<string> appNames) => await Task.Run(() =>
         {
             var pkgs = appNames.Select(cache.ByName);
+            if (!pkgs.Any())
+            {
+                user.Message("No packages found by those names");
+            }
             var pkgsList = pkgs as List<IEnumerable<Package>> ?? pkgs.ToList();
             var unique = pkgsList.Where(p => p.Count() == 1).SelectMany(p => p);
             var ambiguous = pkgsList.Where(p => p.Count() > 1);
-            var choiceTasks = ambiguous.Select(async choices => await Disambiguate(queue, choices));
+            var choiceTasks = ambiguous.Select(async choices => await Disambiguate(user, choices));
             var chosen = Task.WhenAll(choiceTasks).Result;
             Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.Add(p)).ToArray());
         });
@@ -31,7 +35,7 @@ namespace Winston
         }
 
         // TODO: abstract away from text/console
-        static async Task<Package> Disambiguate(QuestionQueue queue, IEnumerable<Package> choices)
+        static async Task<Package> Disambiguate(UserProxy queue, IEnumerable<Package> choices)
         {
             var sb = new StringBuilder();
             var msg = "\nMultiple packages found, please select which to install:\n\n";
