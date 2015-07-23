@@ -78,7 +78,7 @@ namespace Winston
             // TODO: Handle unknown package case. Use option types
             List<Package> matches;
             cache.TryGetValue(pkgName, out matches);
-            return matches;
+            return matches ?? new List<Package>();
         }
 
         public IEnumerable<Package> Search(string query)

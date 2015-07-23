@@ -15,11 +15,12 @@ namespace Winston
         public static async Task AddApps(Cellar cellar, UserProxy user, Cache cache, IEnumerable<string> appNames) => await Task.Run(() =>
         {
             var pkgs = appNames.Select(cache.ByName);
-            if (!pkgs.Any())
-            {
-                user.Message("No packages found by those names");
-            }
             var pkgsList = pkgs as List<IEnumerable<Package>> ?? pkgs.ToList();
+            if (!pkgsList.SelectMany(p => p).Any())
+            {
+                user.Message($"No packages found matching {string.Join(", ", appNames)}");
+                return;
+            }
             var unique = pkgsList.Where(p => p.Count() == 1).SelectMany(p => p);
             var ambiguous = pkgsList.Where(p => p.Count() > 1);
             var choiceTasks = ambiguous.Select(async choices => await Disambiguate(user, choices));
