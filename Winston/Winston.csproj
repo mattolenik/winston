@@ -102,7 +102,7 @@
     </Compile>
     <Compile Include="Cache.cs" />
     <Compile Include="Cellar.cs" />
-    <Compile Include="QuestionQueue.cs" />
+    <Compile Include="UserProxy.cs" />
     <Compile Include="Reflect.cs" />
     <Compile Include="Repo.cs" />
     <Compile Include="TempFile.cs" />

@@ -9,11 +9,11 @@ namespace Winston.Test
 {
     class question_queue : nspec
     {
-        QuestionQueue queue;
+        UserProxy queue;
 
         void before_each()
         {
-            queue = new QuestionQueue();
+            queue = new UserProxy();
         }
 
         void describe_asking()

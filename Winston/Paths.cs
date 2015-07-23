@@ -39,7 +39,7 @@ namespace Winston
             {
                 var nx = NormalizePath(x);
                 var ny = NormalizePath(y);
-                return string.Equals(nx, ny);
+                return String.Equals(nx, ny);
             }
 
             public int GetHashCode(string obj)
@@ -55,6 +55,14 @@ namespace Winston
         {
             if (path == null) return null;
             return Directory.Exists(path) ? path : Path.GetDirectoryName(path);
+        }
+
+        public static string GetRelativePath(string from, string to)
+        {
+            var path1 = new Uri(@from);
+            var path2 = new Uri(to);
+            var diff = path1.MakeRelativeUri(path2);
+            return diff.OriginalString.Replace('/', '\\');
         }
     }
 }
