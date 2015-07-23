@@ -10,15 +10,16 @@ using System.Threading.Tasks.Dataflow;
 
 namespace Winston
 {
-    // Takes questions from other code that gets stuck and requires
-    // user intervention. E.g. another class can ask, "should I reinstall this package?"
-    // and QuestionQueue will block that call until the user responds through a UI.
-    class QuestionQueue : IDisposable
+    /// <summary>
+    /// Provides a proxy mechanism by which application components can notify the user
+    /// or ask the user questions and receive responses.
+    /// </summary>
+    public class UserProxy : IDisposable
     {
         readonly BufferBlock<Question> buf = new BufferBlock<Question>();
         readonly CancellationTokenSource cancel = new CancellationTokenSource();
 
-        public QuestionQueue()
+        public UserProxy()
         {
             Task.Run(async () =>
             {
@@ -60,10 +61,15 @@ namespace Winston
             return await b.ReceiveAsync();
         }
 
+        public void Message(string message)
+        {
+            Console.WriteLine(message);
+        }
+
         public void Dispose() => cancel.Cancel(true);
     }
 
-    struct Question
+    public class Question
     {
         public string Preamble { get; set; }
 

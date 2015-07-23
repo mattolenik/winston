@@ -10,12 +10,15 @@ namespace Winston
 {
     public class Cellar
     {
+        readonly UserProxy user;
+
         public string CellarPath { get; }
 
         public string BinPath { get; }
 
-        public Cellar(string winstonDir)
+        public Cellar(UserProxy user, string winstonDir)
         {
+            this.user = user;
             CellarPath = Path.Combine(winstonDir, @"cellar\");
             BinPath = Path.Combine(winstonDir, @"bin\");
             Path.GetTempPath();
@@ -32,6 +35,7 @@ namespace Winston
                 var installDir = Paths.GetDirectory(installPath);
                 var junctionPath = CreateCurrentJunction(pkgDir, installDir);
                 PathLink(junctionPath);
+                user.Message($"Finished installing {pkg.Name}. It was added to your PATH, but only new windows will get the change.");
             }
         }
 
@@ -75,8 +79,8 @@ namespace Winston
                 throw new InvalidDataException($"Package '{pkg}' does not seem to be installed");
             }
             var appDir = Path.GetDirectoryName(installPath);
-            var relAppPath = GetRelativePath(BinPath, installPath);
-            var relWorkingDir = GetRelativePath(BinPath, appDir);
+            var relAppPath = Paths.GetRelativePath(BinPath, installPath);
+            var relWorkingDir = Paths.GetRelativePath(BinPath, appDir);
             var alias = Path.GetFileNameWithoutExtension(installPath);
             var aliasPath = Path.Combine(BinPath, $"{alias}.exe");
 
@@ -144,14 +148,6 @@ namespace Winston
             }));
             var res = await Task.WhenAll(tasks);
             return res;
-        }
-
-        static string GetRelativePath(string from, string to)
-        {
-            var path1 = new Uri(from);
-            var path2 = new Uri(to);
-            var diff = path1.MakeRelativeUri(path2);
-            return diff.OriginalString;
         }
     }
 

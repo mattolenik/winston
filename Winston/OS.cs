@@ -68,7 +68,7 @@ namespace Winston
             using (var cu = Registry.CurrentUser)
             {
                 var env = cu.OpenSubKey("Environment", true);
-                var pathVar = env.GetValue("PATH", "") as string;
+                var pathVar = env.GetValue("PATH", "", RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
                 var paths = ParsePaths(pathVar);
                 var without = paths.Where(p => !Paths.NormalizedPathComparer.Equals(path, p));
                 var newPath = BuildPathVar(without);

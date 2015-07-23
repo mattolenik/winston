@@ -30,12 +30,12 @@ namespace Winston
 
             using (var cfgProvider = new ConfigProvider())
             using (var cache = new Cache(Paths.WinstonDir))
-            using (var queue = new QuestionQueue())
+            using (var user = new UserProxy())
             {
                 var verb = args.First().ToLowerInvariant();
                 var verbArgs = args.Skip(1);
 
-                var cellar = new Cellar(Paths.WinstonDir);
+                var cellar = new Cellar(user, Paths.WinstonDir);
                 // TODO: find a better way to setup repos
                 // Set up default repo
                 if (verb != "selfinstall" && cache.Empty())
@@ -48,7 +48,7 @@ namespace Winston
                 {
                     case "add":
                         {
-                            await AddApps(cellar, queue, cache, verbArgs);
+                            await AddApps(cellar, user, cache, verbArgs);
                             break;
                         }
                     case "remove":
