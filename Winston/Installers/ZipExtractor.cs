@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Winston.Installers
 {
-    class ZipPackageInstaller : IPackageInstaller
+    class ZipExtractor : IFileExtractor
     {
         string appDir;
         string packageFile;
         string filename;
 
-        public static ZipPackageInstaller TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
+        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
         {
-            var result = new ZipPackageInstaller { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
+            var result = new ZipExtractor { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
             if (Content.ContentTypeMatches(headers, "application/zip"))
             {
                 return result;

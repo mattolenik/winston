@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Winston.Installers
 {
-    class ArchivePackageInstaller : IPackageInstaller
+    class ArchiveExtractor : IFileExtractor
     {
         string appDir;
         string packageFile;
@@ -24,9 +24,9 @@ namespace Winston.Installers
             "zip", "7z"
         };
 
-        public static ArchivePackageInstaller TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
+        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
         {
-            var result = new ArchivePackageInstaller { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
+            var result = new ArchiveExtractor { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
             //"application/x-7z-compressed"
             if (Content.ContentTypeMatches(headers, MatchingMimeTypes))
             {

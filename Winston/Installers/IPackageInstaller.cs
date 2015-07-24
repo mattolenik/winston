@@ -1,11 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Winston.Installers
 {
-    public interface IPackageInstaller
+    public interface IPackageInstaller : IDisposable
     {
-        Task<string> Install();
+        Task<DirectoryInfo> Install();
         Task<Exception> Validate();
     }
 }

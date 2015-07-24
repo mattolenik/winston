@@ -74,7 +74,7 @@ namespace Winston
             {
                 Name = ver.ProductName, // "Winston"
                 Description = ver.Comments, // "Winston app manager."
-                URL = fullDir,
+                URL = new Uri(fullDir),
                 Filename = "winston.exe",
                 Type = PackageType.Shell,
                 Version = ver.FileVersion // "0.1.0.0"

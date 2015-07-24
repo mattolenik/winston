@@ -82,17 +82,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Installers\HttpPackageInstaller.cs" />
+    <Compile Include="Installers\IFileExtractor.cs" />
     <Compile Include="JunctionPoint.cs" />
     <Compile Include="OS.cs" />
     <Compile Include="Installers\LocalDirectoryInstaller.cs" />
     <Compile Include="InstallWorkflow.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Installers\ArchivePackageInstaller.cs" />
+    <Compile Include="Installers\ArchiveExtractor.cs" />
     <Compile Include="Installers\Content.cs" />
-    <Compile Include="Installers\ExePackageInstaller.cs" />
+    <Compile Include="Installers\ExeExtractor.cs" />
     <Compile Include="Installers\IPackageInstaller.cs" />
-    <Compile Include="Installers\ZipPackageInstaller.cs" />
+    <Compile Include="Installers\ZipExtractor.cs" />
     <Compile Include="PackageClient.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

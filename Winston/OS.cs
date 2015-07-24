@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -75,6 +76,21 @@ namespace Winston
                 env.SetValue("PATH", newPath);
                 BroadcastSettingsChange();
             }
+        }
+
+        public static async Task<string> GetSHA1(string file) => await Task.Run(() =>
+        {
+            using (var f = File.OpenRead(file))
+            {
+                return GetSHA1(f);
+            }
+        });
+
+        public static string GetSHA1(Stream stream)
+        {
+            var sha = new SHA1CryptoServiceProvider();
+            var hash = sha.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
         static IList<string> ParsePaths(string pathVar)

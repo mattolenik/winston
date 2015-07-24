@@ -78,7 +78,7 @@ namespace Winston
 
         public string Maintainer { get; set; }
 
-        public string URL { get; set; }
+        public Uri URL { get; set; }
 
         public string Filename { get; set; }
 
@@ -99,6 +99,12 @@ namespace Winston
         //public List<PackageInfo> Releases { get; set; }
 
         public string Version { get; set; }
+
+        public string ResolveVersion()
+        {
+            // TODO: check if null check is sufficient or if IsNullOrWhitespace is needed. Depends on serialization behavior.
+            return Version ?? SHA1;
+        }
     }
 
     public class PackageInfo

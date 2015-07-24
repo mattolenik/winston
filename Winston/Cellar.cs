@@ -29,14 +29,12 @@ namespace Winston
         public async Task Add(Package pkg)
         {
             var pkgDir = Path.Combine(CellarPath, pkg.Name);
-            using (var client = new PackageClient(pkg, pkgDir))
-            {
-                var installPath = await client.Install();
-                var installDir = Paths.GetDirectory(installPath);
-                var junctionPath = CreateCurrentJunction(pkgDir, installDir);
-                PathLink(junctionPath);
-                user.Message($"Finished installing {pkg.Name}. It was added to your PATH, but only new windows will get the change.");
-            }
+            var client = new PackageClient(pkg, pkgDir);
+            var installPath = await client.Install();
+            var installDir = Paths.GetDirectory(installPath);
+            var junctionPath = CreateCurrentJunction(pkgDir, installDir);
+            PathLink(junctionPath);
+            user.Message($"Finished installing {pkg.Name}. It was added to your PATH, but only new windows will get the change.");
         }
 
         static string CreateCurrentJunction(string pkgDir, string installDir)
@@ -113,7 +111,6 @@ namespace Winston
             try
             {
                 // Make best attempt to unlink. If it fails, it won't prevent linking during a future reinstall.
-                var pkg = Yml.Load<Package>(Path.Combine(pkgDir, "pkg.yml"));
                 var junction = RemoveCurrentJunction(pkgDir);
                 if (junction != null) PathUnlink(junction);
             }

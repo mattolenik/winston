@@ -1,34 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Winston.Installers
 {
     class LocalDirectoryInstaller : IPackageInstaller
     {
+        readonly Package pkg;
         readonly string pkgDir;
-        readonly string installFromDir;
-        readonly string finalPath;
 
-        public LocalDirectoryInstaller(string installFromDir, string pkgDir, string pkgFilename)
+        public static IPackageInstaller TryCreate(Package pkg, string pkgDir)
         {
-            this.installFromDir = installFromDir;
-            this.pkgDir = pkgDir;
-            finalPath = Path.Combine(pkgDir, pkgFilename);
+            // TODO: check for a pkg.yml to verify this directory is really a package?
+            return Directory.Exists(pkg.URL.AbsolutePath) ? new LocalDirectoryInstaller(pkg, pkgDir) : null;
         }
 
-        public async Task<string> Install()
+        LocalDirectoryInstaller(Package pkg, string pkgDir)
         {
-            await OS.CopyDirectory(installFromDir, pkgDir);
-            return finalPath;
+            this.pkg = pkg;
+            this.pkgDir = pkgDir;
+        }
+
+        public async Task<DirectoryInfo> Install()
+        {
+            var installDir = Path.Combine(pkg.URL.AbsolutePath, pkg.ResolveVersion() ?? "default");
+            await OS.CopyDirectory(pkg.URL.AbsolutePath, installDir);
+            return new DirectoryInfo(installDir);
         }
 
         public Task<Exception> Validate()
         {
             return Task.FromResult(null as Exception);
         }
+
+        public void Dispose() { }
     }
 }
