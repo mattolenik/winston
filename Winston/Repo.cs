@@ -2,8 +2,11 @@
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
+using YamlDotNet.Serialization;
 
 namespace Winston
 {
@@ -94,6 +97,7 @@ namespace Winston
         public List<string> Ignore { get; set; }
 
         [JsonConverter(typeof (StringEnumConverter))]
+        [DefaultValue(Platform.Any)]
         public Platform Platform { get; set; }
 
         //public List<PackageInfo> Releases { get; set; }

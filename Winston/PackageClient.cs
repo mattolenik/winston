@@ -18,18 +18,18 @@ namespace Winston
             this.pkgDir = pkgDir;
         }
 
-        public async Task<string> Install()
+        public async Task<DirectoryInfo> Install()
         {
             var installer = LocalDirectoryInstaller.TryCreate(pkg, pkgDir) ??
                             HttpPackageInstaller.TryCreate(pkg, pkgDir);
 
-            await installer.Install();
+            var installPath = await installer.Install();
             var error = await installer.Validate();
             if (error != null)
             {
                 throw error;
             }
-            return "";
+            return installPath;
         }
 
     }

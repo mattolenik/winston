@@ -104,6 +104,7 @@
     </Compile>
     <Compile Include="Cache.cs" />
     <Compile Include="Cellar.cs" />
+    <Compile Include="Serialization\YmlUriConverter.cs" />
     <Compile Include="UserProxy.cs" />
     <Compile Include="Reflect.cs" />
     <Compile Include="Repo.cs" />
@@ -112,7 +113,7 @@
     <Compile Include="Winmain.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Wrapper.cs" />
-    <Compile Include="Yml.cs" />
+    <Compile Include="Serialization\Yml.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

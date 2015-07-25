@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Reflection;
 using NSpec;
 using NSpec.Domain;
 using NSpec.Domain.Formatters;
@@ -21,19 +20,22 @@ using NUnit.Framework;
  * Visual Studio will detect this and will give you a window which you can use to attach a debugger.
  */
 
-[TestFixture]
-public abstract class nspec : global::NSpec.nspec
+namespace Winston.Test
 {
-    [Test]
-    public void debug()
+    [TestFixture]
+    public abstract class nspec : global::NSpec.nspec
     {
-        var currentSpec = this.GetType();
-        var finder = new SpecFinder(new[] { currentSpec });
-        var builder = new ContextBuilder(finder, new Tags().Parse(currentSpec.Name), new DefaultConventions());
-        var runner = new ContextRunner(builder, new ConsoleFormatter(), false);
-        var results = runner.Run(builder.Contexts().Build());
+        [Test]
+        public void debug()
+        {
+            var currentSpec = this.GetType();
+            var finder = new SpecFinder(new[] { currentSpec });
+            var builder = new ContextBuilder(finder, new Tags().Parse(currentSpec.Name), new DefaultConventions());
+            var runner = new ContextRunner(builder, new ConsoleFormatter(), false);
+            var results = runner.Run(builder.Contexts().Build());
 
-        //assert that there aren't any failures
-        results.Failures().Count().should_be(0);
+            //assert that there aren't any failures
+            results.Failures().Count().should_be(0);
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace Winston
             }
             var unique = pkgsList.Where(p => p.Count() == 1).SelectMany(p => p);
             var ambiguous = pkgsList.Where(p => p.Count() > 1);
-            var choiceTasks = ambiguous.Select(async choices => await Disambiguate(user, choices));
+            var choiceTasks = ambiguous.Select(async choices => await Disambiguate(user, SelectPlatform(choices)));
             var chosen = Task.WhenAll(choiceTasks).Result;
             Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.Add(p)).ToArray());
         });
@@ -35,9 +35,19 @@ namespace Winston
             await Task.WhenAll(apps.Select(async appName => await cellar.Remove(appName)));
         }
 
+        static IEnumerable<Package> SelectPlatform(IEnumerable<Package> choices)
+        {
+            var platform = Environment.Is64BitProcess ? Platform.x64 : Platform.x86;
+            return choices.Where(p => p.Platform == platform || p.Platform == Platform.Any);
+        }
+
         // TODO: abstract away from text/console
         static async Task<Package> Disambiguate(UserProxy queue, IEnumerable<Package> choices)
         {
+            if (choices.Count() == 1)
+            {
+                return choices.First();
+            }
             var sb = new StringBuilder();
             var msg = "\nMultiple packages found, please select which to install:\n\n";
             sb.Append(msg);

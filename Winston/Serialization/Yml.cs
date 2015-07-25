@@ -1,14 +1,16 @@
 ﻿using System;
+using System.ComponentModel.Design.Serialization;
 using System.IO;
 using YamlDotNet.Serialization;
 
-namespace Winston
+namespace Winston.Serialization
 {
     public class Yml
     {
         public static T Load<T>(string path)
         {
             var deserializer = new Deserializer();
+            deserializer.RegisterTypeConverter(new YmlUriConverter());
             using (var reader = new StreamReader(path))
             {
                 return deserializer.Deserialize<T>(reader);
@@ -42,6 +44,7 @@ namespace Winston
         public static void Save(object obj, string path)
         {
             var serializer = new Serializer();
+            serializer.RegisterTypeConverter(new YmlUriConverter());
             using (var writer = new StreamWriter(path))
             {
                 serializer.Serialize(writer, obj);

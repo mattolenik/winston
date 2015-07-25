@@ -30,9 +30,8 @@ namespace Winston
         {
             var pkgDir = Path.Combine(CellarPath, pkg.Name);
             var client = new PackageClient(pkg, pkgDir);
-            var installPath = await client.Install();
-            var installDir = Paths.GetDirectory(installPath);
-            var junctionPath = CreateCurrentJunction(pkgDir, installDir);
+            var installDir = await client.Install();
+            var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
             PathLink(junctionPath);
             user.Message($"Finished installing {pkg.Name}. It was added to your PATH, but only new windows will get the change.");
         }
