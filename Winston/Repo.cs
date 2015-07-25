@@ -70,7 +70,9 @@ namespace Winston
 
     public enum Platform
     {
-        Any, x64, x86
+        Any = 0,
+        x64 = 1,
+        x86 = 2
     }
 
     public class Package
@@ -87,7 +89,7 @@ namespace Winston
 
         public string SHA1 { get; set; }
 
-        public string Run { get; set; }
+        public string Path { get; set; }
 
         [JsonConverter(typeof (StringEnumConverter))]
         public PackageType Type { get; set; }

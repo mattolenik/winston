@@ -19,8 +19,7 @@
 		},
 		{
 			"Name": "cmder",
-			"URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder.zip",
-			"Filename": "cmder.exe"
+			"URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder.zip"
 		},
 		{
 			"Name": "plink",
@@ -30,15 +29,13 @@
 		{
 			"Name": "7zip",
 			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
-			"Filename": "x64/7za.exe",
-			"Type": "Shell",
+			"Path": "x64",
 			"Platform": "x64"
 		},
 		{
 			"Name": "7zip",
 			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
-			"Filename": "7za.exe",
-			"Type": "Shell",
+			"Path": ".",
 			"Platform": "x86"
 		}
 	]

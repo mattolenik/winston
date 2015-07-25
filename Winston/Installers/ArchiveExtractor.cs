@@ -50,7 +50,7 @@ namespace Winston.Installers
         public async Task<string> Install() => await Task.Run(() =>
         {
             Extract(packageFile, appDir);
-            return Path.Combine(appDir, filename);
+            return Path.Combine(appDir, filename ?? "");
         });
 
         public Task<Exception> Validate()

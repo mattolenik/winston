@@ -46,7 +46,7 @@ namespace Winston
 
         public static Task CopyDirectory(string source, string destination) => Task.Run(() => CopyDir(source, destination));
 
-        public static void AddToPath(string path)
+        public static void AddToPath(string path, string scrub = null)
         {
             using (var cu = Registry.CurrentUser)
             {
@@ -54,10 +54,16 @@ namespace Winston
                 var pathVar = env.GetValue("PATH", "") as string;
                 var paths = ParsePaths(pathVar);
 
-                // Bail if the path is already there
-                if (paths.Contains(path, Paths.NormalizedPathComparer)) return;
-
-                paths.Insert(0, path);
+                if (scrub != null)
+                {
+                    // Clean any old winston entries that no longer exist.
+                    // Only keep paths that are non-winston or that exist.
+                    paths = paths.Where(p => !p.Contains(scrub) || Directory.Exists(p)).ToList();
+                }
+                if (!paths.Contains(path, Paths.NormalizedPathComparer))
+                {
+                    paths.Insert(0, path);
+                }
                 var newPath = BuildPathVar(paths);
                 env.SetValue("PATH", newPath);
                 BroadcastSettingsChange();

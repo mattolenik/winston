@@ -32,7 +32,8 @@ namespace Winston
             var client = new PackageClient(pkg, pkgDir);
             var installDir = await client.Install();
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
-            PathLink(junctionPath);
+            var pathVal = Path.Combine(junctionPath, pkg.Path ?? "");
+            PathLink(pathVal);
             user.Message($"Finished installing {pkg.Name}. It was added to your PATH, but only new windows will get the change.");
         }
 
@@ -54,7 +55,7 @@ namespace Winston
         static void PathLink(string installPath)
         {
             var dir = Paths.GetDirectory(installPath);
-            OS.AddToPath(dir);
+            OS.AddToPath(dir, @"winston\cellar");
         }
 
         static void PathUnlink(string installPath)
@@ -121,15 +122,12 @@ namespace Winston
             await Task.Run(() => Directory.Delete(pkgDir, true));
         }
 
-        public async Task Unlink(Package pkg)
+        public async Task Unlink(Package pkg) => await Task.Run(() =>
         {
-            await Task.Run(() =>
-            {
-                var alias = Path.GetFileNameWithoutExtension(pkg.Run);
-                var aliasPath = Path.Combine(BinPath, alias + ".exe");
-                File.Delete(aliasPath);
-            });
-        }
+            //var alias = Path.GetFileNameWithoutExtension(pkg.Run);
+            //var aliasPath = Path.Combine(BinPath, alias + ".exe");
+            //File.Delete(aliasPath);
+        });
 
         public async Task<Package[]> List()
         {
