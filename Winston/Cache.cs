@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using Winston.Serialization;
 
 namespace Winston
 {
@@ -29,25 +27,27 @@ namespace Winston
             return db;
         }
 
-        async Task<bool> TryCreateTables()
+        async Task<bool> TryCreateTables() => await Task.Run(() =>
         {
             using (var t = db.BeginTransaction())
             {
                 try
                 {
-                    var result = await db.ExecuteAsync(@"
+                    var result = db.Execute(@"
     CREATE TABLE IF NOT EXISTS `Packages` (
 	`Name`	TEXT NOT NULL,
 	`Description`	TEXT,
 	`PackageData`	TEXT NOT NULL,
     PRIMARY KEY(Name)
-)");
-                    result = await db.ExecuteAsync(@"
+)", transaction: t);
+                    result = db.Execute(@"
     CREATE TABLE IF NOT EXISTS `Sources` (
 	`URI`	TEXT NOT NULL,
 	PRIMARY KEY(URI)
-)");
-                    result = await db.ExecuteAsync(@"CREATE INDEX IF NOT EXISTS `PackageIndex` ON `Packages` (`Name` ASC)");
+)", transaction: t);
+                    result = db.Execute(@"CREATE INDEX IF NOT EXISTS `PackageIndex` ON `Packages` (`Name` ASC)", transaction: t);
+                    result = db.Execute(@"CREATE VIRTUAL TABLE IF NOT EXISTS `PackageSearch` USING fts3(Name, Desc)", transaction: t);
+
                     t.Commit();
                 }
                 catch
@@ -57,7 +57,7 @@ namespace Winston
                 }
             }
             return true;
-        }
+        });
 
         async Task Load()
         {
@@ -112,6 +112,10 @@ namespace Winston
                             @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
                             new {Name = pkg.Name, Desc = pkg.Description, Data = json},
                             transaction: t);
+                        result = db.Execute(
+                            @"insert or replace into PackageSearch (Name, Desc) values (@Name, @Desc)",
+                            new {Name = pkg.Name, Desc = pkg.Description},
+                            transaction: t);
                     }
                     t.Commit();
                 }
@@ -145,9 +149,20 @@ namespace Winston
             return await Task.WhenAll(names.Select(ByName));
         }
 
-        public IEnumerable<Package> Search(string query)
+        public async Task<IEnumerable<Package>> Search(string query)
         {
-            return null;
+            var nameMatches = await db.QueryAsync<string>("select distinct Name from PackageSearch where Name match @query", new {query});
+            var descMatches = await db.QueryAsync<string>("select distinct Name from PackageSearch where Desc match @query", new {query});
+            var names = nameMatches.Union(descMatches).Distinct();
+            var result = new List<Package>();
+            foreach (var name in names)
+            {
+                var json = await db.QueryAsync<string>("select PackageData from Packages where Name = @name", new {name});
+                var pkg = JsonConvert.DeserializeObject<Package>(json.Single());
+                result.Add(pkg);
+            }
+
+            return result;
         }
 
         public async Task<IEnumerable<Package>> All()

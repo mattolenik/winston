@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Winston.Serialization;
 using YamlDotNet.Serialization;
 using static Winston.InstallWorkflow;
 
@@ -11,8 +12,6 @@ namespace Winston
 {
     class Winmain
     {
-        static readonly Serializer serializer = new Serializer();
-
         static void Main(string[] args)
         {
             Task.Run(async () => await AsyncMain(args)).Wait();
@@ -57,20 +56,23 @@ namespace Winston
                         }
                     case "search":
                         {
-                            var pkgs = cache.Search(verbArgs.First());
-                            serializer.Serialize(Console.Out, pkgs);
+                            var pkgs = await cache.Search(verbArgs.First());
+                            if (pkgs.Any())
+                            {
+                                Yml.Serialize(Console.Out, pkgs);
+                            }
                             break;
                         }
                     case "list":
                         {
                             var pkgs = await cellar.List();
-                            serializer.Serialize(Console.Out, pkgs);
+                            Yml.Serialize(Console.Out, pkgs);
                             break;
                         }
                     case "available":
                     {
                             var pkgs = await cache.All();
-                            serializer.Serialize(Console.Out, pkgs);
+                            Yml.Serialize(Console.Out, pkgs);
                             break;
                         }
                     case "refresh":
