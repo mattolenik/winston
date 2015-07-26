@@ -5,19 +5,19 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Winston.Serialization;
-using YamlDotNet.Serialization;
 using static Winston.InstallWorkflow;
 
 namespace Winston
 {
     class Winmain
     {
-        static void Main(string[] args)
+        static void Main(string[] args) => Task.Run(async () =>
         {
-            Task.Run(async () => await AsyncMain(args)).Wait();
-        }
+            var cfg = new ConfigProvider();
+            await AsyncMain(args, cfg);
+        }).Wait();
 
-        static async Task AsyncMain(string[] args)
+        public static async Task AsyncMain(string[] args, ConfigProvider cfg)
         {
             if (args.Length < 1)
             {
@@ -27,13 +27,13 @@ namespace Winston
 
             var verb = args.First().ToLowerInvariant();
             var verbArgs = args.Skip(1);
-            Directory.CreateDirectory(Paths.WinstonDir);
 
-            using (var cfgProvider = new ConfigProvider())
+            Directory.CreateDirectory(cfg.Config.WinstonDir);
+
             using (var user = new UserProxy())
-            using (var cache = await Cache.Create(Paths.WinstonDir))
+            using (var cache = await Cache.Create(cfg.Config.WinstonDir))
             {
-                var cellar = new Cellar(user, Paths.WinstonDir);
+                var cellar = new Cellar(user, cfg.Config.WinstonDir);
                 // TODO: find a better way to setup repos
                 // Set up default repo
                 if (verb != "selfinstall" && cache.Empty())
@@ -45,11 +45,13 @@ namespace Winston
                 switch (verb)
                 {
                     case "add":
+                    case "install":
                         {
                             await AddApps(cellar, user, cache, verbArgs);
                             break;
                         }
                     case "remove":
+                    case "uninstall":
                         {
                             await RemoveApps(cellar, verbArgs);
                             break;
@@ -70,7 +72,7 @@ namespace Winston
                             break;
                         }
                     case "available":
-                    {
+                        {
                             var pkgs = await cache.All();
                             Yml.Serialize(Console.Out, pkgs);
                             break;
@@ -109,7 +111,10 @@ namespace Winston
             var ver = FileVersionInfo.GetVersionInfo(assembly.Location);
             var message = $@"
 To add an app:                  winston add nameOfApp
+                                winston install nameOfApp
+
 To remove an app:               winston remove nameOfApp
+                                winston uninstall nameOfApp
 
 To search for apps:             winston search someNameOrDescription
 To list all available apps:     winston available

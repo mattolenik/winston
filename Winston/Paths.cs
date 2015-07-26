@@ -8,11 +8,13 @@ namespace Winston
 {
     public static class Paths
     {
-        public static string WinstonDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "winston");
+        public static string AppData => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        public static string ExecutingDir => Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
 
         public static string AppRelative(string path)
         {
-            var result = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase), path);
+            var result = Path.Combine(ExecutingDir, path);
             return result;
         }
 
