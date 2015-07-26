@@ -2,51 +2,93 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using Winston.Serialization;
 
 namespace Winston
 {
     public class Cache : IDisposable
     {
-        readonly string sourcesPath;
-        readonly string cachePath;
+        readonly string dbPath;
+        SQLiteConnection db;
 
-        // TODO: concurrent collection unneeded? reexamine
-        ConcurrentDictionary<string, List<Package>> cache;
-
-        // TODO: worry about concurrent access here?
-        HashSet<string> sources;
-
-        public Cache(string cellarPath)
+        Cache(string dbPath)
         {
-            sourcesPath = Path.Combine(cellarPath, "sources.yml");
-            cachePath = Path.Combine(cellarPath, "cache.yml");
-            Load();
+            this.dbPath = dbPath;
         }
 
-        void Load()
+        public static async Task<Cache> Create(string cellarPath)
         {
-            // TODO: use binary serialization instead
-            // TODO: fix improper default values
-            Yml.TryLoad(sourcesPath, out sources, () => new HashSet<string>(StringComparer.InvariantCultureIgnoreCase));
-            Yml.TryLoad(cachePath, out cache, () => new ConcurrentDictionary<string, List<Package>>(StringComparer.InvariantCultureIgnoreCase));
+            var dbPath = Path.Combine(cellarPath, "cache.sqlite");
+            var db = new Cache(dbPath);
+            await db.Load();
+            return db;
         }
 
-        void Save()
+        async Task<bool> TryCreateTables()
         {
-            Yml.Save(sources, sourcesPath);
-            Yml.Save(cache, cachePath);
+            using (var t = db.BeginTransaction())
+            {
+                try
+                {
+                    var result = await db.ExecuteAsync(@"
+    CREATE TABLE IF NOT EXISTS `Packages` (
+	`Name`	TEXT NOT NULL,
+	`Description`	TEXT,
+	`PackageData`	TEXT NOT NULL,
+    PRIMARY KEY(Name)
+)");
+                    result = await db.ExecuteAsync(@"
+    CREATE TABLE IF NOT EXISTS `Sources` (
+	`URI`	TEXT NOT NULL,
+	PRIMARY KEY(URI)
+)");
+                    result = await db.ExecuteAsync(@"CREATE INDEX IF NOT EXISTS `PackageIndex` ON `Packages` (`Name` ASC)");
+                    t.Commit();
+                }
+                catch
+                {
+                    t.Rollback();
+                    return false;
+                }
+            }
+            return true;
         }
 
-        public void AddRepo(string uriOrPath)
+        async Task Load()
         {
-            sources.Add(uriOrPath);
+            db = new SQLiteConnection($"Data Source={dbPath}");
+            await db.OpenAsync();
+            var canContinue = await TryCreateTables();
+            if (!canContinue)
+            {
+                // If the expected schema can't be created, delete
+                // the cache file and start over.
+                db.Dispose();
+                File.Delete(dbPath);
+                db = new SQLiteConnection($"Data Source={dbPath}");
+                await db.OpenAsync();
+                // If table creation still fails, throw
+                canContinue = await TryCreateTables();
+                if (!canContinue)
+                {
+                    throw new Exception("Unable to create cache database");
+                }
+            }
         }
 
-        void Put(string uriOrPath)
+        public async Task AddRepo(string uriOrPath)
+        {
+            uriOrPath = new Uri(uriOrPath).AbsoluteUri;
+            var result = db.Execute("insert or replace into Sources (URI) values (@URI)", new { URI = uriOrPath });
+            await LoadRepo(uriOrPath);
+        }
+
+        async Task LoadRepo(string uriOrPath) => await Task.Run(() =>
         {
             // TODO: non-crash handling of missing or failed repos
             if (!LocalFileRepo.CanLoad(uriOrPath)) throw new Exception("Can't load repo " + uriOrPath);
@@ -56,58 +98,73 @@ namespace Winston
             {
                 throw new Exception($"Unable to load repo with URI: {uriOrPath}");
             }
-            foreach (var pkg in r.Packages)
+            using (var t = db.BeginTransaction())
             {
-                if (!cache.ContainsKey(pkg.Name))
+                try
                 {
-                    cache[pkg.Name] = new List<Package>();
+                    foreach (var pkg in r.Packages)
+                    {
+                        var json = JsonConvert.SerializeObject(
+                            pkg,
+                            Formatting.None,
+                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                        var result = db.Execute(
+                            @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
+                            new {Name = pkg.Name, Desc = pkg.Description, Data = json},
+                            transaction: t);
+                    }
+                    t.Commit();
                 }
-                cache[pkg.Name].Add(pkg);
+                catch
+                {
+                    t.Rollback();
+                    throw;
+                }
             }
-        }
+        });
 
         public async Task Refresh()
         {
-            cache.Clear();
-            // TODO: repos with colliding app names will clobber each other here
-            var tasks = sources.Select(s => Task.Run(() => Put(s)));
-            await Task.WhenAll(tasks);
+            var repos = await db.QueryAsync<string>("select URI from Sources");
+            foreach (var repo in repos)
+            {
+                await LoadRepo(repo);
+            }
         }
 
-        public IEnumerable<Package> ByName(string pkgName)
+        public async Task<Package> ByName(string pkgName)
         {
-            // TODO: Handle unknown package case. Use option types
-            List<Package> matches;
-            cache.TryGetValue(pkgName, out matches);
-            return matches ?? new List<Package>();
+            var result = await db.QueryAsync<string>("select PackageData from Packages where Name = @Name", new { Name = pkgName });
+            var json = result.Single();
+            var pkg = JsonConvert.DeserializeObject<Package>(json);
+            return pkg;
+        }
+
+        public async Task<IEnumerable<Package>> ByNames(IEnumerable<string> names)
+        {
+            return await Task.WhenAll(names.Select(ByName));
         }
 
         public IEnumerable<Package> Search(string query)
         {
-            query = query.ToLowerInvariant();
-            if (cache.ContainsKey(query))
-            {
-                foreach (var match in cache[query])
-                {
-                    yield return match;
-                }
-                yield break;
-            }
-            foreach (var pkg in cache.Values.SelectMany(p=>p))
-            {
-                if (pkg.Name.Contains(query) || pkg.Description.Contains(query))
-                {
-                    yield return pkg;
-                }
-            }
+            return null;
         }
 
-        public IEnumerable<Package> All => cache.Values.SelectMany(p => p);
+        public async Task<IEnumerable<Package>> All()
+        {
+            var result = await db.QueryAsync<string>("select PackageData from Packages");
+            var pkgs = result.Select(JsonConvert.DeserializeObject<Package>);
+            return pkgs;
+        }
 
-        public void Dispose() => Save();
+        public void Dispose() => db?.Dispose();
 
-        public bool Empty() => !sources.Any();
-    }
+        public bool Empty()
+        {
+            var result = db.Query<int>("select count(1) from Sources").Single();
+            return result == 0;
+        }
+}
 
     // TODO: find a better way to do this
     static class LocalFileRepo

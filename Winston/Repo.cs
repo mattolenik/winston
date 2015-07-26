@@ -92,17 +92,16 @@ namespace Winston
         public string Path { get; set; }
 
         [JsonConverter(typeof (StringEnumConverter))]
-        public PackageType Type { get; set; }
+        public PackageType? Type { get; set; }
 
         public List<string> Preserve { get; set; }
 
         public List<string> Ignore { get; set; }
 
         [JsonConverter(typeof (StringEnumConverter))]
-        [DefaultValue(Platform.Any)]
-        public Platform Platform { get; set; }
+        public Platform? Platform { get; set; }
 
-        //public List<PackageInfo> Releases { get; set; }
+        public List<Package> Variants { get; set; }
 
         public string Version { get; set; }
 
@@ -111,20 +110,24 @@ namespace Winston
             // TODO: check if null check is sufficient or if IsNullOrWhitespace is needed. Depends on serialization behavior.
             return Version ?? SHA1;
         }
-    }
 
-    public class PackageInfo
-    {
-        public string URL { get; set; }
-
-        public string Version { get; set; }
-
-        public string Run { get; set; }
-
-        public List<string> Preserve { get; set; }
-
-        public List<string> Ignore { get; set; }
-
-        public string SHA1 { get; set; }
+        public Package Merge(Package other)
+        {
+            return new Package
+            {
+                Name = Name ?? other.Name,
+                Description = Description ?? other.Description,
+                Maintainer = Maintainer ?? other.Maintainer,
+                URL = URL ?? other.URL,
+                Filename = Filename ?? other.Filename,
+                Path = Path ?? other.Path,
+                Type = Type ?? other.Type,
+                Preserve = Preserve ?? other.Preserve,
+                Ignore = Ignore ?? other.Ignore,
+                Platform = Platform ?? other.Platform,
+                Variants = Variants ?? other.Variants,
+                Version = Version ?? other.Version
+            };
+        }
     }
 }

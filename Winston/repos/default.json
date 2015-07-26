@@ -28,15 +28,14 @@
 		},
 		{
 			"Name": "7zip",
-			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
-			"Path": "x64",
-			"Platform": "x64"
-		},
-		{
-			"Name": "7zip",
+			"Description": "7zip archive tool",
 			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
 			"Path": ".",
-			"Platform": "x86"
+			"Platform": "x86",
+			"Variants": [{
+				"Path": "x64",
+				"Platform": "x64"
+			}]
 		}
 	]
 }

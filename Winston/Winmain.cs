@@ -26,21 +26,20 @@ namespace Winston
                 return;
             }
 
+            var verb = args.First().ToLowerInvariant();
+            var verbArgs = args.Skip(1);
             Directory.CreateDirectory(Paths.WinstonDir);
 
             using (var cfgProvider = new ConfigProvider())
-            using (var cache = new Cache(Paths.WinstonDir))
             using (var user = new UserProxy())
+            using (var cache = await Cache.Create(Paths.WinstonDir))
             {
-                var verb = args.First().ToLowerInvariant();
-                var verbArgs = args.Skip(1);
-
                 var cellar = new Cellar(user, Paths.WinstonDir);
                 // TODO: find a better way to setup repos
                 // Set up default repo
                 if (verb != "selfinstall" && cache.Empty())
                 {
-                    cache.AddRepo(Paths.AppRelative(@"repos\default.json"));
+                    await cache.AddRepo(Paths.AppRelative(@"repos\default.json"));
                     await cache.Refresh();
                 }
 
@@ -70,7 +69,7 @@ namespace Winston
                         }
                     case "available":
                     {
-                            var pkgs = cache.All.Select(p => p.Name).Distinct(StringComparer.InvariantCultureIgnoreCase);
+                            var pkgs = await cache.All();
                             serializer.Serialize(Console.Out, pkgs);
                             break;
                         }

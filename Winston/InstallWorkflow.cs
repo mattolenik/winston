@@ -12,21 +12,21 @@ namespace Winston
     {
         public static async Task AddApps(Cellar cellar, UserProxy user, Cache cache, params string[] appNames) => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
 
-        public static async Task AddApps(Cellar cellar, UserProxy user, Cache cache, IEnumerable<string> appNames) => await Task.Run(() =>
+        public static async Task AddApps(Cellar cellar, UserProxy user, Cache cache, IEnumerable<string> appNames)
         {
-            var pkgs = appNames.Select(cache.ByName);
-            var pkgsList = pkgs as List<IEnumerable<Package>> ?? pkgs.ToList();
-            if (!pkgsList.SelectMany(p => p).Any())
+            var pkgs = await cache.ByNames(appNames);
+            var pkgsList = pkgs as List<Package> ?? pkgs.ToList();
+            if (!pkgsList.Any())
             {
                 user.Message($"No packages found matching {string.Join(", ", appNames)}");
                 return;
             }
-            var unique = pkgsList.Where(p => p.Count() == 1).SelectMany(p => p);
-            var ambiguous = pkgsList.Where(p => p.Count() > 1);
+            var unique = pkgsList.Where(p => p.Variants.Count == 0);
+            var ambiguous = pkgsList.Where(p => p.Variants.Count > 0);
             var choiceTasks = ambiguous.Select(async choices => await Disambiguate(user, SelectPlatform(choices)));
             var chosen = Task.WhenAll(choiceTasks).Result;
             Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.Add(p)).ToArray());
-        });
+        }
 
         public static async Task RemoveApps(Cellar cellar, IEnumerable<string> apps) => await RemoveApps(cellar, apps.ToArray());
 
@@ -35,10 +35,10 @@ namespace Winston
             await Task.WhenAll(apps.Select(async appName => await cellar.Remove(appName)));
         }
 
-        static IEnumerable<Package> SelectPlatform(IEnumerable<Package> choices)
+        static IEnumerable<Package> SelectPlatform(Package pkg)
         {
             var platform = Environment.Is64BitProcess ? Platform.x64 : Platform.x86;
-            return choices.Where(p => p.Platform == platform || p.Platform == Platform.Any);
+            return pkg.Variants.Where(p => p.Platform == platform || p.Platform == Platform.Any).Select(p => p.Merge(pkg));
         }
 
         // TODO: abstract away from text/console
