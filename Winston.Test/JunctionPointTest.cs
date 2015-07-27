@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 namespace Winston.Test
 {
-    // TODO: convert to NUnit
     [TestFixture]
     public class JunctionPointTest
     {

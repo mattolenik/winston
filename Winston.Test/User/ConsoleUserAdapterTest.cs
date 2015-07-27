@@ -1,25 +1,38 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using NSpec;
 using NUnit.Framework;
 using Winston.User;
 
 namespace Winston.Test.User
 {
-    [TestFixture]
-    public class ConsoleUserAdapterTest
+    class ConsoleUserAdapterTest : nspec
     {
-        [Test]
-        public async Task TestAdapter()
-        {
-            var writer = new StringWriter();
-            var reader = new StringReader("ans1");
-            var adapter = new ConsoleUserAdapter(writer, reader);
-            var answer = await adapter.Ask(new Question("", "Question", "ans1", "ans2"));
-            Assert.AreEqual("ans1", answer);
+        StringWriter writer;
+        StringReader reader;
+        ConsoleUserAdapter adapter;
 
-            adapter.Message("msg");
-            var output = writer.GetStringBuilder().ToString();
-            Assert.IsTrue(output.Contains("msg"), "Message not contained in output");
+        void before_each()
+        {
+            writer = new StringWriter();
+            reader = new StringReader("ans1");
+            adapter = new ConsoleUserAdapter(writer, reader);
+        }
+
+        void describe_adapter()
+        {
+            it["can ask and receive an answer"] = () => Task.Run(async () =>
+            {
+                var answer = await adapter.Ask(new Question("", "Question", "ans1", "ans2"));
+                answer.should_be("ans1");
+            }).Wait();
+
+            it["can receive a message"] = () =>
+            {
+                adapter.Message("msg");
+                var output = writer.GetStringBuilder().ToString();
+                output.should_contain("msg");
+            };
         }
     }
 }
