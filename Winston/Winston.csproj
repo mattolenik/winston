@@ -115,7 +115,10 @@
     <Compile Include="Cache.cs" />
     <Compile Include="Cellar.cs" />
     <Compile Include="Serialization\YmlUriConverter.cs" />
-    <Compile Include="UserProxy.cs" />
+    <Compile Include="User\ConsoleUserAdapter.cs" />
+    <Compile Include="User\IUserAdapter.cs" />
+    <Compile Include="User\Question.cs" />
+    <Compile Include="User\UserProxy.cs" />
     <Compile Include="Reflect.cs" />
     <Compile Include="Repo.cs" />
     <Compile Include="TempFile.cs" />

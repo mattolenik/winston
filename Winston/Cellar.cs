@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Winston.Properties;
+using Winston.User;
 using YamlDotNet.Serialization;
 
 namespace Winston

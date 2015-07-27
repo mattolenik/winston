@@ -6,7 +6,6 @@ namespace Winston.Test
 {
     // TODO: convert to NUnit
     [TestFixture]
-    //[TestsOn(typeof(JunctionPoint))]
     public class JunctionPointTest
     {
         private string tempFolder;
@@ -88,7 +87,7 @@ namespace Winston.Test
         }
 
         [Test]
-        //[ExpectedException(typeof(IOException), "Directory already exists and overwrite parameter is false.")]
+        [ExpectedException(typeof(IOException), UserMessage = "Directory already exists and overwrite parameter is false.")]
         public void Create_ThrowsIfOverwriteNotSpecifiedAndDirectoryExists()
         {
             string targetFolder = Path.Combine(tempFolder, "ADirectory");
@@ -114,7 +113,7 @@ namespace Winston.Test
         }
 
         [Test]
-        //[ExpectedException(typeof(IOException), "Target path does not exist or is not a directory.")]
+        [ExpectedException(typeof(IOException), UserMessage = "Target path does not exist or is not a directory.")]
         public void Create_ThrowsIfTargetDirectoryDoesNotExist()
         {
             string targetFolder = Path.Combine(tempFolder, "ADirectory");
@@ -124,21 +123,21 @@ namespace Winston.Test
         }
 
         [Test]
-        //[ExpectedException(typeof(IOException), "Unable to open reparse point.")]
+        [ExpectedException(typeof(IOException), UserMessage = "Unable to open reparse point.")]
         public void GetTarget_NonExistentJunctionPoint()
         {
             JunctionPoint.GetTarget(Path.Combine(tempFolder, "SymLink"));
         }
 
         [Test]
-        //[ExpectedException(typeof(IOException), "Path is not a junction point.")]
+        [ExpectedException(typeof(IOException), UserMessage = "Path is not a junction point.")]
         public void GetTarget_CalledOnADirectoryThatIsNotAJunctionPoint()
         {
             JunctionPoint.GetTarget(tempFolder);
         }
 
         [Test]
-        //[ExpectedException(typeof(IOException), "Path is not a junction point.")]
+        [ExpectedException(typeof(IOException), UserMessage = "Path is not a junction point.")]
         public void GetTarget_CalledOnAFile()
         {
             File.Create(Path.Combine(tempFolder, "AFile")).Close();
@@ -154,14 +153,14 @@ namespace Winston.Test
         }
 
         [Test]
-        //[ExpectedException(typeof(IOException), "Unable to delete junction point.")]
+        [ExpectedException(typeof(IOException), UserMessage = "Unable to delete junction point.")]
         public void Delete_CalledOnADirectoryThatIsNotAJunctionPoint()
         {
             JunctionPoint.Delete(tempFolder);
         }
 
         [Test]
-        //[ExpectedException(typeof(IOException), "Path is not a junction point.")]
+        [ExpectedException(typeof(IOException), UserMessage = "Path is not a junction point.")]
         public void Delete_CalledOnAFile()
         {
             File.Create(Path.Combine(tempFolder, "AFile")).Close();

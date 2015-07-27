@@ -4,25 +4,53 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NSpec;
+using Winston.User;
 
 namespace Winston.Test
 {
-    class question_queue : nspec
+    class user_proxy : nspec
     {
-        UserProxy queue;
+        UserProxy proxy;
+        TestAdapter adapter;
+
+        class TestAdapter : IUserAdapter
+        {
+            public string Answer;
+
+            public Task<string> Ask(Question question)
+            {
+                return Task.FromResult(Answer);
+            }
+
+            public void Message(string message)
+            {
+            }
+        }
 
         void before_each()
         {
-            queue = new UserProxy();
+            adapter = new TestAdapter();
+            proxy = new UserProxy(adapter);
+        }
+
+        void after_each()
+        {
+            proxy?.Dispose();
         }
 
         void describe_asking()
         {
             it["gets an answer"] = () =>
             {
-                var ans = Task.Run(() => queue.Ask(new Question("what is the answer", "ans1", "ans2")));
+                adapter.Answer = "ans1";
+                var ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
                 ans.Wait();
                 ans.Result.should_be("ans1");
+
+                adapter.Answer = "ans2";
+                ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
+                ans.Wait();
+                ans.Result.should_be("ans2");
             };
         }
     }
