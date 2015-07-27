@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using static System.IO.Path;
 
 namespace Winston
 {
     public class TempFile : IDisposable
     {
-        public string Path { get; } = System.IO.Path.GetTempFileName();
+        public string Path { get; } = GetTempFileName();
 
         public void Dispose() => File.Delete(Path);
 

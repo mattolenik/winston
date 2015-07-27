@@ -12,7 +12,7 @@ namespace Winston
     public class Cache : IDisposable
     {
         readonly string dbPath;
-        SQLiteConnection db;
+        internal SQLiteConnection DB { get; private set; }
 
         Cache(string dbPath)
         {
@@ -22,31 +22,31 @@ namespace Winston
         public static async Task<Cache> Create(string winstonDir)
         {
             var dbPath = Path.Combine(winstonDir, "cache.sqlite");
-            var db = new Cache(dbPath);
-            await db.Load();
-            return db;
+            var cache = new Cache(dbPath);
+            await cache.Load();
+            return cache;
         }
 
         async Task<bool> TryCreateTables() => await Task.Run(() =>
         {
-            using (var t = db.BeginTransaction())
+            using (var t = DB.BeginTransaction())
             {
                 try
                 {
-                    var result = db.Execute(@"
+                    var result = DB.Execute(@"
     CREATE TABLE IF NOT EXISTS `Packages` (
 	`Name`	TEXT NOT NULL,
 	`Description`	TEXT,
 	`PackageData`	TEXT NOT NULL,
     PRIMARY KEY(Name)
 )", transaction: t);
-                    result = db.Execute(@"
+                    result = DB.Execute(@"
     CREATE TABLE IF NOT EXISTS `Sources` (
 	`URI`	TEXT NOT NULL,
 	PRIMARY KEY(URI)
 )", transaction: t);
-                    result = db.Execute(@"CREATE INDEX IF NOT EXISTS `PackageIndex` ON `Packages` (`Name` ASC)", transaction: t);
-                    result = db.Execute(@"CREATE VIRTUAL TABLE IF NOT EXISTS `PackageSearch` USING fts3(Name, Desc)", transaction: t);
+                    result = DB.Execute(@"CREATE INDEX IF NOT EXISTS `PackageIndex` ON `Packages` (`Name` ASC)", transaction: t);
+                    result = DB.Execute(@"CREATE VIRTUAL TABLE IF NOT EXISTS `PackageSearch` USING fts3(Name, Desc)", transaction: t);
 
                     t.Commit();
                 }
@@ -61,17 +61,17 @@ namespace Winston
 
         async Task Load()
         {
-            db = new SQLiteConnection($"Data Source={dbPath}");
-            await db.OpenAsync();
+            DB = new SQLiteConnection($"Data Source={dbPath}");
+            await DB.OpenAsync();
             var canContinue = await TryCreateTables();
             if (!canContinue)
             {
                 // If the expected schema can't be created, delete
                 // the cache file and start over.
-                db.Dispose();
+                DB.Dispose();
                 File.Delete(dbPath);
-                db = new SQLiteConnection($"Data Source={dbPath}");
-                await db.OpenAsync();
+                DB = new SQLiteConnection($"Data Source={dbPath}");
+                await DB.OpenAsync();
                 // If table creation still fails, throw
                 canContinue = await TryCreateTables();
                 if (!canContinue)
@@ -84,7 +84,7 @@ namespace Winston
         public async Task AddRepo(string uriOrPath)
         {
             uriOrPath = new Uri(uriOrPath).AbsoluteUri;
-            var result = db.Execute("insert or replace into Sources (URI) values (@URI)", new { URI = uriOrPath });
+            var result = DB.Execute("insert or replace into Sources (URI) values (@URI)", new { URI = uriOrPath });
             await LoadRepo(uriOrPath);
         }
 
@@ -98,7 +98,7 @@ namespace Winston
             {
                 throw new Exception($"Unable to load repo with URI: {uriOrPath}");
             }
-            using (var t = db.BeginTransaction())
+            using (var t = DB.BeginTransaction())
             {
                 try
                 {
@@ -108,11 +108,11 @@ namespace Winston
                             pkg,
                             Formatting.None,
                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-                        var result = db.Execute(
+                        var result = DB.Execute(
                             @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
                             new {Name = pkg.Name, Desc = pkg.Description, Data = json},
                             transaction: t);
-                        result = db.Execute(
+                        result = DB.Execute(
                             @"insert or replace into PackageSearch (Name, Desc) values (@Name, @Desc)",
                             new {Name = pkg.Name, Desc = pkg.Description},
                             transaction: t);
@@ -129,7 +129,7 @@ namespace Winston
 
         public async Task Refresh()
         {
-            var repos = await db.QueryAsync<string>("select URI from Sources");
+            var repos = await DB.QueryAsync<string>("select URI from Sources");
             foreach (var repo in repos)
             {
                 await LoadRepo(repo);
@@ -138,26 +138,26 @@ namespace Winston
 
         public async Task<Package> ByName(string pkgName)
         {
-            var result = await db.QueryAsync<string>("select PackageData from Packages where Name = @Name", new { Name = pkgName });
+            var result = await DB.QueryAsync<string>("select PackageData from Packages where Name = @Name", new { Name = pkgName });
             var json = result.Single();
             var pkg = JsonConvert.DeserializeObject<Package>(json);
             return pkg;
         }
 
-        public async Task<IEnumerable<Package>> ByNames(IEnumerable<string> names)
+        public async Task<IList<Package>> ByNames(IEnumerable<string> names)
         {
             return await Task.WhenAll(names.Select(ByName));
         }
 
-        public async Task<IEnumerable<Package>> Search(string query)
+        public async Task<IList<Package>> Search(string query)
         {
-            var nameMatches = await db.QueryAsync<string>("select distinct Name from PackageSearch where Name match @query", new {query});
-            var descMatches = await db.QueryAsync<string>("select distinct Name from PackageSearch where Desc match @query", new {query});
+            var nameMatches = await DB.QueryAsync<string>("select distinct Name from PackageSearch where Name match @query", new {query});
+            var descMatches = await DB.QueryAsync<string>("select distinct Name from PackageSearch where Desc match @query", new {query});
             var names = nameMatches.Union(descMatches).Distinct();
             var result = new List<Package>();
             foreach (var name in names)
             {
-                var json = await db.QueryAsync<string>("select PackageData from Packages where Name = @name", new {name});
+                var json = await DB.QueryAsync<string>("select PackageData from Packages where Name = @name", new {name});
                 var pkg = JsonConvert.DeserializeObject<Package>(json.Single());
                 result.Add(pkg);
             }
@@ -167,16 +167,16 @@ namespace Winston
 
         public async Task<IEnumerable<Package>> All()
         {
-            var result = await db.QueryAsync<string>("select PackageData from Packages");
+            var result = await DB.QueryAsync<string>("select PackageData from Packages");
             var pkgs = result.Select(JsonConvert.DeserializeObject<Package>);
             return pkgs;
         }
 
-        public void Dispose() => db?.Dispose();
+        public void Dispose() => DB?.Dispose();
 
         public bool Empty()
         {
-            var result = db.Query<int>("select count(1) from Sources").Single();
+            var result = DB.Query<int>("select count(1) from Sources").Single();
             return result == 0;
         }
 }

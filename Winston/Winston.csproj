@@ -115,6 +115,7 @@
     <Compile Include="Cache.cs" />
     <Compile Include="Cellar.cs" />
     <Compile Include="Serialization\YmlUriConverter.cs" />
+    <Compile Include="TempDirectory.cs" />
     <Compile Include="User\ConsoleUserAdapter.cs" />
     <Compile Include="User\IUserAdapter.cs" />
     <Compile Include="User\Question.cs" />
