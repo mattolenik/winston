@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NSpec;
+using Dapper;
 
 namespace Winston.Test
 {
@@ -71,6 +72,21 @@ namespace Winston.Test
                 pkgs.should_contain(p => p.Name == "Pkg 4");
             }).Wait();
 
+            it["can get all"] = () => Task.Run(async () =>
+            {
+                var pkgs = await cache.All();
+                pkgs.Count().should_be(repo.Packages.Count);
+            }).Wait();
+
+            it["can be refreshed"] = () => Task.Run(async () =>
+            {
+                var result = cache.DB.Query("delete from Packages");
+                var pkgs = await cache.All();
+                pkgs.should_be_empty();
+                await cache.Refresh();
+                pkgs = await cache.All();
+                pkgs.Count().should_be(repo.Packages.Count);
+            }).Wait();
         }
     }
 }

@@ -176,7 +176,7 @@ namespace Winston
 
         public bool Empty()
         {
-            var result = DB.Query<int>("select count(1) from Sources").Single();
+            var result = DB.Query<int>("select count(1) from Packages").Single();
             return result == 0;
         }
 }
