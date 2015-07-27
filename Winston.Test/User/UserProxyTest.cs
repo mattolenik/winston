@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NSpec;
 using Winston.User;
 
-namespace Winston.Test
+namespace Winston.Test.User
 {
-    class user_proxy : nspec
+    class UserProxyTest : nspec
     {
         UserProxy proxy;
         TestAdapter adapter;

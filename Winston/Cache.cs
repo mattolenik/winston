@@ -19,9 +19,9 @@ namespace Winston
             this.dbPath = dbPath;
         }
 
-        public static async Task<Cache> Create(string cellarPath)
+        public static async Task<Cache> Create(string winstonDir)
         {
-            var dbPath = Path.Combine(cellarPath, "cache.sqlite");
+            var dbPath = Path.Combine(winstonDir, "cache.sqlite");
             var db = new Cache(dbPath);
             await db.Load();
             return db;

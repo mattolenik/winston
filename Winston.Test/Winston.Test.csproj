@@ -49,11 +49,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoleUserAdapterTest.cs" />
+    <Compile Include="User\ConsoleUserAdapterTest.cs" />
     <Compile Include="JunctionPointTest.cs" />
     <Compile Include="nspec.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="user_proxy.cs" />
+    <Compile Include="User\UserProxyTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Winston\Winston.csproj">

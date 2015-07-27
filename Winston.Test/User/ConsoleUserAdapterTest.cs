@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Winston.User;
 
-namespace Winston.Test
+namespace Winston.Test.User
 {
     [TestFixture]
     public class ConsoleUserAdapterTest
