@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NSpec;
 using Dapper;
+using Winston.Cache;
 
 namespace Winston.Test
 {
     class CacheTest : nspec
     {
-        Cache cache;
+        SqliteCache cache;
         TempDirectory dir;
         TempFile repoFile;
         Repo repo;
@@ -20,7 +21,7 @@ namespace Winston.Test
         void before_each() => Task.Run(async () =>
         {
             dir = new TempDirectory("winston-test-");
-            cache = await Cache.Create(dir);
+            cache = await SqliteCache.Create(dir);
             repo = new Repo("test")
             {
                 Packages = new List<Package>

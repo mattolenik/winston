@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Winston.Cache;
 using Winston.Serialization;
 using Winston.User;
 using static Winston.InstallWorkflow;
@@ -32,7 +33,7 @@ namespace Winston
             Directory.CreateDirectory(cfg.Config.WinstonDir);
 
             using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
-            using (var cache = await Cache.Create(cfg.Config.WinstonDir))
+            using (var cache = await SqliteCache.Create(cfg.Config.WinstonDir))
             {
                 var cellar = new Cellar(user, cfg.Config.WinstonDir);
                 // TODO: find a better way to setup repos

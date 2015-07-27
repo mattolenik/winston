@@ -7,22 +7,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 
-namespace Winston
+namespace Winston.Cache
 {
-    public class Cache : IDisposable
+    public class SqliteCache : IDisposable
     {
         readonly string dbPath;
         internal SQLiteConnection DB { get; private set; }
 
-        Cache(string dbPath)
+        SqliteCache(string dbPath)
         {
             this.dbPath = dbPath;
         }
 
-        public static async Task<Cache> Create(string winstonDir)
+        public static async Task<SqliteCache> Create(string winstonDir)
         {
             var dbPath = Path.Combine(winstonDir, "cache.sqlite");
-            var cache = new Cache(dbPath);
+            var cache = new SqliteCache(dbPath);
             await cache.Load();
             return cache;
         }
@@ -33,21 +33,11 @@ namespace Winston
             {
                 try
                 {
-                    var result = DB.Execute(@"
-    CREATE TABLE IF NOT EXISTS `Packages` (
-	`Name`	TEXT NOT NULL,
-	`Description`	TEXT,
-	`PackageData`	TEXT NOT NULL,
-    PRIMARY KEY(Name)
-)", transaction: t);
-                    result = DB.Execute(@"
-    CREATE TABLE IF NOT EXISTS `Sources` (
-	`URI`	TEXT NOT NULL,
-	PRIMARY KEY(URI)
-)", transaction: t);
-                    result = DB.Execute(@"CREATE INDEX IF NOT EXISTS `PackageIndex` ON `Packages` (`Name` ASC)", transaction: t);
-                    result = DB.Execute(@"CREATE VIRTUAL TABLE IF NOT EXISTS `PackageSearch` USING fts3(Name, Desc)", transaction: t);
-
+                    // TODO: check results?
+                    var result = DB.Execute(Tables.Packages.CreateStatement, transaction: t);
+                    result = DB.Execute(Tables.Sources.CreateStatement, transaction: t);
+                    result = DB.Execute(Indexes.PackageIndex.CreateStatement, transaction: t);
+                    result = DB.Execute(Tables.PackageSearch.CreateStatement, transaction: t);
                     t.Commit();
                 }
                 catch
@@ -179,8 +169,11 @@ namespace Winston
             var result = DB.Query<int>("select count(1) from Packages").Single();
             return result == 0;
         }
+    }
 }
 
+namespace Winston
+{
     // TODO: find a better way to do this
     static class LocalFileRepo
     {
