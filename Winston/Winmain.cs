@@ -31,7 +31,7 @@ namespace Winston
 
             Directory.CreateDirectory(cfg.Config.WinstonDir);
 
-            using (var user = new UserProxy(new ConsoleUserAdapter()))
+            using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
             using (var cache = await Cache.Create(cfg.Config.WinstonDir))
             {
                 var cellar = new Cellar(user, cfg.Config.WinstonDir);
