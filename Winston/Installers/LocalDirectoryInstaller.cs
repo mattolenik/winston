@@ -13,7 +13,7 @@ namespace Winston.Installers
         public static IPackageInstaller TryCreate(Package pkg, string pkgDir)
         {
             // TODO: check for a pkg.yml to verify this directory is really a package?
-            return Directory.Exists(pkg.URL.AbsolutePath) ? new LocalDirectoryInstaller(pkg, pkgDir) : null;
+            return Directory.Exists(pkg.URL.LocalPath) ? new LocalDirectoryInstaller(pkg, pkgDir) : null;
         }
 
         LocalDirectoryInstaller(Package pkg, string pkgDir)
@@ -25,7 +25,7 @@ namespace Winston.Installers
         public async Task<DirectoryInfo> Install()
         {
             var installDir = Path.Combine(pkgDir, pkg.ResolveVersion() ?? "default");
-            await OS.CopyDirectory(pkg.URL.AbsolutePath, installDir);
+            await OS.CopyDirectory(pkg.URL.LocalPath, installDir);
             return new DirectoryInfo(installDir);
         }
 

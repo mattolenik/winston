@@ -67,7 +67,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="User\ConsoleUserAdapterTest.cs" />
     <Compile Include="JunctionPointTest.cs" />
-    <Compile Include="nspec.cs" />
+    <Compile Include="nspecAsync.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="User\UserProxyTest.cs" />
   </ItemGroup>

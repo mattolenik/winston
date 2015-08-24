@@ -94,14 +94,14 @@ namespace Winston
         [JsonConverter(typeof (StringEnumConverter))]
         public PackageType? Type { get; set; }
 
-        public List<string> Preserve { get; set; }
+        public List<string> Preserve { get; set; } = new List<string>();
 
-        public List<string> Ignore { get; set; }
+        public List<string> Ignore { get; set; } = new List<string>();
 
         [JsonConverter(typeof (StringEnumConverter))]
         public Platform? Platform { get; set; }
 
-        public List<Package> Variants { get; set; }
+        public List<Package> Variants { get; set; } = new List<Package>();
 
         public string Version { get; set; }
 
@@ -128,6 +128,11 @@ namespace Winston
                 Variants = Variants ?? other.Variants,
                 Version = Version ?? other.Version
             };
+        }
+
+        public override string ToString()
+        {
+            return $"Name: {Name}, URL: {URL}, Version: {Version}";
         }
     }
 }

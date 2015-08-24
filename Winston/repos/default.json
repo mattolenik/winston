@@ -1,41 +1,45 @@
 {
-	"Name": "Local Test",
-	"Description": "Not much",
-	"Maintainer": "Matt",
-	"Packages": [
-		{
-			"Name": "testapp",
-			"URL": "https://www.dropbox.com/s/8tfjdtzlxqkbqc0/TestApp.zip?dl=1",
-			"Filename": "TestApp.exe",
-			"Preserve": [
-				"testapp.ini"
-			],
-			"Ignore": [
-				"useless.txt",
-				"*.gif"
-			],
-			"Type": "Shell",
-			"SHA1": "f59b7a76cc9df2ca09caa5a52922cce73eb0b99d"
-		},
-		{
-			"Name": "cmder",
-			"URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder.zip"
-		},
-		{
-			"Name": "plink",
-			"URL": "http://the.earth.li/~sgtatham/putty/latest/x86/plink.exe",
-			"Type": "Shell"
-		},
-		{
-			"Name": "7zip",
-			"Description": "7zip archive tool",
-			"URL": "http://www.7-zip.org/a/7z1505-extra.7z",
-			"Path": ".",
-			"Platform": "x86",
-			"Variants": [{
-				"Path": "x64",
-				"Platform": "x64"
-			}]
-		}
-	]
+    "Name": "Local Test",
+    "Description": "Not much",
+    "Maintainer": "Matt",
+    "Packages": [
+        {
+            "Name": "testapp",
+            "URL": "https://www.dropbox.com/s/8tfjdtzlxqkbqc0/TestApp.zip?dl=1",
+            "Filename": "TestApp.exe",
+            "Preserve": [
+                "testapp.ini"
+            ],
+            "Ignore": [
+                "useless.txt",
+                "*.gif"
+            ],
+            "Type": "Shell",
+            "SHA1": "f59b7a76cc9df2ca09caa5a52922cce73eb0b99d"
+        },
+        {
+            "Name": "cmder",
+            "URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder.zip"
+        },
+        {
+            "Name": "cmder-mini",
+            "URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder_mini.zip"
+        },
+        {
+            "Name": "plink",
+            "URL": "http://the.earth.li/~sgtatham/putty/latest/x86/plink.exe",
+            "Type": "Shell"
+        },
+        {
+            "Name": "7zip",
+            "Description": "7zip archive tool",
+            "URL": "http://www.7-zip.org/a/7z1505-extra.7z",
+            "Path": ".",
+            "Platform": "x86",
+            "Variants": [{
+                "Path": "x64",
+                "Platform": "x64"
+            }]
+        }
+    ]
 }

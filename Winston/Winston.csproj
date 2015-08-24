@@ -44,13 +44,14 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>none</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>false</DebugSymbols>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>Winston.Winmain</StartupObject>
@@ -132,7 +133,6 @@
     <Compile Include="Serialization\Yml.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
     <Content Include="repos\default.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -165,8 +165,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.97.0\build\net451\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.97.0\build\net451\System.Data.SQLite.Core.targets'))" />
   </Target>
-  <!--
-  <Target Name="AfterBuild">
+  <Target Name="CleanArtifacts" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
+    <Exec Command="del /F /Q &quot;$(OutputPath)\%2A.pdb&quot; &amp;&amp; del /F /Q &quot;$(Outputpath)\%2A.xml&quot;" />
   </Target>
-  -->
 </Project>

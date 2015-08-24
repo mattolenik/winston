@@ -11,7 +11,7 @@ using Winston.Cache;
 
 namespace Winston.Test
 {
-    class CacheTest : nspec
+    class CacheTest : nspecAsync
     {
         SqliteCache cache;
         TempDirectory dir;
@@ -46,40 +46,40 @@ namespace Winston.Test
 
         void describe_cache()
         {
-            it["can find by name"] = () => Task.Run(async () =>
+            it["can find by name"] = async () =>
             {
                 var pkg = await cache.ByName("Pkg 1");
                 pkg?.Name.should_be("Pkg 1");
-            }).Wait();
+            };
 
-            it["can find by names"] = () => Task.Run(async () =>
+            it["can find by names"] = async () =>
             {
                 var pkgs = await cache.ByNames(new[] { "Pkg 1", "Pkg 2" });
                 pkgs.Where(p => p.Name == "Pkg 1").should_not_be_empty();
                 pkgs.Where(p => p.Name == "Pkg 2").should_not_be_empty();
-            }).Wait();
+            };
 
-            it["can find by title search"] = () => Task.Run(async () =>
+            it["can find by title search"] = async () =>
             {
                 var pkgs = await cache.Search("Pkg");
                 pkgs.Count().should_be(repo.Packages.Count);
-            }).Wait();
+            };
 
-            it["can find by desc search"] = () => Task.Run(async () =>
+            it["can find by desc search"] = async () =>
             {
                 var pkgs = await cache.Search("even");
                 pkgs.Count().should_be(2);
                 pkgs.should_contain(p => p.Name == "Pkg 2");
                 pkgs.should_contain(p => p.Name == "Pkg 4");
-            }).Wait();
+            };
 
-            it["can get all"] = () => Task.Run(async () =>
+            it["can get all"] = async () =>
             {
                 var pkgs = await cache.All();
                 pkgs.Count().should_be(repo.Packages.Count);
-            }).Wait();
+            };
 
-            it["can be refreshed"] = () => Task.Run(async () =>
+            it["can be refreshed"] = async () =>
             {
                 var result = cache.DB.Query("delete from Packages");
                 var pkgs = await cache.All();
@@ -87,7 +87,7 @@ namespace Winston.Test
                 await cache.Refresh();
                 pkgs = await cache.All();
                 pkgs.Count().should_be(repo.Packages.Count);
-            }).Wait();
+            };
         }
     }
 }
