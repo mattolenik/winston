@@ -87,17 +87,17 @@ namespace Winston
                     case "help":
                         {
                             Help();
-                            return;
+                            break;
                         }
                     case "selfinstall":
                         {
                             await SelfInstall(cellar, verbArgs.FirstOrDefault() ?? ".");
-                            return;
+                            break;
                         }
                     default:
                         {
                             PrintUsage();
-                            return;
+                            break;
                         }
                 }
             }

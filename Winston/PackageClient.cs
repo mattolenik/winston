@@ -23,6 +23,10 @@ namespace Winston
             var installer = LocalDirectoryInstaller.TryCreate(pkg, pkgDir) ??
                             HttpPackageInstaller.TryCreate(pkg, pkgDir);
 
+            if (installer == null)
+            {
+                throw new InvalidOperationException($"Could not find suitable installer for package {pkg}");
+            }
             var installPath = await installer.Install();
             var error = await installer.Validate();
             if (error != null)
