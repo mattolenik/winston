@@ -13,18 +13,23 @@ namespace Winston
 {
     class Winmain
     {
-        static void Main(string[] args) => Task.Run(async () =>
+        static int Main(string[] args)
         {
-            var cfg = new ConfigProvider();
-            await AsyncMain(args, cfg);
-        }).Wait();
+            int result = -1;
+            Task.Run(async () =>
+            {
+                var cfg = new ConfigProvider();
+                result = await AsyncMain(args, cfg);
+            }).Wait();
+            return result;
+        }
 
-        public static async Task AsyncMain(string[] args, ConfigProvider cfg)
+        public static async Task<int> AsyncMain(string[] args, ConfigProvider cfg)
         {
             if (args.Length < 1)
             {
                 PrintUsage();
-                return;
+                return ExitCodes.PrintUsage;
             }
 
             var verb = args.First().ToLowerInvariant();
@@ -50,13 +55,13 @@ namespace Winston
                     case "install":
                         {
                             await AddApps(cellar, user, cache, verbArgs);
-                            break;
+                            return ExitCodes.Install;
                         }
                     case "remove":
                     case "uninstall":
                         {
                             await RemoveApps(cellar, verbArgs);
-                            break;
+                            return ExitCodes.Uninstall;
                         }
                     case "search":
                         {
@@ -97,10 +102,11 @@ namespace Winston
                     default:
                         {
                             PrintUsage();
-                            break;
+                            return ExitCodes.PrintUsage;
                         }
                 }
             }
+            return 0;
         }
 
         static void Help()

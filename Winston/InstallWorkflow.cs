@@ -46,10 +46,9 @@ namespace Winston
         // TODO: abstract away from text/console
         static async Task<Package> Disambiguate(UserProxy queue, IEnumerable<Package> choices)
         {
-            if (choices.Count() == 1)
-            {
-                return choices.First();
-            }
+            var first = choices.FirstOrDefault();
+            if (first != null) return first;
+
             var sb = new StringBuilder();
             var msg = "\nMultiple packages found, please select which to install:\n\n";
             sb.Append(msg);
@@ -81,13 +80,12 @@ namespace Winston
         public static async Task SelfInstall(Cellar cellar, string installFromDir)
         {
             var fullDir = Path.GetFullPath(installFromDir);
-            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winston.exe"));
+            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winstonapp.exe"));
             var pkg = new Package
             {
                 Name = ver.ProductName, // "Winston"
                 Description = ver.Comments, // "Winston app manager."
                 URL = new Uri(fullDir),
-                Filename = "winston.exe",
                 Type = PackageType.Shell,
                 Version = ver.FileVersion // "0.1.0.0"
             };

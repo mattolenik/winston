@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Winston</RootNamespace>
-    <AssemblyName>Winston</AssemblyName>
+    <AssemblyName>WinstonApp</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -95,6 +95,7 @@
   <ItemGroup>
     <Compile Include="Cache\Indexes.cs" />
     <Compile Include="Cache\Tables.cs" />
+    <Compile Include="ExitCodes.cs" />
     <Compile Include="Installers\HttpPackageInstaller.cs" />
     <Compile Include="Installers\IFileExtractor.cs" />
     <Compile Include="JunctionPoint.cs" />
@@ -137,6 +138,12 @@
     <Content Include="repos\default.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="updatepath.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="winston.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -149,6 +156,12 @@
     <Content Include="tools\7za.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mergepathstrings\mergepathstrings.csproj">
+      <Project>{7b6158e7-d322-4f4e-b55d-65026a088410}</Project>
+      <Name>mergepathstrings</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
