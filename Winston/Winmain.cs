@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Winston.Cache;
 using Winston.Serialization;
 using Winston.User;
@@ -75,13 +76,25 @@ namespace Winston
                     case "list":
                         {
                             var pkgs = await cellar.List();
-                            Yml.Serialize(Console.Out, pkgs);
+                            foreach (var pkg in pkgs)
+                            {
+                                Console.WriteLine(pkg.ToString());
+                            }
                             break;
                         }
                     case "available":
                         {
                             var pkgs = await cache.All();
-                            Yml.Serialize(Console.Out, pkgs);
+                            foreach (var pkg in pkgs)
+                            {
+                                Console.WriteLine(pkg.ToString());
+                            }
+                            break;
+                        }
+                    case "show":
+                        {
+                            var pkg = await cache.ByName(verbArgs.First());
+                            Console.WriteLine(JsonConvert.SerializeObject(pkg, Formatting.Indented));
                             break;
                         }
                     case "refresh":
@@ -127,6 +140,8 @@ To remove an app:               winston remove nameOfApp
 To search for apps:             winston search someNameOrDescription
 To list all available apps:     winston available
 To list installed apps:         winston list
+
+To show package details:        winston show nameOfApp
 
 To refresh app repos:           winston refresh
 

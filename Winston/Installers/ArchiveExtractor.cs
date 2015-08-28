@@ -21,7 +21,7 @@ namespace Winston.Installers
 
         static readonly string[] MatchingExtensions =
         {
-            "zip", "7z"
+            "zip", "7z", "exe"
         };
 
         public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
@@ -63,7 +63,7 @@ namespace Winston.Installers
         {
             Directory.Delete(destination, true);
             var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            using (var proc = new ProcessHost(@"tools\7za.exe", workingDir))
+            using (var proc = new ProcessHost(@"tools\7z.exe", workingDir))
             {
                 var args = $"x \"{filename}\" -o{destination} -y";
                 proc.Start(args);

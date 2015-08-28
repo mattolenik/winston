@@ -54,6 +54,13 @@
             "Description": "Powerful Bash-style command line editing for cmd.exe",
             "URL": "https://github.com/mridgers/clink/releases/download/0.4.4/clink_0.4.4.zip",
             "Path": "clink_0.4.4"
+        },
+        {
+            "Name": "gow",
+            "Description": "The lightweight alternative to Cygwin. Unix command line utilities for Windows.",
+            "URL": "https://github.com/bmatzelle/gow/releases/download/v0.8.0/Gow-0.8.0.exe",
+            "Path": "bin",
+            "FileType": "Archive"
         }
     ]
 }
