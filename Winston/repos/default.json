@@ -45,7 +45,7 @@
         },
         {
             "Name": "dmd2",
-            "Description": "D compiler and tools",
+            "Description": "Digital Mars D compiler and tools",
             "URL": "http://downloads.dlang.org/releases/2.x/2.068.0/dmd.2.068.0.windows.zip",
             "Path": "dmd2/windows/bin"
         },
