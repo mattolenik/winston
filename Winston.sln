@@ -1,16 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winston", "Winston\Winston.csproj", "{A9C75236-1DCD-4C2A-B975-9121CEE9F256}"
-	ProjectSection(ProjectDependencies) = postProject
-		{52164F12-A264-46A9-BCF3-4EE5620F3F57} = {52164F12-A264-46A9-BCF3-4EE5620F3F57}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wrap", "wrap\wrap.vcxproj", "{52164F12-A264-46A9-BCF3-4EE5620F3F57}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winston.Test", "Winston.Test\Winston.Test.csproj", "{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}"
 EndProject
@@ -18,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winston_install", "winston_
 	ProjectSection(ProjectDependencies) = postProject
 		{A9C75236-1DCD-4C2A-B975-9121CEE9F256} = {A9C75236-1DCD-4C2A-B975-9121CEE9F256}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mergepathstrings", "mergepathstrings\mergepathstrings.csproj", "{7B6158E7-D322-4F4E-B55D-65026A088410}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +30,6 @@ Global
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C974CDF8-5963-4B50-8CFA-A40ABB8DA60F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Debug|Any CPU.Build.0 = Debug|Win32
-		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Release|Any CPU.ActiveCfg = Release|Win32
-		{52164F12-A264-46A9-BCF3-4EE5620F3F57}.Release|Any CPU.Build.0 = Release|Win32
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC45BE5F-70C7-4B03-ADCB-145F6F2A8115}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +38,10 @@ Global
 		{E676EE0B-5393-4323-B78D-3CBAF0298595}.Debug|Any CPU.Build.0 = Debug|Win32
 		{E676EE0B-5393-4323-B78D-3CBAF0298595}.Release|Any CPU.ActiveCfg = Release|Win32
 		{E676EE0B-5393-4323-B78D-3CBAF0298595}.Release|Any CPU.Build.0 = Release|Win32
+		{7B6158E7-D322-4F4E-B55D-65026A088410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B6158E7-D322-4F4E-B55D-65026A088410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B6158E7-D322-4F4E-B55D-65026A088410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B6158E7-D322-4F4E-B55D-65026A088410}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

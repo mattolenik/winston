@@ -35,7 +35,7 @@ namespace Winston
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
             var pathVal = Path.Combine(junctionPath, pkg.Path ?? "");
             PathLink(pathVal);
-            user.Message($"Finished installing {pkg.Name}. It was added to your PATH, but only new windows will get the change.");
+            user.Message($"Finished installing {pkg.Name}. It is now available on your PATH.");
         }
 
         static string CreateCurrentJunction(string pkgDir, string installDir)

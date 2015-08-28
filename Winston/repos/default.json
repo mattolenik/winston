@@ -36,10 +36,24 @@
             "URL": "http://www.7-zip.org/a/7z1505-extra.7z",
             "Path": ".",
             "Platform": "x86",
-            "Variants": [{
-                "Path": "x64",
-                "Platform": "x64"
-            }]
+            "Variants": [
+                {
+                    "Path": "x64",
+                    "Platform": "x64"
+                }
+            ]
+        },
+        {
+            "Name": "dmd2",
+            "Description": "D compiler and tools",
+            "URL": "http://downloads.dlang.org/releases/2.x/2.068.0/dmd.2.068.0.windows.zip",
+            "Path": "dmd2/windows/bin"
+        },
+        {
+            "Name": "clink",
+            "Description": "Powerful Bash-style command line editing for cmd.exe",
+            "URL": "https://github.com/mridgers/clink/releases/download/0.4.4/clink_0.4.4.zip",
+            "Path": "clink_0.4.4"
         }
     ]
 }
