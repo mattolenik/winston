@@ -68,6 +68,11 @@ namespace Winston
         UI, Shell
     }
 
+    public enum PackageFileType
+    {
+        Archive, Binary
+    }
+
     public enum Platform
     {
         Any = 0,
@@ -93,6 +98,9 @@ namespace Winston
 
         [JsonConverter(typeof (StringEnumConverter))]
         public PackageType? Type { get; set; }
+
+        [JsonConverter(typeof (StringEnumConverter))]
+        public PackageFileType? FileType { get; set; }
 
         public List<string> Preserve { get; set; } = new List<string>();
 
@@ -122,6 +130,7 @@ namespace Winston
                 Filename = Filename ?? other.Filename,
                 Path = Path ?? other.Path,
                 Type = Type ?? other.Type,
+                FileType = FileType ?? other.FileType,
                 Preserve = Preserve ?? other.Preserve,
                 Ignore = Ignore ?? other.Ignore,
                 Platform = Platform ?? other.Platform,
@@ -133,7 +142,7 @@ namespace Winston
         public override string ToString()
         {
             var result = $"- Name: {Name}\n  URI: {URL}\n";
-            if (Version != null) result += $"Version: {Version}\n";
+            if (Version != null) result += $"Version: {Version}";
             return result;
         }
     }

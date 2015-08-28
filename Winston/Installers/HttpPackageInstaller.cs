@@ -61,8 +61,24 @@ namespace Winston.Installers
                 var installDir = Path.Combine(pkgDir, version);
                 Directory.CreateDirectory(installDir);
 
-                var archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL) ??
-                              ExeExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL);
+                IFileExtractor archive;
+
+                switch (pkg?.FileType)
+                {
+                    case PackageFileType.Archive:
+                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL);
+                        break;
+
+                    case PackageFileType.Binary:
+                        archive = ExeExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL);
+                        break;
+
+                    default:
+                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL) ??
+                                      ExeExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL);
+                        break;
+                }
+
                 if (archive != null)
                 {
                     var p = await archive.Install();
@@ -75,6 +91,7 @@ namespace Winston.Installers
                 return new DirectoryInfo(installDir);
             }
         }
+
 
         public Task<Exception> Validate()
         {
