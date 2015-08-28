@@ -66,9 +66,9 @@ namespace Winston
                     case "search":
                         {
                             var pkgs = await cache.Search(verbArgs.First());
-                            if (pkgs.Any())
+                            foreach (var pkg in pkgs)
                             {
-                                Yml.Serialize(Console.Out, pkgs);
+                                Console.WriteLine(pkg.ToString());
                             }
                             break;
                         }

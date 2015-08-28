@@ -132,7 +132,9 @@ namespace Winston
 
         public override string ToString()
         {
-            return $"Name: {Name}, URL: {URL}, Version: {Version}";
+            var result = $"- Name: {Name}\n  URI: {URL}\n";
+            if (Version != null) result += $"Version: {Version}\n";
+            return result;
         }
     }
 }
