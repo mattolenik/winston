@@ -16,18 +16,24 @@ namespace Winston.Installers
 
         static readonly string[] MatchingMimeTypes =
         {
-            "application/zip", "application/x-7z-compressed"
+            "application/zip",
+            "application/x-7z-compressed",
+            "application/x-rar-compressed",
+            "application/x-tar",
+            "application/x-compressed",
+            "application/x-gzip",
+            "application/x-bzip2",
+            "application/x-lzh"
         };
 
         static readonly string[] MatchingExtensions =
         {
-            "zip", "7z", "exe"
+            "zip", "7z", "exe", "xz", "bz2", "gz", "tar", "cab", "lzh", "lha", "rar", "xar", "z"
         };
 
         public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
         {
             var result = new ArchiveExtractor { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
-            //"application/x-7z-compressed"
             if (Content.ContentTypeMatches(headers, MatchingMimeTypes))
             {
                 return result;
