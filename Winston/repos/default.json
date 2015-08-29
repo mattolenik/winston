@@ -61,6 +61,11 @@
             "URL": "https://github.com/bmatzelle/gow/releases/download/v0.8.0/Gow-0.8.0.exe",
             "Path": "bin",
             "FileType": "Archive"
+        },
+        {
+            "Name": "lessmsi",
+            "Description": "A tool to view and extract the contents of an Windows Installer (.msi) file",
+            "URL": "https://github.com/activescott/lessmsi/releases/download/v1.3/lessmsi-v1.3.zip"
         }
     ]
 }
