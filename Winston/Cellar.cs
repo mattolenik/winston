@@ -3,9 +3,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Winston.OS;
 using Winston.Properties;
 using Winston.User;
 using YamlDotNet.Serialization;
+using Environment = Winston.OS.Environment;
 
 namespace Winston
 {
@@ -56,12 +58,12 @@ namespace Winston
         static void PathLink(string installPath)
         {
             var dir = Paths.GetDirectory(installPath);
-            OS.AddToPath(dir, @"winston\cellar");
+            Environment.AddToPath(dir, @"winston\cellar");
         }
 
         static void PathUnlink(string installPath)
         {
-            OS.RemoveFromPath(installPath);
+            Environment.RemoveFromPath(installPath);
         }
 
         public async Task Link(Package pkg, string installPath)

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Winston.OS;
 using Winston.Serialization;
 
 namespace Winston.Installers
@@ -43,7 +44,7 @@ namespace Winston.Installers
                     await body.CopyToAsync(file);
                 }
 
-                var hash = await OS.GetSHA1(tmpFile);
+                var hash = await FS.GetSHA1(tmpFile);
                 // Only check when SHA1 is specified in the package metadata
                 if (!string.IsNullOrWhiteSpace(pkg.SHA1) &&
                     !string.Equals(hash, pkg.SHA1, StringComparison.OrdinalIgnoreCase))

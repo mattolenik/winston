@@ -98,8 +98,9 @@
     <Compile Include="ExitCodes.cs" />
     <Compile Include="Installers\HttpPackageInstaller.cs" />
     <Compile Include="Installers\IFileExtractor.cs" />
-    <Compile Include="JunctionPoint.cs" />
-    <Compile Include="OS.cs" />
+    <Compile Include="OS\Environment.cs" />
+    <Compile Include="OS\JunctionPoint.cs" />
+    <Compile Include="OS\FS.cs" />
     <Compile Include="Installers\LocalDirectoryInstaller.cs" />
     <Compile Include="InstallWorkflow.cs" />
     <Compile Include="Config.cs" />
@@ -156,7 +157,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\wrap.exe" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mergepathstrings\mergepathstrings.csproj">

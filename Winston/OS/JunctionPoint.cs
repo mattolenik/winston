@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
-namespace Winston
+namespace Winston.OS
 {
     /// <summary>
     /// Provides access to NTFS junction points in .NET
