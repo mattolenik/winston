@@ -71,7 +71,7 @@ namespace Winston.Installers
             var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             using (var proc = new ProcessHost(@"tools\7z.exe", workingDir))
             {
-                var args = $"x \"{filename}\" -o{destination} -y";
+                var args = $"x \"{filename}\" -o\"{destination}\" -y";
                 proc.Start(args);
 
                 // TODO: make config value
