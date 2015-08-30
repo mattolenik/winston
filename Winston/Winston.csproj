@@ -128,10 +128,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="tools\7z.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\7z.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="winston.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -163,13 +163,16 @@
   <PropertyGroup>
     <DistTar>..\dist\winston.tar</DistTar>
   </PropertyGroup>
-  <Target Name="Dist" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
-    <Exec Command="del /F /Q $(OutputPath)\*.pdb" />
-    <Exec Command="del /F /Q $(OutputPath)\*.xml" />
-    <Exec Command="del /F /Q $(OutputPath)$(DistTar) &gt; nul" />
-    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(ProjectDir)tools\7z.exe&quot; a -y -r -ttar $(DistTar) ." />
+  <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles" Condition="'$(Configuration)' == 'Release' " >
+    <Exec Command="del /F /Q &quot;$(OutputPath)..\dist\*.tar&quot;" />
+    <Exec Command="del /F /Q &quot;$(OutputPath)*.pdb&quot;" />
+    <Exec Command="del /F /Q &quot;$(OutputPath)*.xml&quot;" />
   </Target>
-  <Target Name="CleanDist" AfterTargets="Clean" Condition="'$(Configuration)' == 'Release' ">
-    <Exec Command="del /F /Q &quot;$(OutputPath)$(DistTar)&quot; 2&gt; nul" />
+  <Target Name="Dist" AfterTargets="AfterBuild" DependsOnTargets="DistPrep">
+    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(ProjectDir)tools\7z.exe&quot; a -y -r -ttar $(DistTar) ." />
+    <Message Text="Creating dist at $(DistTar)" />
+  </Target>
+  <Target Name="DistClean" AfterTargets="AfterClean">
+    <Exec Command="del /F /Q &quot;$(OutputPath)..\dist\*.tar&quot;" />
   </Target>
 </Project>
