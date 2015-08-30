@@ -241,9 +241,10 @@ std::wstring extractFile(std::wstring directory, std::wstring filename, unsigned
 	return fn;
 }
 
-int removeDirectory(std::wstring dir) // Fully qualified name of the directory being   deleted,   without trailing backslash
+int removeDirectory(std::wstring dir)
 {
 	std::vector<wchar_t> buf(dir.begin(), dir.end());
+	// Double-null termination is expected by this API
 	buf.push_back(0);
 	buf.push_back(0);
 
