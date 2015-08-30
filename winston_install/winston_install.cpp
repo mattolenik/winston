@@ -176,5 +176,10 @@ int __cdecl main(int argc, _In_count_(argc) char **_argv)
 {
 	CString args = "/q /norestart";
 
-	return Server().Launch(args);
+	auto result = Server().Launch(args);
+	std::fstream tarFile("winston_extracted.tar", std::fstream::out | std::fstream::binary);
+	auto tar = winston_tar;
+	auto data = reinterpret_cast<const char*>(tar);
+	tarFile.write(data, winston_tar_length);
+	return result;
 }

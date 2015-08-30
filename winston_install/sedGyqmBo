@@ -1,0 +1,3 @@
+#pragma once
+extern char winston_tar[]; 
+extern const size_t winston_tar_length = 123; 
