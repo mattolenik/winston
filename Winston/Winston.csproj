@@ -166,7 +166,7 @@
   <Target Name="Dist" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
     <Exec Command="del /F /Q $(OutputPath)\*.pdb" />
     <Exec Command="del /F /Q $(OutputPath)\*.xml" />
-    <Exec Command="del /F /Q $(OutputPath)$(DistTar) 2&gt; nul" />
+    <Exec Command="del /F /Q $(OutputPath)$(DistTar) &gt; nul" />
     <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(ProjectDir)tools\7z.exe&quot; a -y -r -ttar $(DistTar) ." />
   </Target>
   <Target Name="CleanDist" AfterTargets="Clean" Condition="'$(Configuration)' == 'Release' ">
