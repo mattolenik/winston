@@ -97,6 +97,8 @@
     </ManifestResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="detectfx.h" />
+    <ClInclude Include="export_types.h" />
     <ClInclude Include="IProgressObserver.h" />
     <ClInclude Include="MmIoChainer.h" />
     <ClInclude Include="resource.h" />
@@ -112,14 +114,14 @@
     <None Include="elevate.h.tpl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="detectfx.cpp" />
     <ClCompile Include="winston_install.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="winston_tar.bin.cpp" />
-    <ClCompile Include="netfx40_setup.bin.cpp" />
-    <ClCompile Include="netfx46_setup.bin.cpp" />
+    <ClCompile Include="netfx_setup.bin.cpp" />
     <ClCompile Include="elevate_dll.bin.cpp" />
     <ClCompile Include="elevate_exe.bin.cpp" />
   </ItemGroup>
@@ -127,6 +129,7 @@
     <ResourceCompile Include="winston_install.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\icon2.ico" />
     <Image Include="..\package.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -135,8 +138,7 @@
   <!-- Embedded files -->
   <PropertyGroup>
     <WinstonTar>$(SolutionDir)winston\bin\dist\winston.tar</WinstonTar>
-    <NetFx40>dotNetFx40_Full_setup.exe</NetFx40>
-    <NetFx46>NDP46-KB3045560-Web.exe</NetFx46>
+    <NetFx>NDP46-KB3045560-Web.exe</NetFx>
   </PropertyGroup>
   <!-- Embedding Winston -->
   <Target Name="EmbedWinston" BeforeTargets="PrepareForBuild">
@@ -148,25 +150,18 @@
   </Target>
   <!-- Clean -->
   <Target Name="CleanEmbed" AfterTargets="Clean">
-    <Exec Command="del /F /Q *.bin.cpp 2&gt; nul" />
-    <Exec Command="del /F /Q *.bin.h 2&gt; nul" />
-    <Exec Command="del /F /Q $(NetFx40) 2&gt; nul" />
-    <Exec Command="del /F /Q $(NetFx46) 2&gt; nul" />
+    <Exec Command="del /F /Q *.bin.cpp 2&gt;nul" IgnoreExitCode="true" />
+    <Exec Command="del /F /Q *.bin.h 2&gt;nul" IgnoreExitCode="true" />
+    <Exec Command="del /F /Q $(NetFx) 2&gt;nul" IgnoreExitCode="true" />
   </Target>
   <!-- .NET download and embedding -->
   <Target Name="EmbedNetFx" BeforeTargets="PrepareForBuild">
-    <DownloadFile Address="http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe" FileName="$(NetFx40)" />
-    <DownloadFile Address="http://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe" FileName="$(NetFx46)" />
-    <Exec Command="tools\xd.exe -dnetfx40_setup $(NetFx40) &gt; netfx40_setup.bin.cpp" />
-    <Exec Command="tools\xd.exe -dnetfx46_setup $(NetFx46) &gt; netfx46_setup.bin.cpp" />
-    <GetFileSize FileName="$(NetFx46)">
-      <Output TaskParameter="FileSize" PropertyName="NetFx46Size" />
+    <DownloadFile Address="http://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe" FileName="$(NetFx)" />
+    <Exec Command="tools\xd.exe -dnetfx_setup $(NetFx) &gt; netfx_setup.bin.cpp" />
+    <GetFileSize FileName="$(NetFx)">
+      <Output TaskParameter="FileSize" PropertyName="NetFxSize" />
     </GetFileSize>
-    <GetFileSize FileName="$(NetFx40)">
-      <Output TaskParameter="FileSize" PropertyName="NetFx40Size" />
-    </GetFileSize>
-    <ReplaceInFile Source="netfx_setup.h.tpl" Destination="netfx_setup.bin.h" Old="_40_SIZE_" New="$(NetFx40Size)" />
-    <ReplaceInFile Source="netfx_setup.bin.h" Destination="netfx_setup.bin.h" Old="_46_SIZE_" New="$(NetFx46Size)" />
+    <ReplaceInFile Source="netfx_setup.h.tpl" Destination="netfx_setup.bin.h" Old="_SIZE_" New="$(NetFxSize)" />
   </Target>
   <!-- Elevate embedding -->
   <Target Name="EmbedElevate" BeforeTargets="PrepareForBuild">
