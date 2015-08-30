@@ -175,8 +175,16 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.97.0\build\net451\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.97.0\build\net451\System.Data.SQLite.Core.targets'))" />
   </Target>
-  <Target Name="CleanArtifacts" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
-	<Exec Command="del $(OutputPath)\*.pdb" />
-	<Exec Command="del $(OutputPath)\*.xml" />
+  <PropertyGroup>
+	<DistTar>..\dist\winston.tar</DistTar>
+  </PropertyGroup>
+  <Target Name="Dist" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
+	<Exec Command="del /F /Q $(OutputPath)\*.pdb" />
+	<Exec Command="del /F /Q $(OutputPath)\*.xml" />
+	<Exec Command="del /F /Q $(OutputPath)$(DistTar) 2> nul" />
+	<Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(ProjectDir)tools\7z.exe&quot; a -y -r -ttar $(DistTar) ." />
+  </Target>
+  <Target Name="CleanDist" AfterTargets="Clean" Condition="'$(Configuration)' == 'Release' ">
+	<Exec Command="del /F /Q &quot;$(OutputPath)$(DistTar)&quot; 2> nul" />
   </Target>
 </Project>

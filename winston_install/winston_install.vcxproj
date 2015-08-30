@@ -111,4 +111,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <PropertyGroup>
+	<DistTar>$(SolutionDir)winston\bin\dist\winston.tar</DistTar>
+  </PropertyGroup>
+  <Target Name="CreateTarC" BeforeTargets="PrepareForBuild">
+	<Exec Command="xd.exe -dwinston_tar &quot;$(DistTar)&quot; > winston_tar.c" />
+  </Target>
+  <Target Name="CleanTarC" AfterTargets="Clean">
+	<Exec Command="del /F /Q winston_tar.c 2> nul" />
+  </Target>
 </Project>
