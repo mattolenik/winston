@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <FileName Required="true" />
+      <FileSize ParameterType="System.Int64" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+FileInfo fi = new FileInfo(FileName);
+FileSize = fi.Length;
+  ]]></Code>
+    </Task>
+  </UsingTask>
+  <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <Address ParameterType="System.String" Required="true" />
+      <FileName ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+            if(!System.IO.File.Exists(FileName))
+            {
+                new System.Net.WebClient().DownloadFile(Address, FileName);
+            }
+        ]]></Code>
+    </Task>
+  </UsingTask>
+  <UsingTask TaskName="ReplaceInFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <Source ParameterType="System.String" Required="true" />
+      <Destination ParameterType="System.String" Required="true" />
+      <Old ParameterType="System.String" Required="true" />
+      <New ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+            if(!System.IO.File.Exists(Source)) return false;
+            var source = System.IO.File.ReadAllText(Source, System.Text.Encoding.UTF8);
+            var transformed = source.Replace(Old, New);
+            System.IO.File.WriteAllText(Destination, transformed, System.Text.Encoding.UTF8);
+        ]]></Code>
+    </Task>
+  </UsingTask>
+</Project>

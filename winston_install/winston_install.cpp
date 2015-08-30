@@ -7,7 +7,10 @@
 
 #include "MmioChainer.h"
 #include "IProgressObserver.h"
-#include "winston_tar.h"
+#include "export_types.h"
+#include "winston_tar.bin.h"
+#include "netfx_setup.bin.h"
+#include "elevate.bin.h"
 
 /*
 The classes:
@@ -47,19 +50,25 @@ public:
 	Server() :ChainerSample::MmioChainer(L"winston-install-net46", L"winston-install-event") //customize for your event names
 	{}
 
-	bool Launch(const CString& args)
+	bool Launch(const CString& args, const CString& exe, const std::wstring& workingDir, const std::wstring& elevateDll)
 	{
-		CString cmdline = L"NDP46-KB3045560-Web.exe /pipe winston-install-net46 " + args; // Customize with name and location of setup .exe that you want to run
+		CString cmdline = exe + L" /pipe winston-install-net46 " + args; // Customize with name and location of setup .exe that you want to run
 		STARTUPINFO si = { 0 };
 		si.cb = sizeof(si);
 		PROCESS_INFORMATION pi = { 0 };
 
 		// Launch the Setup.exe which installs the .NET 4.5 Framework
-		BOOL bLaunchedSetup = ::CreateProcess(NULL,
+		BOOL bLaunchedSetup = CreateProcess(NULL,
 			cmdline.GetBuffer(),
-			NULL, NULL, FALSE, 0, NULL, NULL,
+			NULL, NULL, FALSE, 0, NULL, workingDir.c_str(),
 			&si,
 			&pi);
+		if (!bLaunchedSetup && GetLastError() == ERROR_ELEVATION_REQUIRED)
+		{
+			HMODULE libHandle = LoadLibrary(elevateDll.c_str());
+			auto createProcessElevated = (DLL_CreateProcessElevatedWType)GetProcAddress(libHandle, "CreateProcessElevatedW");
+			bLaunchedSetup = createProcessElevated(NULL, cmdline.GetBuffer(), NULL, NULL, FALSE, 0, NULL, workingDir.c_str(), &si, &pi);
+		}
 
 		// If successful 
 		if (bLaunchedSetup != 0)
@@ -80,8 +89,6 @@ public:
 			// http://msdn.microsoft.com/en-us/library/aa372835(VS.85).aspx
 			HRESULT hrInternalResult = GetInternalResult();
 			printf("Internal result: %08X\n", hrInternalResult);
-
-
 
 
 			::CloseHandle(pi.hThread);
@@ -181,25 +188,66 @@ int octal_string_to_int(const char *current_char, unsigned int size)
 	return output;
 }
 
+std::wstring extractFile(std::wstring directory, std::wstring filename, unsigned char* file, size_t length)
+{
+	auto fn = directory + std::wstring(L"\\") + filename;
+	std::fstream f(fn, std::fstream::out | std::fstream::binary);
+	f.write(reinterpret_cast<const char*>(file), length);
+	return fn;
+}
+
+int removeDirectory(std::wstring dir) // Fully qualified name of the directory being   deleted,   without trailing backslash
+{
+	std::vector<wchar_t> buf(dir.begin(), dir.end());
+	buf.push_back(0);
+	buf.push_back(0);
+
+	SHFILEOPSTRUCT file_op = {
+		NULL,
+		FO_DELETE,
+		buf.data(),
+		L"",
+		FOF_NOCONFIRMATION |
+		FOF_NOERRORUI |
+		FOF_SILENT,
+		false,
+		0,
+		L"" };
+	int ret = SHFileOperation(&file_op);
+	return ret; // returns 0 on success, non zero on failure.
+}
+
 // Main entry point for program
 int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 {
-	CString args = "/q /norestart";
+	srand((unsigned int)time(NULL));
+	wchar_t tmp[512];
+	GetTempPath(512, tmp);
+	std::wstring tmpDir(tmp);
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	auto uniq = std::to_wstring(rand() % 999999999 + 1000000000);
+	auto installSource = tmpDir + std::wstring(L"\\winston_install_") + uniq;
+	auto prereqs = tmpDir + std::wstring(L"\\winston_prereqs_") + uniq;
 
-	auto result = Server().Launch(args);
+	CreateDirectory(installSource.c_str(), NULL);
+	CreateDirectory(prereqs.c_str(), NULL);
+
+	auto netFx40 = extractFile(prereqs, std::wstring(L"dotNetFx40_Full_setup.exe"), netfx40_setup, netfx40_setup_length);
+	auto netFx46 = extractFile(prereqs, std::wstring(L"NDP46-KB3045560-Web.exe"), netfx46_setup, netfx46_setup_length);
+	auto elevateDll = extractFile(prereqs, std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
+	auto elevateExe = extractFile(prereqs, std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
+
+
+	CString args = "/q /norestart /ChainingPackage Winston";
+
+	auto result40 = Server().Launch(args, CString(netFx40.c_str()), installSource, elevateDll);
+	auto result46 = Server().Launch(args, CString(netFx46.c_str()), installSource, elevateDll);
 	auto tar = winston_tar;
 	auto data = reinterpret_cast<const char*>(tar);
 
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	wchar_t tmp[512];
-	GetTempPath(512, tmp);
-	auto tmpName = std::wstring(L"winston-install-") + std::to_wstring(rand() % 10000);
-	wchar_t tmpOut[600];
-	PathCombine(tmpOut, tmp, tmpName.c_str());
-	CreateDirectory(tmpOut, NULL);
 
 	size_t c = 0;
-	while(true)
+	while (true)
 	{
 
 		auto rec = &data[c];
@@ -210,20 +258,17 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		{
 			break;
 		}
-		wchar_t path[1024];
-		std::wstring wName = converter.from_bytes(name);
-		PathCombine(path, tmpOut, wName.c_str());
+		std::wstring path = installSource + std::wstring(L"\\") + converter.from_bytes(name);
 
 		switch (rec[156])
 		{
 		case '0':
 		case '\0':
-			//auto file = &data[c];
 			// normal file
-			{
-				std::fstream file(path, std::fstream::out | std::fstream::binary);
-				file.write(&data[c], size);
-			}
+		{
+			std::fstream file(path, std::fstream::out | std::fstream::binary);
+			file.write(&data[c], size);
+		}
 		break;
 		case '1':
 			// hard link
@@ -233,26 +278,21 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 			break;
 		case '5':
 			// directory
-			CreateDirectory(path, NULL);
+			CreateDirectory(path.c_str(), NULL);
 			break;
 		}
-		wprintf(L"%s\n", path);
 		if (size > 0)
 		{
 			c += (((size - 1) / 512) + 1) * 512;
 		}
 	}
 
-
 	STARTUPINFO si = { 0 };
 	si.cb = sizeof(si);
 	PROCESS_INFORMATION pi = { 0 };
 
-	wchar_t cmdline[1024];
-	PathCombine(cmdline, tmpOut, L"winston.cmd");
-	std::wstring installCmd(cmdline);
-
 	std::wstring qt(L"\"");
+	std::wstring cmdline = installSource + std::wstring(L"\\winston.cmd");
 	std::wstring fullCmd = qt + cmdline + qt + std::wstring(L" selfinstall");
 	std::vector<wchar_t> buf(fullCmd.begin(), fullCmd.end());
 	buf.push_back(0);
@@ -260,12 +300,11 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	BOOL installSuccess = ::CreateProcess(NULL,
 		buf.data(),
 		NULL, NULL, FALSE, 0, NULL,
-		tmpOut,
+		installSource.c_str(),
 		&si,
 		&pi);
 
-
-	RemoveDirectory(tmpOut);
-	DeleteFile(tmpOut);
+	removeDirectory(installSource);
+	removeDirectory(prereqs);
 	return 0;
 }

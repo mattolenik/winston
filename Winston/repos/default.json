@@ -66,6 +66,12 @@
             "Name": "lessmsi",
             "Description": "A tool to view and extract the contents of an Windows Installer (.msi) file",
             "URL": "https://github.com/activescott/lessmsi/releases/download/v1.3/lessmsi-v1.3.zip"
+        },
+        {
+            "Name": "aria2",
+            "Description": "A multi-protocol & multi-source, cross platform download utility",
+            "URL": "http://downloads.sourceforge.net/project/aria2/stable/aria2-1.19.0/aria2-1.19.0-win-64bit-build1.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Faria2%2Ffiles%2Fstable%2Faria2-1.19.0%2F&ts=1440912523&use_mirror=iweb",
+            "Path": "aria2-1.19.0-win-64bit-build1"
         }
     ]
 }
