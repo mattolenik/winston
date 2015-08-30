@@ -161,18 +161,19 @@
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.97.0\build\net451\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.97.0\build\net451\System.Data.SQLite.Core.targets'))" />
   </Target>
   <PropertyGroup>
-    <DistTar>..\dist\winston.tar</DistTar>
+    <Dist>$(ProjectDir)bin\dist\</Dist>
+    <DistTar>$(Dist)winston.tar</DistTar>
   </PropertyGroup>
   <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles" Condition="'$(Configuration)' == 'Release' " >
-    <Exec Command="del /F /Q &quot;$(OutputPath)..\dist\*.tar&quot;" />
-    <Exec Command="del /F /Q &quot;$(OutputPath)*.pdb&quot;" />
-    <Exec Command="del /F /Q &quot;$(OutputPath)*.xml&quot;" />
+    <Exec Command="del /F /Q &quot;$(DistTar)&quot; 2&gt;nul" IgnoreExitCode="true" />
+    <Exec Command="del /F /Q &quot;$(OutputPath)*.pdb&quot; 2&gt;nul" IgnoreExitCode="true" />
+    <Exec Command="del /F /Q &quot;$(OutputPath)*.xml&quot; 2&gt;nul" IgnoreExitCode="true" />
   </Target>
   <Target Name="Dist" AfterTargets="AfterBuild" DependsOnTargets="DistPrep">
-    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(ProjectDir)tools\7z.exe&quot; a -y -r -ttar $(DistTar) ." />
-    <Message Text="Creating dist at $(DistTar)" />
+    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(ProjectDir)tools\7z.exe&quot; a -y -r -ttar &quot;$(DistTar)&quot; ." />
+    <Message Text="Building tar at $(DistTar)" />
   </Target>
   <Target Name="DistClean" AfterTargets="AfterClean">
-    <Exec Command="del /F /Q &quot;$(OutputPath)..\dist\*.tar&quot;" />
+    <Exec Command="del /F /Q &quot;$(DistTar)&quot; 2&gt;nul" IgnoreExitCode="true" />
   </Target>
 </Project>
