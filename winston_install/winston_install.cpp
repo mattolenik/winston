@@ -11,6 +11,7 @@
 #include "winston_tar.bin.h"
 #include "netfx_setup.bin.h"
 #include "elevate.bin.h"
+#include "detectfx.h"
 
 /*
 The classes:
@@ -42,6 +43,7 @@ MmioChainerBase
 					class methods.
 */
 
+// From https://msdn.microsoft.com/en-us/library/ff859983.aspx
 class Server : public ChainerSample::MmioChainer, public ChainerSample::IProgressObserver
 {
 public:
@@ -104,9 +106,52 @@ public:
 	}
 
 private: // IProgressObserver
+	int lastLength = 0;
+	int lastValue = -1;
+	int lastSpin = -1;
+
 	virtual void OnProgress(unsigned char ubProgressSoFar)
 	{
-		printf("Progress: %i\n  ", ubProgressSoFar);
+		if (lastValue == -1)
+		{
+			std::wcout << "Progress: ";
+		}
+		if (lastSpin >= 0)
+		{
+			std::wcout << L'\b';
+		}
+		auto value = (int)ceil(ubProgressSoFar / 255.0 * 100.0);
+		if (value != lastValue)
+		{
+			lastValue = value;
+			auto percent = std::to_wstring(value);
+			if (lastLength > 0)
+			{
+				std::wcout << std::wstring(lastLength, L'\b');
+			}
+			lastLength = percent.size();
+			std::wcout << percent;
+		}
+
+		switch (lastSpin)
+		{
+		case -1:
+		case 0:
+			std::wcout << L'-';
+			break;
+		case 1:
+			std::wcout << L'\\';
+			break;
+		case 2:
+			std::wcout << L'|';
+			break;
+		case 3:
+			std::wcout << L'/';
+			break;
+		}
+		lastSpin++;
+		if (lastSpin > 3) lastSpin = 0;
+
 
 		// Testing: BEGIN - To test Abort behavior, uncomment the folllowing code.
 		//if (ubProgressSoFar > 127)
@@ -227,24 +272,24 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	auto uniq = std::to_wstring(rand() % 999999999 + 1000000000);
 	auto installSource = tmpDir + std::wstring(L"\\winston_install_") + uniq;
-	auto prereqs = tmpDir + std::wstring(L"\\winston_prereqs_") + uniq;
 
 	CreateDirectory(installSource.c_str(), NULL);
-	CreateDirectory(prereqs.c_str(), NULL);
 
-	auto netFx40 = extractFile(prereqs, std::wstring(L"dotNetFx40_Full_setup.exe"), netfx40_setup, netfx40_setup_length);
-	auto netFx46 = extractFile(prereqs, std::wstring(L"NDP46-KB3045560-Web.exe"), netfx46_setup, netfx46_setup_length);
-	auto elevateDll = extractFile(prereqs, std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
-	auto elevateExe = extractFile(prereqs, std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
+	if (!IsNetfx46Installed())
+	{
+		auto prereqs = tmpDir + std::wstring(L"\\winston_prereqs_") + uniq;
+		CreateDirectory(prereqs.c_str(), NULL);
+		auto netFxInstall = extractFile(prereqs, std::wstring(L"NDP46-KB3045560-Web.exe"), netfx_setup, netfx_setup_length);
+		auto elevateDll = extractFile(prereqs, std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
+		auto elevateExe = extractFile(prereqs, std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
+		CString args = "/q /norestart /ChainingPackage Winston";
+		std::wcout << L"Installing .NET 4.6" << std::endl;
+		auto netfxResult = Server().Launch(args, CString(netFxInstall.c_str()), installSource, elevateDll);
+		removeDirectory(prereqs);
+	}
 
-
-	CString args = "/q /norestart /ChainingPackage Winston";
-
-	auto result40 = Server().Launch(args, CString(netFx40.c_str()), installSource, elevateDll);
-	auto result46 = Server().Launch(args, CString(netFx46.c_str()), installSource, elevateDll);
 	auto tar = winston_tar;
 	auto data = reinterpret_cast<const char*>(tar);
-
 
 	size_t c = 0;
 	while (true)
@@ -304,7 +349,7 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		&si,
 		&pi);
 
+	// TODO: make exception safe
 	removeDirectory(installSource);
-	removeDirectory(prereqs);
 	return 0;
 }
