@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(SolutionDir)tasks.proj" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -98,10 +99,17 @@
   <ItemGroup>
     <ClInclude Include="IProgressObserver.h" />
     <ClInclude Include="MmIoChainer.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="winston_tar.h" />
-    <ClInclude Include="winston_tar.h.tpl" />
+    <ClInclude Include="winston_tar.bin.h" />
+    <ClInclude Include="netfx_setup.bin.h" />
+    <ClInclude Include="elevate.bin.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="netfx_setup.h.tpl" />
+    <None Include="winston_tar.h.tpl" />
+    <None Include="elevate.h.tpl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winston_install.cpp" />
@@ -109,35 +117,71 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="winston_tar.cpp" />
+    <ClCompile Include="winston_tar.bin.cpp" />
+    <ClCompile Include="netfx40_setup.bin.cpp" />
+    <ClCompile Include="netfx46_setup.bin.cpp" />
+    <ClCompile Include="elevate_dll.bin.cpp" />
+    <ClCompile Include="elevate_exe.bin.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="winston_install.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\package.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- Embedded files -->
   <PropertyGroup>
-    <DistTar>$(SolutionDir)winston\bin\dist\winston.tar</DistTar>
+    <WinstonTar>$(SolutionDir)winston\bin\dist\winston.tar</WinstonTar>
+    <NetFx40>dotNetFx40_Full_setup.exe</NetFx40>
+    <NetFx46>NDP46-KB3045560-Web.exe</NetFx46>
   </PropertyGroup>
-  <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
-    <ParameterGroup>
-      <FileName Required="true" />
-      <FileSize ParameterType="System.Int64" Output="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Code Type="Fragment" Language="cs"><![CDATA[
-FileInfo fi = new FileInfo(FileName);
-FileSize = fi.Length;
-  ]]></Code>
-    </Task>
-  </UsingTask>
-  <Target Name="CreateTarC" BeforeTargets="PrepareForBuild">
-    <Exec Command="tools\xd.exe -dwinston_tar &quot;$(DistTar)&quot; &gt; winston_tar.cpp" />
-    <GetFileSize FileName="$(DistTar)">
+  <!-- Embedding Winston -->
+  <Target Name="EmbedWinston" BeforeTargets="PrepareForBuild">
+    <Exec Command="tools\xd.exe -dwinston_tar &quot;$(WinstonTar)&quot; &gt; winston_tar.bin.cpp" />
+    <GetFileSize FileName="$(WinstonTar)">
       <Output TaskParameter="FileSize" PropertyName="TarSize" />
     </GetFileSize>
-    <Exec Command="tools\sed.exe &quot;s/_SIZE_/$(TarSize)/&quot; winston_tar.h.tpl &gt; winston_tar.h" />
+    <ReplaceInFile Source="winston_tar.h.tpl" Destination="winston_tar.bin.h" Old="_SIZE_" New="$(TarSize)" />
   </Target>
-  <Target Name="CleanTarC" AfterTargets="Clean">
-    <Exec Command="del /F /Q winston_tar.cpp 2&gt; nul" />
+  <!-- Clean -->
+  <Target Name="CleanEmbed" AfterTargets="Clean">
+    <Exec Command="del /F /Q *.bin.cpp 2&gt; nul" />
+    <Exec Command="del /F /Q *.bin.h 2&gt; nul" />
+    <Exec Command="del /F /Q $(NetFx40) 2&gt; nul" />
+    <Exec Command="del /F /Q $(NetFx46) 2&gt; nul" />
+  </Target>
+  <!-- .NET download and embedding -->
+  <Target Name="EmbedNetFx" BeforeTargets="PrepareForBuild">
+    <DownloadFile Address="http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe" FileName="$(NetFx40)" />
+    <DownloadFile Address="http://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe" FileName="$(NetFx46)" />
+    <Exec Command="tools\xd.exe -dnetfx40_setup $(NetFx40) &gt; netfx40_setup.bin.cpp" />
+    <Exec Command="tools\xd.exe -dnetfx46_setup $(NetFx46) &gt; netfx46_setup.bin.cpp" />
+    <GetFileSize FileName="$(NetFx46)">
+      <Output TaskParameter="FileSize" PropertyName="NetFx46Size" />
+    </GetFileSize>
+    <GetFileSize FileName="$(NetFx40)">
+      <Output TaskParameter="FileSize" PropertyName="NetFx40Size" />
+    </GetFileSize>
+    <ReplaceInFile Source="netfx_setup.h.tpl" Destination="netfx_setup.bin.h" Old="_40_SIZE_" New="$(NetFx40Size)" />
+    <ReplaceInFile Source="netfx_setup.bin.h" Destination="netfx_setup.bin.h" Old="_46_SIZE_" New="$(NetFx46Size)" />
+  </Target>
+  <!-- Elevate embedding -->
+  <Target Name="EmbedElevate" BeforeTargets="PrepareForBuild">
+    <Exec Command="tools\xd.exe -delevate_dll elevate.dll &gt; elevate_dll.bin.cpp" />
+    <Exec Command="tools\xd.exe -delevate_exe elevate.exe &gt; elevate_exe.bin.cpp" />
+    <GetFileSize FileName="elevate.dll">
+      <Output TaskParameter="FileSize" PropertyName="ElevateDllSize" />
+    </GetFileSize>
+    <GetFileSize FileName="elevate.exe">
+      <Output TaskParameter="FileSize" PropertyName="ElevateExeSize" />
+    </GetFileSize>
+    <ReplaceInFile Source="elevate.h.tpl" Destination="elevate.bin.h" Old="_DLL_SIZE_" New="$(ElevateDllSize)" />
+    <ReplaceInFile Source="elevate.bin.h" Destination="elevate.bin.h" Old="_EXE_SIZE_" New="$(ElevateExeSize)" />
+  </Target>
+  <Target Name="Compact" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
+    <Exec Command="tools\upx.exe &quot;$(OutputPath)winston_install.exe&quot;" />
   </Target>
 </Project>
