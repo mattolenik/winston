@@ -10,3 +10,4 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <atlstr.h>
+#include <fstream>

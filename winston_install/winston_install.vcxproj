@@ -56,6 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -76,6 +77,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -99,6 +101,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="winston_tar.h" />
+    <ClInclude Include="winston_tar.h.tpl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winston_install.cpp" />
@@ -106,18 +109,35 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="winston_tar.c" />
+    <ClCompile Include="winston_tar.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <PropertyGroup>
-	<DistTar>$(SolutionDir)winston\bin\dist\winston.tar</DistTar>
+    <DistTar>$(SolutionDir)winston\bin\dist\winston.tar</DistTar>
   </PropertyGroup>
+  <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <FileName Required="true" />
+      <FileSize ParameterType="System.Int64" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+FileInfo fi = new FileInfo(FileName);
+FileSize = fi.Length;
+  ]]></Code>
+    </Task>
+  </UsingTask>
   <Target Name="CreateTarC" BeforeTargets="PrepareForBuild">
-	<Exec Command="xd.exe -dwinston_tar &quot;$(DistTar)&quot; > winston_tar.c" />
+    <Exec Command="tools\xd.exe -dwinston_tar &quot;$(DistTar)&quot; &gt; winston_tar.cpp" />
+    <GetFileSize FileName="$(DistTar)">
+      <Output TaskParameter="FileSize" PropertyName="TarSize" />
+    </GetFileSize>
+    <Exec Command="tools\sed.exe &quot;s/_SIZE_/$(TarSize)/&quot; winston_tar.h.tpl > winston_tar.h" />
   </Target>
   <Target Name="CleanTarC" AfterTargets="Clean">
-	<Exec Command="del /F /Q winston_tar.c 2> nul" />
+    <Exec Command="del /F /Q winston_tar.cpp 2&gt; nul" />
   </Target>
 </Project>
