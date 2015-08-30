@@ -49,7 +49,7 @@ public:
 
 	bool Launch(const CString& args)
 	{
-		CString cmdline = L"NDP46-KB3033092-Web.exe /pipe winston-install-net46 " + args; // Customize with name and location of setup .exe that you want to run
+		CString cmdline = L"NDP46-KB3045560-Web.exe /pipe winston-install-net46 " + args; // Customize with name and location of setup .exe that you want to run
 		STARTUPINFO si = { 0 };
 		si.cb = sizeof(si);
 		PROCESS_INFORMATION pi = { 0 };
@@ -135,7 +135,7 @@ private: // IProgressObserver
 		case MMIO_CLOSE_APPS:
 			dwResult = IDYES;  // Close apps
 			break;
-        default:
+		default:
 			break;
 		}
 		printf("  response: %d\n  ", dwResult);
@@ -168,18 +168,104 @@ private:
 			LocalFree(lpstrMsgBuf);
 		}
 	}
-
 };
 
+int octal_string_to_int(const char *current_char, unsigned int size)
+{
+	unsigned int output = 0;
+	while (size > 0) {
+		output = output * 8 + *current_char - '0';
+		current_char++;
+		size--;
+	}
+	return output;
+}
+
 // Main entry point for program
-int __cdecl main(int argc, _In_count_(argc) char **_argv)
+int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 {
 	CString args = "/q /norestart";
 
 	auto result = Server().Launch(args);
-	std::fstream tarFile("winston_extracted.tar", std::fstream::out | std::fstream::binary);
 	auto tar = winston_tar;
 	auto data = reinterpret_cast<const char*>(tar);
-	tarFile.write(data, winston_tar_length);
-	return result;
+
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	wchar_t tmp[512];
+	GetTempPath(512, tmp);
+	auto tmpName = std::wstring(L"winston-install-") + std::to_wstring(rand() % 10000);
+	wchar_t tmpOut[600];
+	PathCombine(tmpOut, tmp, tmpName.c_str());
+	CreateDirectory(tmpOut, NULL);
+
+	size_t c = 0;
+	while(true)
+	{
+
+		auto rec = &data[c];
+		std::string name(rec);
+		int size = octal_string_to_int(&rec[124], 11);
+		c += 512;
+		if (c + 512 >= winston_tar_length)
+		{
+			break;
+		}
+		wchar_t path[1024];
+		std::wstring wName = converter.from_bytes(name);
+		PathCombine(path, tmpOut, wName.c_str());
+
+		switch (rec[156])
+		{
+		case '0':
+		case '\0':
+			//auto file = &data[c];
+			// normal file
+			{
+				std::fstream file(path, std::fstream::out | std::fstream::binary);
+				file.write(&data[c], size);
+			}
+		break;
+		case '1':
+			// hard link
+			break;
+		case '2':
+			// symbolic link
+			break;
+		case '5':
+			// directory
+			CreateDirectory(path, NULL);
+			break;
+		}
+		wprintf(L"%s\n", path);
+		if (size > 0)
+		{
+			c += (((size - 1) / 512) + 1) * 512;
+		}
+	}
+
+
+	STARTUPINFO si = { 0 };
+	si.cb = sizeof(si);
+	PROCESS_INFORMATION pi = { 0 };
+
+	wchar_t cmdline[1024];
+	PathCombine(cmdline, tmpOut, L"winston.cmd");
+	std::wstring installCmd(cmdline);
+
+	std::wstring qt(L"\"");
+	std::wstring fullCmd = qt + cmdline + qt + std::wstring(L" selfinstall");
+	std::vector<wchar_t> buf(fullCmd.begin(), fullCmd.end());
+	buf.push_back(0);
+
+	BOOL installSuccess = ::CreateProcess(NULL,
+		buf.data(),
+		NULL, NULL, FALSE, 0, NULL,
+		tmpOut,
+		&si,
+		&pi);
+
+
+	RemoveDirectory(tmpOut);
+	DeleteFile(tmpOut);
+	return 0;
 }

@@ -11,3 +11,8 @@
 #include <stdlib.h>
 #include <atlstr.h>
 #include <fstream>
+#include <iostream>
+#include <locale>
+#include <codecvt>
+#include <string>
+#include <vector>
