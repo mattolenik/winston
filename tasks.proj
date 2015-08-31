@@ -39,9 +39,10 @@ FileSize = fi.Length;
       <Reference Include="System" />
       <Code Type="Fragment" Language="cs"><![CDATA[
             if(!System.IO.File.Exists(Source)) return false;
-            var source = System.IO.File.ReadAllText(Source, System.Text.Encoding.UTF8);
+            var utf8 = new System.Text.UTF8Encoding(false);
+            var source = System.IO.File.ReadAllText(Source, utf8);
             var transformed = source.Replace(Old, New);
-            System.IO.File.WriteAllText(Destination, transformed, System.Text.Encoding.UTF8);
+            System.IO.File.WriteAllText(Destination, transformed, utf8);
         ]]></Code>
     </Task>
   </UsingTask>

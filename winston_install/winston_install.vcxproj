@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="netfx_setup.h.tpl" />
+    <None Include="version.tpl" />
     <None Include="winston_tar.h.tpl" />
     <None Include="elevate.h.tpl" />
   </ItemGroup>
@@ -139,6 +140,7 @@
   <PropertyGroup>
     <WinstonTar>$(SolutionDir)winston\bin\dist\winston.tar</WinstonTar>
     <NetFx>NDP46-KB3045560-Web.exe</NetFx>
+    <APPVEYOR_BUILD_VERSION Condition="'$(APPVEYOR_BUILD_VERSION)' == ''">0.0.1.0</APPVEYOR_BUILD_VERSION>
   </PropertyGroup>
   <!-- Embedding Winston -->
   <Target Name="EmbedWinston" BeforeTargets="PrepareForBuild">
@@ -178,5 +180,7 @@
   </Target>
   <Target Name="Compact" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
     <Exec Command="tools\upx.exe &quot;$(OutputPath)winston_install.exe&quot;" />
+    <ReplaceInFile Source="version.tpl" Destination="version.tmp" Old="_VERSION_" New="$(APPVEYOR_BUILD_VERSION)" />
+    <Exec Command="tools\stampver.exe -vversion.tmp &quot;$(OutputPath)winston_install.exe&quot;" />
   </Target>
 </Project>
