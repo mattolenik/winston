@@ -12,6 +12,8 @@ namespace Winston
 {
     static class InstallWorkflow
     {
+        const string PowerShellUniq = "#winston582390";
+
         public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames) => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
 
         public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
@@ -55,7 +57,7 @@ namespace Winston
 
             var choicesArray = choices as Package[] ?? choices.ToArray();
             var diffProps = Reflect.Diff(choicesArray).ToArray();
-            for(int i = 1; i <= choicesArray.Length; i++)
+            for (int i = 1; i <= choicesArray.Length; i++)
             {
                 var c = choicesArray[i - 1];
                 sb.AppendLine($"{i}. {c.Name}");
@@ -83,13 +85,33 @@ namespace Winston
             var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winstonapp.exe"));
             var pkg = new Package
             {
-                Name = ver.ProductName, // "Winston"
-                Description = ver.Comments, // "Winston app manager."
+                Name = ver.ProductName,
+                Description = ver.Comments,
                 URL = new Uri(fullDir),
                 Type = PackageType.Shell,
-                Version = ver.FileVersion // "0.1.0.0"
+                Version = ver.FileVersion
             };
             await cellar.Add(pkg);
+
+            SetupPowerShell();
+        }
+
+        static void SetupPowerShell()
+        {
+            var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var profile = Path.Combine(docs, @"WindowsPowerShell\Microsoft.PowerShell_profile.ps1");
+            var modules = Path.Combine(docs, @"WindowsPowerShell\Modules\Winston\");
+            Directory.CreateDirectory(modules);
+            File.Copy("winston.psm1", Path.Combine(modules, "winston.psm1"), true);
+
+            var line = $"Import-Module winston.psm1 {PowerShellUniq}";
+            var oldProfile = File.Exists(profile) ? File.ReadAllLines(profile) : new string[] { };
+            // Filter old lines and concat new line
+            var newProfile =
+                oldProfile
+                    .Where(l => !l.ContainsInvIgnoreCase(PowerShellUniq))
+                    .Concat(new[] { line });
+            File.WriteAllLines(profile, newProfile);
         }
     }
 }
