@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MergePathStrings
 {
@@ -24,16 +25,24 @@ namespace MergePathStrings
 
     class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
-            var paths = new[]
-            {
-                // Ordered the same way as how variables are combined and printed when
-                // you type "echo %PATH%" in cmd
-                Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine),
-                Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User),
-                Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process)
-            };
+            var paths = args.FirstOrDefault() == "-p"
+                ? new[]
+                {
+                    // Different order for PowerShell
+                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process),
+                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User),
+                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine)
+                }
+                : new[]
+                {
+                    // Ordered the same way as how variables are combined and printed when
+                    // you type "echo %PATH%" in cmd
+                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine),
+                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User),
+                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process)
+                };
 
             var result = Merge(paths);
             Console.Write(string.Join(";", result));
