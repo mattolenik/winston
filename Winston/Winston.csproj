@@ -120,6 +120,9 @@
     <Compile Include="Serialization\Yml.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="winston.psm1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <Content Include="repos\default.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -164,7 +167,7 @@
     <Dist>$(ProjectDir)bin\dist\</Dist>
     <DistTar>$(Dist)winston.tar</DistTar>
   </PropertyGroup>
-  <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles" Condition="'$(Configuration)' == 'Release' " >
+  <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles" Condition="'$(Configuration)' == 'Release' ">
     <Exec Command="del /F /Q &quot;$(DistTar)&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.pdb&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.xml&quot; 2&gt;nul" IgnoreExitCode="true" />
