@@ -100,11 +100,11 @@ namespace Winston.Cache
                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                         var result = DB.Execute(
                             @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
-                            new {Name = pkg.Name, Desc = pkg.Description, Data = json},
+                            new { Name = pkg.Name, Desc = pkg.Description, Data = json },
                             transaction: t);
                         result = DB.Execute(
                             @"insert or replace into PackageSearch (Name, Desc) values (@Name, @Desc)",
-                            new {Name = pkg.Name, Desc = pkg.Description},
+                            new { Name = pkg.Name, Desc = pkg.Description },
                             transaction: t);
                     }
                     t.Commit();
@@ -129,27 +129,44 @@ namespace Winston.Cache
         public async Task<Package> ByName(string pkgName)
         {
             var result = await DB.QueryAsync<string>("select PackageData from Packages where Name = @Name", new { Name = pkgName });
-            var json = result.Single();
+            var json = result.SingleOrDefault();
+            if (json == null) return null;
             var pkg = JsonConvert.DeserializeObject<Package>(json);
             return pkg;
         }
 
         public async Task<IList<Package>> ByNames(IEnumerable<string> names)
         {
-            return await Task.WhenAll(names.Select(ByName));
+            // SQLite is going to end up executing these all in serial anyway,
+            // little point in making this code parallel.
+            var result = new List<Package>();
+            foreach (var name in names)
+            {
+                var match = await ByName(name);
+                if (match != null)
+                {
+                    result.Add(match);
+                }
+            }
+            return result;
         }
 
         public async Task<IList<Package>> Search(string query)
         {
-            var nameMatches = await DB.QueryAsync<string>("select distinct Name from PackageSearch where Name match @query", new {query});
-            var descMatches = await DB.QueryAsync<string>("select distinct Name from PackageSearch where Desc match @query", new {query});
+            var nameMatches = await DB.QueryAsync<string>("select distinct Name from PackageSearch where Name match @query", new { query });
+            var descMatches = await DB.QueryAsync<string>("select distinct Name from PackageSearch where Desc match @query", new { query });
             var names = nameMatches.Union(descMatches).Distinct();
             var result = new List<Package>();
             foreach (var name in names)
             {
-                var json = await DB.QueryAsync<string>("select PackageData from Packages where Name = @name", new {name});
-                var pkg = JsonConvert.DeserializeObject<Package>(json.Single());
-                result.Add(pkg);
+                var json =
+                    await DB.QueryAsync<string>("select PackageData from Packages where Name = @name", new { name });
+                var single = json.SingleOrDefault();
+                if (single != null)
+                {
+                    var pkg = JsonConvert.DeserializeObject<Package>(single);
+                    result.Add(pkg);
+                }
             }
 
             return result;
