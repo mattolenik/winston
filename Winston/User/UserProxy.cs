@@ -44,6 +44,12 @@ namespace Winston.User
             adapter.Message(message);
         }
 
+        public Action<int> NewProgress()
+        {
+            var p = adapter.NewProgress();
+            return p.Update;
+        }
+
         public void Dispose() => cancel.Cancel(true);
     }
 }

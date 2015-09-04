@@ -33,7 +33,7 @@ namespace Winston
         {
             var pkgDir = Path.Combine(CellarPath, pkg.Name);
             var client = new PackageClient(pkg, pkgDir);
-            var installDir = await client.Install();
+            var installDir = await client.Install(user.NewProgress());
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
             var pathVal = Path.Combine(junctionPath, pkg.Path ?? "");
             PathLink(pathVal);

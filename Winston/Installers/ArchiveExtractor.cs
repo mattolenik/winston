@@ -1,5 +1,6 @@
 ﻿using RunProcess;
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -31,7 +32,7 @@ namespace Winston.Installers
             "zip", "7z", "exe", "xz", "bz2", "gz", "tar", "cab", "lzh", "lha", "rar", "xar", "z"
         };
 
-        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
+        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, NameValueCollection headers, Uri uri)
         {
             var result = new ArchiveExtractor { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
             if (Content.ContentTypeMatches(headers, MatchingMimeTypes))
