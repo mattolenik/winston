@@ -44,10 +44,9 @@ namespace Winston.User
             adapter.Message(message);
         }
 
-        public Action<int> NewProgress()
+        public Progress NewProgress(string name)
         {
-            var p = adapter.NewProgress();
-            return p.Update;
+            return adapter.NewProgress(name);
         }
 
         public void Dispose() => cancel.Cancel(true);

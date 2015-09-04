@@ -13,21 +13,31 @@ namespace Winston.User
     {
         public Action<int> Update { get; set; } = _ => { };
 
+        public Action Completed { get; set; } = () => { };
+
         public int Row { get; set; }
+
+        public string Name { get; set; }
+
+        internal int? Last { get; set; }
+
+        internal string ProgressPrefix { get; set; }
     }
 
     class ConsoleUserAdapter : IUserAdapter
     {
         readonly TextWriter output;
         readonly TextReader input;
+        readonly object progressLock = new object();
+        int lastProgressRow;
+        int lastPrintRow;
+        int startRow;
 
         public ConsoleUserAdapter(TextWriter output, TextReader input)
         {
             this.output = output;
             this.input = input;
-            Console.Clear();
-            origRow = Console.CursorTop;
-            origCol = Console.CursorLeft;
+            this.startRow = Console.CursorTop;
         }
 
         public async Task<string> Ask(Question question) => await Task.Run(() =>
@@ -51,28 +61,37 @@ namespace Winston.User
 
         public void Message(string message)
         {
+            ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
             output.WriteLine(message);
+            lastPrintRow++;
         }
 
-        int row = 0;
-
-        public Progress NewProgress()
+        public Progress NewProgress(string name)
         {
-            var result = new Progress();
+            var result = new Progress { Name = name };
             result.Update = p =>
             {
-                if (p != last)
+                lock (progressLock)
                 {
-                    ConsoleEx.WriteAt(0, result.Row, p.ToString());
-                    last = p;
+                    if (p != result.Last)
+                    {
+                        ConsoleEx.WriteAt(result.ProgressPrefix.Length, result.Row, p.ToString());
+                        result.Last = p;
+                    }
                 }
             };
-            result.Row = row++;
+            result.Completed = () =>
+            {
+                lock (progressLock)
+                {
+                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 4, result.Row, " completed");
+                }
+            };
+            result.Row = startRow + lastProgressRow;
+            result.ProgressPrefix = result.Name + ": ";
+            ConsoleEx.WriteAt(0, result.Row, result.ProgressPrefix);
+            lastProgressRow++;
             return result;
         }
-
-        protected static int origRow;
-        protected static int origCol;
-        protected static int? last;
     }
 }
