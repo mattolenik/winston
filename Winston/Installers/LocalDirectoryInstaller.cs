@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Winston.OS;
+using Winston.User;
 
 namespace Winston.Installers
 {
@@ -23,7 +24,7 @@ namespace Winston.Installers
             this.pkgDir = pkgDir;
         }
 
-        public async Task<DirectoryInfo> Install(Action<int> progress)
+        public async Task<DirectoryInfo> Install(Progress progress)
         {
             var installDir = Path.Combine(pkgDir, pkg.ResolveVersion() ?? "default");
             await FS.CopyDirectory(pkg.URL.LocalPath, installDir);
