@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Mime;
@@ -7,11 +8,11 @@ namespace Winston.Installers
 {
     static class Content
     {
-        public static string MatchContentDispositionFileExt(HttpContentHeaders headers, params string[] extensions)
+        public static string MatchContentDispositionFileExt(NameValueCollection headers, params string[] extensions)
         {
-            if (!headers.Contains("Content-Disposition")) return null;
+            if (!headers.AllKeys.Contains("Content-Disposition")) return null;
 
-            var disposition = headers.GetValues("Content-Disposition").SingleOrDefault();
+            var disposition = headers["Content-Disposition"];
             if (string.IsNullOrWhiteSpace(disposition)) return null;
 
             var cd = new ContentDisposition(disposition);
@@ -21,9 +22,9 @@ namespace Winston.Installers
             return extensions.Any(ext => cd.FileName.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase)) ? cd.FileName : null;
         }
 
-        public static bool ContentTypeMatches(HttpContentHeaders headers, params string[] contentTypes)
+        public static bool ContentTypeMatches(NameValueCollection headers, params string[] contentTypes)
         {
-            var ct = headers.GetValues("Content-Type").SingleOrDefault() ?? "";
+            var ct = headers["Content-Type"] ?? "";
             return contentTypes.Any(contentType => string.Equals(ct, contentType, StringComparison.OrdinalIgnoreCase));
         }
 

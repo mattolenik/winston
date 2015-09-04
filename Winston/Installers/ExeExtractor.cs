@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Winston.Installers
         string packageFile;
         string exePath;
 
-        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
+        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, NameValueCollection headers, Uri uri)
         {
             var result = new ExeExtractor { packageFile = packageFile };
             var cdFilename = Content.MatchContentDispositionFileExt(headers, "exe");

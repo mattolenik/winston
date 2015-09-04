@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http.Headers;
@@ -12,7 +13,7 @@ namespace Winston.Installers
         string packageFile;
         string filename;
 
-        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, HttpContentHeaders headers, Uri uri)
+        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, NameValueCollection headers, Uri uri)
         {
             var result = new ZipExtractor { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
             if (Content.ContentTypeMatches(headers, "application/zip"))
