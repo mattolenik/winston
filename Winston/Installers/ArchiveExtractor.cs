@@ -1,11 +1,10 @@
-﻿using RunProcess;
-using System;
+﻿using System;
 using System.Collections.Specialized;
 using System.IO;
-using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using RunProcess;
 
 namespace Winston.Installers
 {

@@ -1,14 +1,12 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Winston.OS;
-using Winston.Properties;
 using Winston.User;
 using YamlDotNet.Serialization;
-using Environment = Winston.OS.Environment;
 using Env = System.Environment;
+using Environment = Winston.OS.Environment;
 
 namespace Winston
 {
