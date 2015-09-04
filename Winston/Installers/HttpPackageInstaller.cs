@@ -4,7 +4,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Winston.OS;
 using Winston.Serialization;
-using Winston.User;
 
 namespace Winston.Installers
 {
