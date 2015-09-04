@@ -2,7 +2,6 @@
 using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Winston.Installers
