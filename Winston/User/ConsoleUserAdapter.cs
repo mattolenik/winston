@@ -6,21 +6,6 @@ using Microsoft.GotDotNet;
 
 namespace Winston.User
 {
-    public class Progress
-    {
-        public Action<int> Update { get; set; } = _ => { };
-
-        public Action Completed { get; set; } = () => { };
-
-        public int Row { get; set; }
-
-        public string Name { get; set; }
-
-        internal int? Last { get; set; }
-
-        internal string ProgressPrefix { get; set; }
-    }
-
     class ConsoleUserAdapter : IUserAdapter
     {
         readonly TextWriter output;
@@ -28,7 +13,7 @@ namespace Winston.User
         readonly object progressLock = new object();
         int lastProgressRow;
         int lastPrintRow;
-        int startRow;
+        readonly int startRow;
 
         public ConsoleUserAdapter(TextWriter output, TextReader input)
         {
