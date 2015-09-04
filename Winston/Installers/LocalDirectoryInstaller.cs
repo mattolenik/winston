@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Winston.OS;
-using Winston.User;
 
 namespace Winston.Installers
 {
