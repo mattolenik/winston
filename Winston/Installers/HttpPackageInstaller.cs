@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -33,16 +34,12 @@ namespace Winston.Installers
             tmpFile = new TempFile();
         }
 
-        public async Task<DirectoryInfo> Install()
+        public async Task<DirectoryInfo> Install(Action<int> progress)
         {
-            using (var client = new HttpClient())
-            using (var res = await client.GetAsync(pkg.URL))
-            using (var body = await res.Content.ReadAsStreamAsync())
+            using (var c = new WebClient())
             {
-                using (var file = File.OpenWrite(tmpFile))
-                {
-                    await body.CopyToAsync(file);
-                }
+                c.DownloadProgressChanged += (sender, args) => progress(args.ProgressPercentage);
+                await c.DownloadFileTaskAsync(pkg.URL, tmpFile);
 
                 var hash = await FS.GetSHA1(tmpFile);
                 // Only check when SHA1 is specified in the package metadata
@@ -67,16 +64,16 @@ namespace Winston.Installers
                 switch (pkg?.FileType)
                 {
                     case PackageFileType.Archive:
-                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL);
+                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL);
                         break;
 
                     case PackageFileType.Binary:
-                        archive = ExeExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL);
+                        archive = ExeExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL);
                         break;
 
                     default:
-                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL) ??
-                                      ExeExtractor.TryCreate(pkg, installDir, tmpFile, res.Content.Headers, pkg.URL);
+                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL) ??
+                                      ExeExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL);
                         break;
                 }
 
