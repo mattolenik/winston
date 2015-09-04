@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Net.Mime;
 
 namespace Winston.Installers
