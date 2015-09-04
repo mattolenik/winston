@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Winston.OS;
 using Winston.Serialization;
+using Winston.User;
 
 namespace Winston.Installers
 {
@@ -34,12 +35,13 @@ namespace Winston.Installers
             tmpFile = new TempFile();
         }
 
-        public async Task<DirectoryInfo> Install(Action<int> progress)
+        public async Task<DirectoryInfo> Install(Progress progress)
         {
             using (var c = new WebClient())
             {
-                c.DownloadProgressChanged += (sender, args) => progress(args.ProgressPercentage);
+                c.DownloadProgressChanged += (sender, args) => progress.Update(args.ProgressPercentage);
                 await c.DownloadFileTaskAsync(pkg.URL, tmpFile);
+                progress.Completed();
 
                 var hash = await FS.GetSHA1(tmpFile);
                 // Only check when SHA1 is specified in the package metadata

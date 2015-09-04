@@ -7,6 +7,6 @@ namespace Winston.User
     {
         Task<string> Ask(Question question);
         void Message(string message);
-        Progress NewProgress();
+        Progress NewProgress(string name);
     }
 }

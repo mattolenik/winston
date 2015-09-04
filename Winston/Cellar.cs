@@ -8,6 +8,7 @@ using Winston.Properties;
 using Winston.User;
 using YamlDotNet.Serialization;
 using Environment = Winston.OS.Environment;
+using Env = System.Environment;
 
 namespace Winston
 {
@@ -33,11 +34,12 @@ namespace Winston
         {
             var pkgDir = Path.Combine(CellarPath, pkg.Name);
             var client = new PackageClient(pkg, pkgDir);
-            var installDir = await client.Install(user.NewProgress());
+            var progress = user.NewProgress(pkg.Name);
+            var installDir = await client.Install(progress);
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
             var pathVal = Path.Combine(junctionPath, pkg.Path ?? "");
             PathLink(pathVal);
-            user.Message($"\nFinished installing {pkg.Name}.");
+            user.Message($"Finished installing {pkg.Name}.");
         }
 
         static string CreateCurrentJunction(string pkgDir, string installDir)

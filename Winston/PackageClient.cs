@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Winston.Installers;
+using Winston.User;
 
 namespace Winston
 {
@@ -18,7 +19,7 @@ namespace Winston
             this.pkgDir = pkgDir;
         }
 
-        public async Task<DirectoryInfo> Install(Action<int> progress)
+        public async Task<DirectoryInfo>Install(Progress progress)
         {
             var installer = LocalDirectoryInstaller.TryCreate(pkg, pkgDir) ??
                             HttpPackageInstaller.TryCreate(pkg, pkgDir);
