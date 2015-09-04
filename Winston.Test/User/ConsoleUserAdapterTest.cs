@@ -1,7 +1,5 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 using NSpec;
-using NUnit.Framework;
 using Winston.User;
 
 namespace Winston.Test.User

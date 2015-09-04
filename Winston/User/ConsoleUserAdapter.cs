@@ -1,9 +1,6 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.GotDotNet;
 
@@ -68,7 +65,7 @@ namespace Winston.User
 
         public Progress NewProgress(string name)
         {
-            var result = new Progress { Name = name };
+            var result = new Progress {Name = name};
             result.Update = p =>
             {
                 lock (progressLock)
