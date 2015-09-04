@@ -23,7 +23,7 @@ namespace Winston.Test.User
             {
             }
 
-            public Progress NewProgress()
+            public Progress NewProgress(string name)
             {
                 return new Progress();
             }
