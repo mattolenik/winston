@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using NSpec;
 using Winston.User;
 
@@ -20,6 +21,11 @@ namespace Winston.Test.User
 
             public void Message(string message)
             {
+            }
+
+            public Progress NewProgress()
+            {
+                return new Progress();
             }
         }
 

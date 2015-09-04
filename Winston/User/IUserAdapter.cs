@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace Winston.User
@@ -6,5 +7,6 @@ namespace Winston.User
     {
         Task<string> Ask(Question question);
         void Message(string message);
+        Progress NewProgress();
     }
 }
