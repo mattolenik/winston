@@ -4,9 +4,13 @@ namespace Winston
 {
     public class Progress
     {
-        public Action<int> Update { get; set; } = _ => { };
+        public Action<int> UpdateInstall { get; set; } = _ => { };
 
-        public Action Completed { get; set; } = () => { };
+        public Action<int> UpdateDownload { get; set; } = _ => { };
+
+        public Action CompletedDownload { get; set; } = () => { };
+
+        public Action CompletedInstall { get; set; } = () => { };
 
         public int Row { get; set; }
 

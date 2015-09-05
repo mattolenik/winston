@@ -29,6 +29,7 @@ namespace Winston
             var ambiguous = pkgsList.Where(p => p.Variants.Count > 0);
             var choiceTasks = ambiguous.Select(async choices => await Disambiguate(user, SelectPlatform(choices)));
             var chosen = Task.WhenAll(choiceTasks).Result;
+            // TODO: break this up
             Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.Add(p)).ToArray());
         }
 

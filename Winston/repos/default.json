@@ -43,10 +43,30 @@
                 }
             ]
         },
+        
+        {
+            "Name": "7zip-test",
+            "Description": "7zip archive tool",
+            "URL": "https://www.dropbox.com/s/shdca56rutphg3r/7z1505-extra.7z?dl=1",
+            "Path": ".",
+            "Platform": "x86",
+            "Variants": [
+                {
+                    "Path": "x64",
+                    "Platform": "x64"
+                }
+            ]
+        },
         {
             "Name": "dmd2",
             "Description": "Digital Mars D compiler and tools",
             "URL": "http://downloads.dlang.org/releases/2.x/2.068.0/dmd.2.068.0.windows.zip",
+            "Path": "dmd2/windows/bin"
+        },
+        {
+            "Name": "dmd2-test",
+            "Description": "Digital Mars D compiler and tools",
+            "URL": "https://www.dropbox.com/s/a5n0hvqiulx10u8/dmd.2.068.0.windows.zip?dl=1",
             "Path": "dmd2/windows/bin"
         },
         {
