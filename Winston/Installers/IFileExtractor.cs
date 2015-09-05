@@ -4,6 +4,6 @@ namespace Winston.Installers
 {
     interface IFileExtractor
     {
-        Task<string> Install();
+        Task<string> Install(Progress progress);
     }
 }

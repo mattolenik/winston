@@ -33,9 +33,9 @@ namespace Winston.Installers
         {
             using (var c = new WebClient())
             {
-                c.DownloadProgressChanged += (sender, args) => progress.Update(args.ProgressPercentage);
+                c.DownloadProgressChanged += (sender, args) => progress.UpdateDownload(args.ProgressPercentage);
                 await c.DownloadFileTaskAsync(pkg.URL, tmpFile);
-                progress.Completed();
+                progress.CompletedDownload();
 
                 var hash = await FS.GetSHA1(tmpFile);
                 // Only check when SHA1 is specified in the package metadata
@@ -75,7 +75,8 @@ namespace Winston.Installers
 
                 if (archive != null)
                 {
-                    var p = await archive.Install();
+                    var p = await archive.Install(progress);
+                    progress.CompletedInstall();
                 }
                 else
                 {

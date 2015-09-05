@@ -34,7 +34,7 @@ namespace Winston.Installers
             return null;
         }
 
-        public async Task<string> Install()
+        public async Task<string> Install(Progress progress)
         {
             return await Task.Run(() =>
             {
