@@ -51,7 +51,7 @@ namespace Winston.User
         public Progress NewProgress(string name)
         {
             var result = new Progress {Name = name};
-            result.Update = p =>
+            result.UpdateDownload = p =>
             {
                 lock (progressLock)
                 {
@@ -62,11 +62,26 @@ namespace Winston.User
                     }
                 }
             };
-            result.Completed = () =>
+            result.CompletedDownload = () =>
             {
                 lock (progressLock)
                 {
-                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 4, result.Row, " completed");
+                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
+                }
+            };
+            result.UpdateInstall = p =>
+            {
+                lock (progressLock)
+                {
+                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, p.ToString());
+                    result.Last = p;
+                }
+            };
+            result.CompletedInstall = () =>
+            {
+                lock (progressLock)
+                {
+                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
                 }
             };
             result.Row = startRow + lastProgressRow;
