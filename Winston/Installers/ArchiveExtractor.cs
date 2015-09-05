@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using RunProcess;
 
 namespace Winston.Installers
 {
@@ -13,6 +14,7 @@ namespace Winston.Installers
         string appDir;
         string packageFile;
         string filename;
+        static readonly TimeSpan ExtractionTimeout = TimeSpan.FromMinutes(20);
 
         static readonly string[] MatchingMimeTypes =
         {
@@ -31,7 +33,8 @@ namespace Winston.Installers
             "zip", "7z", "exe", "xz", "bz2", "gz", "tar", "cab", "lzh", "lha", "rar", "xar", "z"
         };
 
-        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, NameValueCollection headers, Uri uri)
+        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile,
+            NameValueCollection headers, Uri uri)
         {
             var result = new ArchiveExtractor { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
             if (Content.ContentTypeMatches(headers, MatchingMimeTypes))
@@ -53,11 +56,11 @@ namespace Winston.Installers
             return null;
         }
 
-        public async Task<string> Install() => await Task.Run(() =>
+        public async Task<string> Install(Progress progress)
         {
-            Extract(packageFile, appDir);
+            await Extract(packageFile, appDir, progress);
             return Path.Combine(appDir, filename ?? "");
-        });
+        }
 
         public Task<Exception> Validate()
         {
@@ -65,31 +68,34 @@ namespace Winston.Installers
             return Task.FromResult<Exception>(null);
         }
 
-        static void Extract(string filename, string destination)
+        static async Task Extract(string filename, string destination, Progress progress)
         {
             Directory.Delete(destination, true);
             var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            using (var proc = new ProcessHost(@"tools\7z.exe", workingDir))
+            var args = $"x \"{filename}\" -o\"{destination}\" -y";
+            var si = new ProcessStartInfo(@"tools\7z.exe", args)
             {
-                var args = $"x \"{filename}\" -o\"{destination}\" -y";
-                proc.Start(args);
-
-                // TODO: make config value
-                int exitCode;
-                if (!proc.WaitForExit(TimeSpan.FromMinutes(10), out exitCode))
-                {
-                    proc.Kill();
-                    throw new TimeoutException("Took too long to extract archive: " + filename);
-                }
-                var stdout = proc.StdOut.ReadAllText(Encoding.UTF8);
-                var stderr = proc.StdErr.ReadAllText(Encoding.UTF8);
-                if (exitCode != 0)
-                {
-                    // TODO: better exception type
-                    throw new Exception(
-                        $"Failed to extract archive '{filename}'. 7zip stdout:\n{stdout}\n\n7zip stderr:{stderr}\n");
-                }
+                WorkingDirectory = workingDir,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                UseShellExecute = false
+            };
+            var proc = new Process { StartInfo = si };
+            proc.Start();
+            var exited = await proc.WaitForExitAsync(ExtractionTimeout);
+            if (!exited)
+            {
+                proc.Kill();
+                throw new TimeoutException($"Extraction of '{filename}' took longer than {ExtractionTimeout}, aborting");
             }
+            if (proc.ExitCode != 0)
+            {
+                // TODO: better exception type
+                throw new Exception(
+                    $"Failed to extract archive '{filename}'. 7zip exit code: {proc.ExitCode}");
+            }
+            progress.CompletedInstall();
         }
     }
 }
