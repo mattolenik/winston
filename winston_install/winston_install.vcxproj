@@ -130,7 +130,6 @@
     <ResourceCompile Include="winston_install.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\icon2.ico" />
     <Image Include="..\package.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
