@@ -9,7 +9,7 @@ namespace Winston.User
     /// Provides a proxy mechanism by which application components can notify the user
     /// or ask the user questions and receive responses.
     /// </summary>
-    public class UserProxy : IDisposable
+    public sealed class UserProxy : IDisposable
     {
         readonly BufferBlock<Question> buf = new BufferBlock<Question>();
         readonly CancellationTokenSource cancel = new CancellationTokenSource();
@@ -48,6 +48,6 @@ namespace Winston.User
             return adapter.NewProgress(name);
         }
 
-        public void Dispose() => cancel.Cancel(true);
+        public void Dispose() => cancel?.Dispose();
     }
 }

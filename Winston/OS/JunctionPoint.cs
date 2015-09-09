@@ -10,7 +10,7 @@ namespace Winston.OS
     /// Provides access to NTFS junction points in .NET
     /// From here: http://www.codeproject.com/Articles/15633/Manipulating-NTFS-Junction-Points-in-NET
     /// </summary>
-    public static class JunctionPoint
+    static class JunctionPoint
     {
         /// <summary>
         /// The file or directory is not a reparse point.
@@ -176,7 +176,7 @@ namespace Winston.OS
             IntPtr OutBuffer, int nOutBufferSize,
             out int pBytesReturned, IntPtr lpOverlapped);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern IntPtr CreateFile(
             string lpFileName,
             EFileAccess dwDesiredAccess,
