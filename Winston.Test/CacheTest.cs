@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using NSpec;
 using Winston.Cache;
+using Winston.OS;
 
 namespace Winston.Test
 {
