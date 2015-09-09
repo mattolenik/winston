@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 
-namespace Winston
+namespace Winston.OS
 {
-    public class TempDirectory : IDisposable
+    sealed class TempDirectory : IDisposable
     {
         public string Path { get; }
 

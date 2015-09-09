@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Winston.Cache
 {
-    public class SqliteCache : IDisposable
+    public sealed class SqliteCache : IDisposable
     {
         readonly string dbPath;
         internal SQLiteConnection DB { get; private set; }
