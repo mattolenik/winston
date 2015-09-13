@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Winston.OS;
 using Winston.User;
 using YamlDotNet.Serialization;
-using Env = System.Environment;
 using Environment = Winston.OS.Environment;
 
 namespace Winston
@@ -66,44 +65,6 @@ namespace Winston
             Environment.RemoveFromPath(installPath);
         }
 
-        //public async Task Link(Package pkg, string installPath)
-        //{
-        //    // If the package installer extracted an EXE, the installPath will be the full path to that EXE.
-        //    // If the installer extracted a ZIP file, the installPath will be the directory, and the full
-        //    // path will have to be constructed using pkg.Filename
-        //    if (!File.Exists(installPath))
-        //    {
-        //        installPath = Path.Combine(installPath, pkg.Filename);
-        //    }
-        //    if (!File.Exists(installPath))
-        //    {
-        //        throw new InvalidDataException($"Package '{pkg}' does not seem to be installed");
-        //    }
-        //    var appDir = Path.GetDirectoryName(installPath);
-        //    var relAppPath = Paths.GetRelativePath(BinPath, installPath);
-        //    var relWorkingDir = Paths.GetRelativePath(BinPath, appDir);
-        //    var alias = Path.GetFileNameWithoutExtension(installPath);
-        //    var aliasPath = Path.Combine(BinPath, $"{alias}.exe");
-
-        //    if (File.Exists(aliasPath))
-        //    {
-        //        var dt = DateTime.Now.ToString("yyyyMMddHHmmss");
-        //        var oldAlias = Path.Combine(BinPath, $"{alias}.old_{dt}");
-        //        // Works even if the process is running, gives us upgrade for free
-        //        File.Move(aliasPath, oldAlias);
-        //    }
-
-        //    using (var wrap = new MemoryStream(Resources.wrap, 0, Resources.wrap.Length, true, true))
-        //    using (var wrapper = new Wrapper(wrap, relAppPath, relWorkingDir, pkg.Type == PackageType.Shell))
-        //    using (var file = File.Create(aliasPath))
-        //    {
-        //        wrapper.Wrap();
-        //        wrap.Position = 0;
-        //        var buf = wrap.GetBuffer();
-        //        await file.WriteAsync(buf, 0, buf.Length);
-        //    }
-        //}
-
         public async Task Remove(string name)
         {
             var pkgDir = Path.Combine(CellarPath, name);
@@ -125,13 +86,6 @@ namespace Winston
             await Task.Run(() => Directory.Delete(pkgDir, true));
         }
 
-        public async Task Unlink(Package pkg) => await Task.Run(() =>
-        {
-            //var alias = Path.GetFileNameWithoutExtension(pkg.Run);
-            //var aliasPath = Path.Combine(BinPath, alias + ".exe");
-            //File.Delete(aliasPath);
-        });
-
         public async Task<Package[]> List()
         {
             var pkgFiles = Directory.GetFiles(CellarPath, "pkg.yml", SearchOption.AllDirectories);
@@ -147,5 +101,4 @@ namespace Winston
             return res;
         }
     }
-
 }
