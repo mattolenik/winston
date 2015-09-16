@@ -14,7 +14,8 @@ namespace Winston
     {
         const string PowerShellUniq = "#winston582390";
 
-        public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames) => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
+        public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames)
+            => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
 
         public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
         {
