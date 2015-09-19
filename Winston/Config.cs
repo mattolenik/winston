@@ -1,20 +1,15 @@
 ﻿using System;
 using System.IO;
 using Winston.Serialization;
-using YamlDotNet.Serialization;
 
 namespace Winston
 {
     public class Config
     {
         /// <summary>
-        /// The directory in which Winston will install itself. Winston will create
-        /// a subdirectory, %WinstonRoot%\winston, and install and run itself from there.
+        /// The directory in which Winston will install itself.
         /// </summary>
-        public string WinstonRoot { get; set; }
-
-        [YamlIgnore]
-        public string WinstonDir => Path.Combine(WinstonRoot, @"winston\");
+        public string WinstonDir { get; set; }
     }
 
     public interface IConfigProvider
@@ -26,7 +21,10 @@ namespace Winston
     {
         public Config Config { get; private set; }
 
-        static readonly Config Default = new Config { WinstonRoot = Paths.AppData };
+        static readonly Config Default = new Config
+        {
+            WinstonDir = Path.Combine(Paths.AppData, @"winston\")
+        };
 
         readonly string path = Path.Combine(Paths.ExecutingDir, "config.yml");
 
