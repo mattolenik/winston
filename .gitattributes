@@ -1,2 +1,2 @@
-*.h.tpl linguist-language=cpp
-*.h linguist-language=cpp
+*.h.tpl linguist-language=c++
+*.h linguist-language=c++
