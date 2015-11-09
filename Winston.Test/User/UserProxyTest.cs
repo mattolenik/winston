@@ -4,7 +4,7 @@ using Winston.User;
 
 namespace Winston.Test.User
 {
-    class UserProxyTest : nspecAsync
+    class UserProxyTest : nspec
     {
         UserProxy proxy;
         TestAdapter adapter;
@@ -41,7 +41,7 @@ namespace Winston.Test.User
 
         void describe_asking()
         {
-            itSync["gets an answer"] = () =>
+            it["gets an answer"] = () =>
             {
                 adapter.Answer = "ans1";
                 var ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));

@@ -4,7 +4,7 @@ using Winston.User;
 
 namespace Winston.Test.User
 {
-    class ConsoleUserAdapterTest : nspecAsync
+    class ConsoleUserAdapterTest : nspec
     {
         StringWriter writer;
         StringReader reader;
@@ -19,13 +19,13 @@ namespace Winston.Test.User
 
         void describe_adapter()
         {
-            it["can ask and receive an answer"] = async () =>
+            itAsync["can ask and receive an answer"] = async () =>
             {
                 var answer = await adapter.Ask(new Question("", "Question", "ans1", "ans2"));
                 answer.should_be("ans1");
             };
 
-            itSync["can receive a message"] = () =>
+            it["can receive a message"] = () =>
             {
                 adapter.Message("msg");
                 var output = writer.GetStringBuilder().ToString();

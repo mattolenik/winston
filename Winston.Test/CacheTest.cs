@@ -9,7 +9,7 @@ using Winston.OS;
 
 namespace Winston.Test
 {
-    class CacheTest : nspecAsync
+    class CacheTest : nspec
     {
         SqliteCache cache;
         TempDirectory dir;
@@ -44,7 +44,7 @@ namespace Winston.Test
 
         void describe_cache()
         {
-            it["can find by name"] = async () =>
+            itAsync["can find by name"] = async () =>
             {
                 var pkg = await cache.ByName("Pkg 1");
                 pkg?.Name.should_be("Pkg 1");
