@@ -25,7 +25,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 public class DebuggerShim
 {
     [TestMethod]
-    public void debug()
+    public void NSpec_Tests()
     {
         var tagOrClassName = "class_or_tag_you_want_to_debug";
 
