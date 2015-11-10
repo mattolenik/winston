@@ -43,14 +43,21 @@ namespace Winston.User
 
         public void Message(string message)
         {
-            ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
+            if (Environment.UserInteractive)
+            {
+                ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
+            }
             output.WriteLine(message);
             lastPrintRow++;
         }
 
         public Progress NewProgress(string name)
         {
-            var result = new Progress {Name = name};
+            var result = new Progress { Name = name };
+            if (!Environment.UserInteractive)
+            {
+                return result;
+            }
             result.UpdateDownload = p =>
             {
                 lock (progressLock)
