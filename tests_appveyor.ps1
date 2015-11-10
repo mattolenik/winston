@@ -1,9 +1,9 @@
-param (
-	[string]$configuration = "Release"
-)
+$testAssembly="Winston.Test\bin\$configuration\Winston.Test.dll"
+# Set by AppVeyor
+$configuration=$env:CONFIGURATION
 
 function NSpec {
-    . "$(resolve-path .\packages\nspec.*\tools\NSpecRunner.exe)" --formatter=XmlFormatter Winston.Test\bin\$configuration\Winston.Test.dll > nspec_results.xml
+    . "$(resolve-path .\packages\nspec.*\tools\NSpecRunner.exe)" --formatter=XmlFormatter $testAssembly > nspec_results.xml
     [xml]$res = Get-Content .\nspec_results.xml
     foreach($c in $res.Contexts.Context) {
         $spec = $c.Context.Specs.Spec
@@ -16,11 +16,15 @@ function NSpec {
 }
 
 function MSTest {
-    mstest /testcontainer:"$(Resolve-Path **\bin\$configuration\Winston.Test.dll)" /resultsfile:TestResults\ci.trx
-    [xml]$trx = Get-Content TestResults\ci.trx
+    $trxPath = "TestResults\ci.trx"
+    If (Test-Path $trxPath) {
+        Remove-Item -Force $trxPath
+    }
+    mstest /testcontainer:"$testAssembly" /resultsfile:"$trxPath"
+    [xml]$trx = Get-Content "$trxPath"
     $results = $trx.TestRun.Results.UnitTestResult | select testName,outcome,duration
     foreach($r in $results) {
-        Add-AppveyorTest -Name "$r.testName" -Outcome $r.outcome -Duration $r.duration
+        Add-AppveyorTest -Name "$r.testName" -Outcome "$r.outcome" -Duration "$r.duration"
     }
 }
 
