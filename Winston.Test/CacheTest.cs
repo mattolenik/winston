@@ -50,20 +50,20 @@ namespace Winston.Test
                 pkg?.Name.should_be("Pkg 1");
             };
 
-            it["can find by names"] = async () =>
+            itAsync["can find by names"] = async () =>
             {
                 var pkgs = await cache.ByNames(new[] { "Pkg 1", "Pkg 2" });
                 pkgs.Where(p => p.Name == "Pkg 1").should_not_be_empty();
                 pkgs.Where(p => p.Name == "Pkg 2").should_not_be_empty();
             };
 
-            it["can find by title search"] = async () =>
+            itAsync["can find by title search"] = async () =>
             {
                 var pkgs = await cache.Search("Pkg");
                 pkgs.Count().should_be(repo.Packages.Count);
             };
 
-            it["can find by desc search"] = async () =>
+            itAsync["can find by desc search"] = async () =>
             {
                 var pkgs = await cache.Search("even");
                 pkgs.Count().should_be(2);
@@ -71,13 +71,13 @@ namespace Winston.Test
                 pkgs.should_contain(p => p.Name == "Pkg 4");
             };
 
-            it["can get all"] = async () =>
+            itAsync["can get all"] = async () =>
             {
                 var pkgs = await cache.All();
                 pkgs.Count().should_be(repo.Packages.Count);
             };
 
-            it["can be refreshed"] = async () =>
+            itAsync["can be refreshed"] = async () =>
             {
                 var result = cache.DB.Query("delete from Packages");
                 var pkgs = await cache.All();
