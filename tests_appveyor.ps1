@@ -16,16 +16,7 @@ function RunNSpec {
 }
 
 function RunMSTest {
-    $trxPath = "TestResults\ci.trx"
-    If (Test-Path $trxPath) {
-        Remove-Item -Force $trxPath
-    }
-    mstest /testcontainer:"$testAssembly" /resultsfile:"$trxPath"
-    [xml]$trx = Get-Content "$trxPath"
-    $results = $trx.TestRun.Results.UnitTestResult | select testName,outcome,duration
-    foreach($r in $results) {
-        Add-AppveyorTest -Name "$r.testName" -Outcome "$r.outcome" -Duration "$r.duration"
-    }
+    vstest.console /logger:Appveyor $testAssembly
 }
 
 RunNSpec
