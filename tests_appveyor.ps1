@@ -1,6 +1,7 @@
+param (
+	[string]$configuration = "Release"
+)
 $testAssembly="Winston.Test\bin\$configuration\Winston.Test.dll"
-# Set by AppVeyor
-$configuration=$env:CONFIGURATION
 
 function RunNSpec {
     . "$(resolve-path .\packages\nspec.*\tools\NSpecRunner.exe)" --formatter=XmlFormatter $testAssembly > nspec_results.xml
