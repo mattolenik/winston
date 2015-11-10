@@ -2,7 +2,7 @@ $testAssembly="Winston.Test\bin\$configuration\Winston.Test.dll"
 # Set by AppVeyor
 $configuration=$env:CONFIGURATION
 
-function NSpec {
+function RunNSpec {
     . "$(resolve-path .\packages\nspec.*\tools\NSpecRunner.exe)" --formatter=XmlFormatter $testAssembly > nspec_results.xml
     [xml]$res = Get-Content .\nspec_results.xml
     foreach($c in $res.Contexts.Context) {
@@ -15,7 +15,7 @@ function NSpec {
     }
 }
 
-function MSTest {
+function RunMSTest {
     $trxPath = "TestResults\ci.trx"
     If (Test-Path $trxPath) {
         Remove-Item -Force $trxPath
@@ -28,5 +28,5 @@ function MSTest {
     }
 }
 
-NSpec
-MSTest
+RunNSpec
+RunMSTest
