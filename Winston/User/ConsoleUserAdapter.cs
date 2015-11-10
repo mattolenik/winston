@@ -19,7 +19,10 @@ namespace Winston.User
         {
             this.output = output;
             this.input = input;
-            this.startRow = Console.CursorTop;
+            if (Environment.UserInteractive)
+            {
+                this.startRow = Console.CursorTop;
+            }
         }
 
         public async Task<string> Ask(Question question) => await Task.Run(() =>
