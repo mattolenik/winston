@@ -27,13 +27,11 @@ public class DebuggerShim
     [TestMethod]
     public void NSpec_Tests()
     {
-        var tagOrClassName = "class_or_tag_you_want_to_debug";
-
         var types = GetType().Assembly.GetTypes(); 
         // OR
         // var types = new Type[]{typeof(Some_Type_Containg_some_Specs)};
-        var finder = new SpecFinder(types, "");
-        var builder = new ContextBuilder(finder, new Tags().Parse(tagOrClassName), new DefaultConventions());
+        var finder = new SpecFinder(types);
+        var builder = new ContextBuilder(finder, new DefaultConventions());
         var runner = new ContextRunner(builder, new ConsoleFormatter(), false);
         var results = runner.Run(builder.Contexts().Build());
 
