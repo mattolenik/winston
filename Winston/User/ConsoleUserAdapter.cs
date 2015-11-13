@@ -19,10 +19,11 @@ namespace Winston.User
         {
             this.output = output;
             this.input = input;
-            if (Environment.UserInteractive)
+            try
             {
                 this.startRow = Console.CursorTop;
             }
+            catch (IOException) { }
         }
 
         public async Task<string> Ask(Question question) => await Task.Run(() =>
@@ -46,10 +47,11 @@ namespace Winston.User
 
         public void Message(string message)
         {
-            if (Environment.UserInteractive)
+            try
             {
                 ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
             }
+            catch (IOException) { }
             output.WriteLine(message);
             lastPrintRow++;
         }
@@ -57,17 +59,17 @@ namespace Winston.User
         public Progress NewProgress(string name)
         {
             var result = new Progress { Name = name };
-            if (!Environment.UserInteractive)
-            {
-                return result;
-            }
             result.UpdateDownload = p =>
             {
                 lock (progressLock)
                 {
                     if (p != result.Last)
                     {
-                        ConsoleEx.WriteAt(result.ProgressPrefix.Length, result.Row, p.ToString());
+                        try
+                        {
+                            ConsoleEx.WriteAt(result.ProgressPrefix.Length, result.Row, p.ToString());
+                        }
+                        catch (IOException) { }
                         result.Last = p;
                     }
                 }
@@ -76,14 +78,22 @@ namespace Winston.User
             {
                 lock (progressLock)
                 {
-                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
+                    try
+                    {
+                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
+                    }
+                    catch (IOException) { }
                 }
             };
             result.UpdateInstall = p =>
             {
                 lock (progressLock)
                 {
-                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, p.ToString());
+                    try
+                    {
+                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, p.ToString());
+                    }
+                    catch (IOException) { }
                     result.Last = p;
                 }
             };
@@ -91,7 +101,11 @@ namespace Winston.User
             {
                 lock (progressLock)
                 {
-                    ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
+                    try
+                    {
+                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
+                    }
+                    catch (IOException) { }
                 }
             };
             result.Row = startRow + lastProgressRow;
