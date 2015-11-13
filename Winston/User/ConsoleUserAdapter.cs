@@ -23,7 +23,7 @@ namespace Winston.User
             {
                 this.startRow = Console.CursorTop;
             }
-            catch (IOException) { }
+            catch (Exception) { }
         }
 
         public async Task<string> Ask(Question question) => await Task.Run(() =>
@@ -51,7 +51,7 @@ namespace Winston.User
             {
                 ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
             }
-            catch (IOException) { }
+            catch (Exception) { }
             output.WriteLine(message);
             lastPrintRow++;
         }
@@ -69,7 +69,7 @@ namespace Winston.User
                         {
                             ConsoleEx.WriteAt(result.ProgressPrefix.Length, result.Row, p.ToString());
                         }
-                        catch (IOException) { }
+                        catch (Exception) { }
                         result.Last = p;
                     }
                 }
@@ -82,7 +82,7 @@ namespace Winston.User
                     {
                         ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
                     }
-                    catch (IOException) { }
+                    catch (Exception) { }
                 }
             };
             result.UpdateInstall = p =>
@@ -93,7 +93,7 @@ namespace Winston.User
                     {
                         ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, p.ToString());
                     }
-                    catch (IOException) { }
+                    catch (Exception) { }
                     result.Last = p;
                 }
             };
@@ -105,7 +105,7 @@ namespace Winston.User
                     {
                         ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
                     }
-                    catch (IOException) { }
+                    catch (Exception) { }
                 }
             };
             result.Row = startRow + lastProgressRow;
