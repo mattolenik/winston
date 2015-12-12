@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Winston.OS;
 using Winston.Serialization;
 
@@ -49,7 +50,7 @@ namespace Winston.Installers
                 // Save package information to disk first. Other actions can use this
                 // to interact with a package without having to load whole repos into memory.
                 Directory.CreateDirectory(pkgDir);
-                Yml.Save(pkg, Path.Combine(pkgDir, "pkg.yml"));
+                File.WriteAllText(Path.Combine(pkgDir, "pkg.json"), JsonConvert.SerializeObject(pkg));
 
                 // TODO: replace hash with version resolution
                 var installDir = Path.Combine(pkgDir, version);

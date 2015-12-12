@@ -12,7 +12,7 @@ namespace Winston.Installers
 
         public static IPackageInstaller TryCreate(Package pkg, string pkgDir)
         {
-            // TODO: check for a pkg.yml to verify this directory is really a package?
+            // TODO: check for a pkg.json to verify this directory is really a package?
             return Directory.Exists(pkg.URL.LocalPath) ? new LocalDirectoryInstaller(pkg, pkgDir) : null;
         }
 

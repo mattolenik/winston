@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mergepathstrings", "mergepa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winston.Test", "Winston.Test\Winston.Test.csproj", "{4FAEFA93-AA58-4693-88B1-02177FF86B59}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winston.Test.Debug", "Winston.Test.Debug\Winston.Test.Debug.csproj", "{4E6452E3-2E62-4DB4-ACE2-DCA43E1708C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{4FAEFA93-AA58-4693-88B1-02177FF86B59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FAEFA93-AA58-4693-88B1-02177FF86B59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FAEFA93-AA58-4693-88B1-02177FF86B59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E6452E3-2E62-4DB4-ACE2-DCA43E1708C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E6452E3-2E62-4DB4-ACE2-DCA43E1708C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E6452E3-2E62-4DB4-ACE2-DCA43E1708C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E6452E3-2E62-4DB4-ACE2-DCA43E1708C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

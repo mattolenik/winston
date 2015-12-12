@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Winston.Cache;
+using Winston.Serialization;
 using Winston.User;
 
 namespace Winston
@@ -96,6 +97,35 @@ namespace Winston
             await cellar.Add(pkg);
 
             SetupPowerShell();
+        }
+
+        public static async Task Bootstrap(string installSource, string destination)
+        {
+            var installSourceFull = Path.GetFullPath(installSource);
+            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(installSourceFull, "winstonapp.exe"));
+            var pkg = new Package
+            {
+                Name = ver.ProductName,
+                Description = ver.Comments,
+                URL = new Uri(installSourceFull),
+                Type = PackageType.Shell,
+                Version = ver.FileVersion
+            };
+            // Save config to tell Winston to live in ${destination}, making it portable to that directory
+            var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), destination);
+            await cellar.Add(pkg);
+            var cfg = new Config { WinstonDir = "../../../" };
+            var cfgFile = Path.Combine(destination, "cellar", "winston", "latest", "config.yml");
+            Yml.Save(cfg, cfgFile);
+            var wrapper = 
+@"@echo off
+cd cellar\Winston\latest
+winstonapp %*
+IF %ERRORLEVEL% EQU 2 updatepath.cmd
+IF %ERRORLEVEL% EQU 3 updatepath.cmd
+IF %ERRORLEVEL% EQU 4 updatepath.cmd
+cd ..\..\..";
+            File.WriteAllText(Path.Combine(destination, "winston.cmd"), wrapper);
         }
 
         static void SetupPowerShell()

@@ -5,7 +5,7 @@ using Winston.OS;
 namespace Winston.Test
 {
     [TestClass]
-    public class JunctionPointTest
+    class JunctionPointTest
     {
         string tempFolder;
 

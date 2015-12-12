@@ -104,6 +104,7 @@
     <Compile Include="Serialization\YmlUriConverter.cs" />
     <Compile Include="OS\TempDirectory.cs" />
     <Compile Include="User\ConsoleUserAdapter.cs" />
+    <Compile Include="User\HeadlessUserAdapter.cs" />
     <Compile Include="User\IUserAdapter.cs" />
     <Compile Include="Progress.cs" />
     <Compile Include="User\Question.cs" />

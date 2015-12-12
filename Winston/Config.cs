@@ -26,7 +26,7 @@ namespace Winston
             WinstonDir = Path.Combine(Paths.AppData, @"winston\")
         };
 
-        readonly string path = Path.Combine(Paths.ExecutingDir, "config.yml");
+        readonly string path = Path.Combine(new Uri(Paths.ExecutingDir).LocalPath, "config.yml");
 
         public ConfigProvider()
         {

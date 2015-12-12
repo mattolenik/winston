@@ -18,6 +18,7 @@ namespace Winston
             int result = -1;
             Task.Run(async () =>
             {
+                System.Diagnostics.Debugger.Launch();
                 var cfg = new ConfigProvider();
                 result = await AsyncMain(args, cfg);
             }).Wait();
@@ -35,6 +36,13 @@ namespace Winston
             var verb = args.First().ToLowerInvariant();
             var verbArgs = args.Skip(1);
 
+            if (verb == "bootstrap")
+            {
+                var source = verbArgs.FirstOrDefault();
+                var dest = verbArgs.Skip(1).FirstOrDefault();
+                await Bootstrap(source, dest);
+                return 0;
+            }
             Directory.CreateDirectory(cfg.Config.WinstonDir);
 
             using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
@@ -100,6 +108,11 @@ namespace Winston
                         {
                             await cache.Refresh();
                             break;
+                        }
+                    case "restore":
+                        {
+                            await cellar.Restore();
+                            return ExitCodes.Restore;
                         }
                     case "help":
                         {

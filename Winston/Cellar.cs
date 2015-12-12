@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Winston.OS;
+using Winston.Serialization;
 using Winston.User;
 using YamlDotNet.Serialization;
 using Environment = Winston.OS.Environment;
@@ -88,7 +91,7 @@ namespace Winston
 
         public async Task<Package[]> List()
         {
-            var pkgFiles = Directory.GetFiles(CellarPath, "pkg.yml", SearchOption.AllDirectories);
+            var pkgFiles = Directory.GetFiles(CellarPath, "pkg.json", SearchOption.AllDirectories);
             var tasks = pkgFiles.Select(async p => await Task.Run(() =>
             {
                 var deserializer = new Deserializer();
@@ -100,5 +103,18 @@ namespace Winston
             var res = await Task.WhenAll(tasks);
             return res;
         }
+
+        public async Task Restore() => await Task.Run(() =>
+        {
+            var pkgs =
+                Directory.GetFiles(CellarPath, "pkg.json", SearchOption.AllDirectories)
+                    .Select(x => new
+                    {
+                        File = new FileInfo(x),
+                        Pkg = JsonConvert.DeserializeObject<Package>(File.ReadAllText(x))
+                    });
+            var list = pkgs.Select(pkg => Path.Combine(pkg.File.DirectoryName, pkg.Pkg.Path ?? ""));
+            // TODO: env variable injection
+        });
     }
 }

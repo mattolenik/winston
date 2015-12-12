@@ -22,7 +22,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
  */
 
 [TestClass]
-public class DebuggerShim
+ class DebuggerShim
 {
     [TestMethod]
     public void NSpec_Tests()

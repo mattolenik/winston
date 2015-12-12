@@ -2,7 +2,7 @@
 
 namespace Winston.Test
 {
-    static class Extensions
+    public static class Extensions
     {
         public static string ToJson(this object obj)
         {
