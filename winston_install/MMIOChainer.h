@@ -594,7 +594,7 @@ namespace ChainerSample
         // pdwBufferSize : Initially a pointer to the size of pBuffer.  Upon successful
         //                 call, the number of bytes copied to pBuffer.
         //------------------------------------------------------------------------------
-        DWORD Send(DWORD dwMessage, LPVOID pData, DWORD dwDataLength)
+        virtual DWORD Send(DWORD dwMessage, LPVOID pData, DWORD dwDataLength)
         {
             if (NULL == m_pData 
                 || !MMIO_SUFFICIENT_SIZE_FOR_FIELD(m_dwDataSize, m_messageCode)

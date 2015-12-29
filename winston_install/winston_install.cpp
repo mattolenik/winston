@@ -49,27 +49,34 @@ class Server : public ChainerSample::MmioChainer, public ChainerSample::IProgres
 public:
 	// Mmio chainer will create section with given name. You should make this and the event name unique.
 	// Event is also created by the Mmio chainer and name is saved in the mapped data structure.
-	Server() :ChainerSample::MmioChainer(L"winston-install-net46", L"winston-install-event") //customize for your event names
+	Server() :ChainerSample::MmioChainer(L"winston-install-net46", L"winston-install-event")
 	{}
 
-	bool Launch(const CString& args, const CString& exe, const std::wstring& workingDir, const std::wstring& elevateDll)
+	bool Launch(const std::wstring& args, const std::wstring& exe, const std::wstring& workingDir, const std::wstring& elevateDll)
 	{
-		CString cmdline = exe + L" /pipe winston-install-net46 " + args; // Customize with name and location of setup .exe that you want to run
+		std::wstring cmdline = exe + L" /pipe winston-install-net46 " + args;
+		auto cmdlineCStr = const_cast<LPWSTR>(cmdline.c_str());
 		STARTUPINFO si = { 0 };
 		si.cb = sizeof(si);
 		PROCESS_INFORMATION pi = { 0 };
 
 		// Launch the Setup.exe which installs the .NET 4.5 Framework
-		BOOL bLaunchedSetup = CreateProcess(NULL,
-			cmdline.GetBuffer(),
-			NULL, NULL, FALSE, 0, NULL, workingDir.c_str(),
+		BOOL bLaunchedSetup = CreateProcess(
+			nullptr,
+			cmdlineCStr,
+			nullptr,
+			nullptr,
+			FALSE,
+			0,
+			nullptr,
+			workingDir.c_str(),
 			&si,
 			&pi);
 		if (!bLaunchedSetup && GetLastError() == ERROR_ELEVATION_REQUIRED)
 		{
 			HMODULE libHandle = LoadLibrary(elevateDll.c_str());
-			auto createProcessElevated = (DLL_CreateProcessElevatedWType)GetProcAddress(libHandle, "CreateProcessElevatedW");
-			bLaunchedSetup = createProcessElevated(NULL, cmdline.GetBuffer(), NULL, NULL, FALSE, 0, NULL, workingDir.c_str(), &si, &pi);
+			auto createProcessElevated = reinterpret_cast<DLL_CreateProcessElevatedWType>(GetProcAddress(libHandle, "CreateProcessElevatedW"));
+			bLaunchedSetup = createProcessElevated(nullptr, cmdlineCStr, nullptr, nullptr, FALSE, 0, nullptr, workingDir.c_str(), &si, &pi);
 		}
 
 		// If successful 
@@ -81,7 +88,7 @@ public:
 			DWORD dwResult = GetResult();
 			if (E_PENDING == dwResult)
 			{
-				::GetExitCodeProcess(pi.hProcess, &dwResult);
+				GetExitCodeProcess(pi.hProcess, &dwResult);
 			}
 
 			printf("Result: %08X\n  ", dwResult);
@@ -93,8 +100,8 @@ public:
 			printf("Internal result: %08X\n", hrInternalResult);
 
 
-			::CloseHandle(pi.hThread);
-			::CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+			CloseHandle(pi.hProcess);
 		}
 		else
 		{
@@ -110,7 +117,7 @@ private: // IProgressObserver
 	int lastValue = -1;
 	int lastSpin = -1;
 
-	virtual void OnProgress(unsigned char ubProgressSoFar)
+	virtual void OnProgress(unsigned char ubProgressSoFar) override
 	{
 		if (lastValue == -1)
 		{
@@ -120,7 +127,7 @@ private: // IProgressObserver
 		{
 			std::wcout << L'\b';
 		}
-		auto value = (int)ceil(ubProgressSoFar / 255.0 * 100.0);
+		auto value = static_cast<int>(ceil(ubProgressSoFar / 255.0 * 100.0));
 		if (value != lastValue)
 		{
 			lastValue = value;
@@ -162,7 +169,7 @@ private: // IProgressObserver
 		// Testing END
 	}
 
-	virtual void Finished(HRESULT hr)
+	virtual void Finished(HRESULT hr) override
 	{
 		// This HRESULT is communicated over MMIO and may be different than process
 		// exit code of the Chainee Setup.exe itself.
@@ -177,7 +184,7 @@ private: // IProgressObserver
 		// dwDataLength : Initially a pointer to the size of pBuffer.  Upon successful
 		//                 call, the number of bytes copied to pBuffer.
 		//------------------------------------------------------------------------------
-	virtual DWORD Send(DWORD dwMessage, LPVOID pData, DWORD dwDataLength)
+	virtual DWORD Send(DWORD dwMessage, LPVOID pData, DWORD dwDataLength) override
 	{
 		DWORD dwResult = 0;
 		printf("recieved message: %d\n", dwMessage);
@@ -292,9 +299,9 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		downloadFile(L"https://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe", netFxInstall.c_str(), &status);
 		auto elevateDll = extractFile(prereqs, std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
 		auto elevateExe = extractFile(prereqs, std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
-		CString args = "/q /norestart /ChainingPackage Winston";
+		std::wstring args = L"/q /norestart /ChainingPackage Winston";
 		std::wcout << L"Installing .NET 4.6" << std::endl;
-		auto netfxResult = Server().Launch(args, CString(netFxInstall.c_str()), installSource, elevateDll);
+		auto netfxResult = Server().Launch(args, netFxInstall, installSource, elevateDll);
 		removeDirectory(prereqs);
 	}
 

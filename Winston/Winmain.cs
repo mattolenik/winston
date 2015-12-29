@@ -18,7 +18,7 @@ namespace Winston
             int result = -1;
             Task.Run(async () =>
             {
-                System.Diagnostics.Debugger.Launch();
+                //System.Diagnostics.Debugger.Launch();
                 var cfg = new ConfigProvider();
                 result = await AsyncMain(args, cfg);
             }).Wait();
