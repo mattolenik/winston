@@ -9,9 +9,9 @@
 #include "IProgressObserver.h"
 #include "export_types.h"
 #include "winston_tar.bin.h"
-#include "netfx_setup.bin.h"
 #include "elevate.bin.h"
 #include "detectfx.h"
+#include "DownloadStatus.h"
 
 /*
 The classes:
@@ -196,21 +196,21 @@ private: // IProgressObserver
 
 private:
 	// Utility function to get text version of last error
-	void ReportLastError(void)
+	static void ReportLastError(void)
 	{
 		DWORD dwLastError = 0;
-		LPWSTR lpstrMsgBuf = NULL;
+		LPWSTR lpstrMsgBuf = nullptr;
 		DWORD dwMessageLength = 0;
 
 		dwLastError = GetLastError();
 		dwMessageLength = FormatMessageW(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-			NULL,
+			nullptr,
 			dwLastError,
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR)&lpstrMsgBuf,
+			lpstrMsgBuf,
 			0,
-			NULL);
+			nullptr);
 
 		if (dwMessageLength)
 		{
@@ -241,6 +241,11 @@ std::wstring extractFile(std::wstring directory, std::wstring filename, unsigned
 	return fn;
 }
 
+void downloadFile(LPCWSTR url, LPCWSTR filename, DownloadStatus* status)
+{
+	URLDownloadToFile(nullptr, url, filename, 0, status);
+}
+
 int removeDirectory(std::wstring dir)
 {
 	std::vector<wchar_t> buf(dir.begin(), dir.end());
@@ -249,7 +254,7 @@ int removeDirectory(std::wstring dir)
 	buf.push_back(0);
 
 	SHFILEOPSTRUCT file_op = {
-		NULL,
+		nullptr,
 		FO_DELETE,
 		buf.data(),
 		L"",
@@ -266,7 +271,7 @@ int removeDirectory(std::wstring dir)
 // Main entry point for program
 int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 {
-	srand((unsigned int)time(NULL));
+	srand(static_cast<unsigned int>(time(nullptr)));
 	wchar_t tmp[512];
 	GetTempPath(512, tmp);
 	std::wstring tmpDir(tmp);
@@ -274,13 +279,17 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	auto uniq = std::to_wstring(rand() % 999999999 + 1000000000);
 	auto installSource = tmpDir + std::wstring(L"\\winston_install_") + uniq;
 
-	CreateDirectory(installSource.c_str(), NULL);
+
+	CreateDirectory(installSource.c_str(), nullptr);
 
 	if (!IsNetfx46Installed())
 	{
 		auto prereqs = tmpDir + std::wstring(L"\\winston_prereqs_") + uniq;
-		CreateDirectory(prereqs.c_str(), NULL);
-		auto netFxInstall = extractFile(prereqs, std::wstring(L"NDP46-KB3045560-Web.exe"), netfx_setup, netfx_setup_length);
+		CreateDirectory(prereqs.c_str(), nullptr);
+		//auto netFxInstall = extractFile(prereqs, std::wstring(L"NDP46-KB3045560-Web.exe"), netfx_setup, netfx_setup_length);
+		auto netFxInstall = installSource + std::wstring(L"NDP46-KB3045560-Web.exe");
+		DownloadStatus status;
+		downloadFile(L"https://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe", netFxInstall.c_str(), &status);
 		auto elevateDll = extractFile(prereqs, std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
 		auto elevateExe = extractFile(prereqs, std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
 		CString args = "/q /norestart /ChainingPackage Winston";
@@ -324,7 +333,7 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 			break;
 		case '5':
 			// directory
-			CreateDirectory(path.c_str(), NULL);
+			CreateDirectory(path.c_str(), nullptr);
 			break;
 		}
 		if (size > 0)
@@ -343,9 +352,14 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	std::vector<wchar_t> buf(fullCmd.begin(), fullCmd.end());
 	buf.push_back(0);
 
-	BOOL installSuccess = ::CreateProcess(NULL,
+	BOOL installSuccess = ::CreateProcess(
+		nullptr,
 		buf.data(),
-		NULL, NULL, FALSE, 0, NULL,
+		nullptr,
+		nullptr,
+		FALSE,
+		0,
+		nullptr,
 		installSource.c_str(),
 		&si,
 		&pi);

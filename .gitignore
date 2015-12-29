@@ -209,3 +209,6 @@ FakesAssemblies/
 # xd binary source files
 *.bin.cpp
 *.bin.h
+
+# SQLite browser files
+*.opendb
