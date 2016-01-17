@@ -1,4 +1,4 @@
-// From: http://blogs.msdn.com/b/astebner/archive/2009/06/16/9763379.aspx
+// .NET portion from: http://blogs.msdn.com/b/astebner/archive/2009/06/16/9763379.aspx
 #include <stdio.h>
 #include <windows.h>
 #include <tchar.h>
@@ -37,6 +37,9 @@ const TCHAR *g_szNetfx45RegValueName = _T("Release");
 const TCHAR *g_szNetfxStandardRegValueName = _T("Install");
 const TCHAR *g_szNetfxStandardSPxRegValueName = _T("SP");
 const TCHAR *g_szNetfxStandardVersionRegValueName = _T("Version");
+const TCHAR *g_szVCRedistX86RegKeyName = L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{65AD78AD-D23D-3A1E-9305-3AE65CD522C2}";
+const TCHAR *g_szVCRedistX64RegKeyName = L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{A1C31BA5-5438-3A07-9EEE-A5FB2D0FDE36}";
+const TCHAR *g_szVCRedistRegValueName = L"Version";
 
 // Version information for final release of .NET Framework 3.0
 const int g_iNetfx30VersionMajor = 3;
@@ -69,6 +72,8 @@ const int g_dwNetfx452ReleaseVersion = 379893;
 
 // Version information for final release of .NET Framework 4.6
 const int g_dwNetfx46ReleaseVersion = 393295;
+
+const int g_dwVCRedistVersion = 234904530;
 
 // Constants for known .NET Framework versions used with the GetRequestedRuntimeInfo API
 const TCHAR *g_szNetfx10VersionString = _T("v1.0.3705");
@@ -747,251 +752,26 @@ bool RegistryGetValue(HKEY hk, const TCHAR * pszKey, const TCHAR * pszValue, DWO
 	return true;
 }
 
-
-int APIENTRY _tWinMain(HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPTSTR    lpCmdLine,
-	int       nCmdShow)
+bool IsVCRedist2015x86Installed()
 {
-	int iNetfx10SPLevel = -1;
-	int iNetfx11SPLevel = -1;
-	int iNetfx20SPLevel = -1;
-	int iNetfx30SPLevel = -1;
-	int iNetfx35SPLevel = -1;
-	int iNetfx40ClientSPLevel = -1;
-	int iNetfx40FullSPLevel = -1;
-	int iNetfx45SPLevel = -1;
-	int iNetfx451SPLevel = -1;
-	int iNetfx452SPLevel = -1;
-	int iNetfx46SPLevel = -1;
-	TCHAR szMessage[MAX_PATH];
-	TCHAR szOutputString[MAX_PATH * 20];
+	DWORD dwRegValue = 0;
 
-	// Determine whether or not the .NET Framework
-	// 1.0, 1.1, 2.0, 3.0, 3.5, 4, 4.5, 4.5.1, 4.5.2, or 4.6 are installed
-	bool bNetfx10Installed = (IsNetfx10Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx10VersionString));
-	bool bNetfx11Installed = (IsNetfx11Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx11VersionString));
-	bool bNetfx20Installed = (IsNetfx20Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx20VersionString));
-
-	// The .NET Framework 3.0 is an add-in that installs
-	// on top of the .NET Framework 2.0.  For this version
-	// check, validate that both 2.0 and 3.0 are installed.
-	bool bNetfx30Installed = (IsNetfx20Installed() && IsNetfx30Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx20VersionString));
-
-	// The .NET Framework 3.5 is an add-in that installs
-	// on top of the .NET Framework 2.0 and 3.0.  For this version
-	// check, validate that 2.0, 3.0 and 3.5 are installed.
-	bool bNetfx35Installed = (IsNetfx20Installed() && IsNetfx30Installed() && IsNetfx35Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx20VersionString));
-
-	bool bNetfx40ClientInstalled = (IsNetfx40ClientInstalled() && CheckNetfxVersionUsingMscoree(g_szNetfx40VersionString));
-	bool bNetfx40FullInstalled = (IsNetfx40FullInstalled() && CheckNetfxVersionUsingMscoree(g_szNetfx40VersionString));
-
-	// The .NET Framework 4.5, 4.5.1, 4.5.2, and 4.6 are in-place replacements for the .NET Framework 4.
-	// They use the same runtime version as the .NET Framework 4.
-	bool bNetfx45Installed = (IsNetfx45Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx40VersionString));
-	bool bNetfx451Installed = (IsNetfx451Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx40VersionString));
-	bool bNetfx452Installed = (IsNetfx452Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx40VersionString));
-	bool bNetfx46Installed = (IsNetfx46Installed() && CheckNetfxVersionUsingMscoree(g_szNetfx40VersionString));
-
-	// If .NET Framework 1.0 is installed, get the
-	// service pack level
-	if (bNetfx10Installed)
+	if (RegistryGetValue(HKEY_LOCAL_MACHINE, g_szVCRedistX86RegKeyName, g_szVCRedistRegValueName, NULL, (LPBYTE)&dwRegValue, sizeof(DWORD)))
 	{
-		iNetfx10SPLevel = GetNetfx10SPLevel();
-
-		if (iNetfx10SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T(".NET Framework 1.0 service pack %i is installed."), iNetfx10SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T(".NET Framework 1.0 is installed with no service packs."));
-
-		_tcscpy_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscpy_s(szOutputString, _T(".NET Framework 1.0 is not installed."));
+		return dwRegValue == g_dwVCRedistVersion;
 	}
 
-	// If .NET Framework 1.1 is installed, get the
-	// service pack level
-	if (bNetfx11Installed)
-	{
-		iNetfx11SPLevel = GetNetfxSPLevel(g_szNetfx11RegKeyName, g_szNetfxStandardSPxRegValueName);
+	return false;
+}
 
-		if (iNetfx11SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 1.1 service pack %i is installed."), iNetfx11SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 1.1 is installed with no service packs."));
+bool IsVCRedist2015x64Installed()
+{
+	DWORD dwRegValue = 0;
 
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
+	if (RegistryGetValue(HKEY_LOCAL_MACHINE, g_szVCRedistX64RegKeyName, g_szVCRedistRegValueName, NULL, (LPBYTE)&dwRegValue, sizeof(DWORD)))
 	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 1.1 is not installed."));
+		return dwRegValue == g_dwVCRedistVersion;
 	}
 
-	// If .NET Framework 2.0 is installed, get the
-	// service pack level
-	if (bNetfx20Installed)
-	{
-		iNetfx20SPLevel = GetNetfxSPLevel(g_szNetfx20RegKeyName, g_szNetfxStandardSPxRegValueName);
-
-		if (iNetfx20SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 2.0 service pack %i is installed."), iNetfx20SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 2.0 is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 2.0 is not installed."));
-	}
-
-	// If .NET Framework 3.0 is installed, get the
-	// service pack level
-	if (bNetfx30Installed)
-	{
-		iNetfx30SPLevel = GetNetfxSPLevel(g_szNetfx30SpRegKeyName, g_szNetfxStandardSPxRegValueName);
-
-		if (iNetfx30SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 3.0 service pack %i is installed."), iNetfx30SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 3.0 is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 3.0 is not installed."));
-	}
-
-	// If .NET Framework 3.5 is installed, get the
-	// service pack level
-	if (bNetfx35Installed)
-	{
-		iNetfx35SPLevel = GetNetfxSPLevel(g_szNetfx35RegKeyName, g_szNetfxStandardSPxRegValueName);
-
-		if (iNetfx35SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 3.5 service pack %i is installed."), iNetfx35SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 3.5 is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 3.5 is not installed."));
-	}
-
-	// If .NET Framework 4 Client is installed, get the
-	// service pack level
-	if (bNetfx40ClientInstalled)
-	{
-		iNetfx40ClientSPLevel = GetNetfxSPLevel(g_szNetfx40ClientRegKeyName, g_szNetfx40SPxRegValueName);
-
-		if (iNetfx40ClientSPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4 client service pack %i is installed."), iNetfx40ClientSPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4 client is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 4 client is not installed."));
-	}
-
-	// If .NET Framework 4 Full is installed, get the
-	// service pack level
-	if (bNetfx40FullInstalled)
-	{
-		iNetfx40FullSPLevel = GetNetfxSPLevel(g_szNetfx40FullRegKeyName, g_szNetfx40SPxRegValueName);
-
-		if (iNetfx40FullSPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4 full service pack %i is installed."), iNetfx40FullSPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4 full is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 4 full is not installed."));
-	}
-
-	// If .NET Framework 4.5 is installed, get the
-	// service pack level
-	if (bNetfx45Installed)
-	{
-		iNetfx45SPLevel = GetNetfxSPLevel(g_szNetfx45RegKeyName, g_szNetfx40SPxRegValueName);
-
-		if (iNetfx45SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.5 service pack %i is installed."), iNetfx45SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.5 is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 4.5 is not installed."));
-	}
-
-	// If .NET Framework 4.5.1 is installed, get the
-	// service pack level
-	if (bNetfx451Installed)
-	{
-		iNetfx451SPLevel = GetNetfxSPLevel(g_szNetfx45RegKeyName, g_szNetfx40SPxRegValueName);
-
-		if (iNetfx451SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.5.1 service pack %i is installed."), iNetfx451SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.5.1 is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 4.5.1 is not installed."));
-	}
-
-	// If .NET Framework 4.5.2 is installed, get the
-	// service pack level
-	if (bNetfx452Installed)
-	{
-		iNetfx452SPLevel = GetNetfxSPLevel(g_szNetfx45RegKeyName, g_szNetfx40SPxRegValueName);
-
-		if (iNetfx452SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.5.2 service pack %i is installed."), iNetfx452SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.5.2 is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 4.5.2 is not installed."));
-	}
-
-	// If .NET Framework 4.6 is installed, get the
-	// service pack level
-	if (bNetfx46Installed)
-	{
-		iNetfx46SPLevel = GetNetfxSPLevel(g_szNetfx45RegKeyName, g_szNetfx40SPxRegValueName);
-
-		if (iNetfx46SPLevel > 0)
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.6 service pack %i is installed."), iNetfx46SPLevel);
-		else
-			_stprintf_s(szMessage, MAX_PATH, _T("\n\n.NET Framework 4.6 is installed with no service packs."));
-
-		_tcscat_s(szOutputString, szMessage);
-	}
-	else
-	{
-		_tcscat_s(szOutputString, _T("\n\n.NET Framework 4.6 is not installed."));
-	}
-
-	MessageBox(NULL, szOutputString, _T(".NET Framework Install Info"), MB_OK | MB_ICONINFORMATION);
-
-	return 0;
+	return false;
 }

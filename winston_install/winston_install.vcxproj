@@ -99,7 +99,7 @@
     </ManifestResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="detectfx.h" />
+    <ClInclude Include="Prereqs.h" />
     <ClInclude Include="DownloadStatus.h" />
     <ClInclude Include="export_types.h" />
     <ClInclude Include="IProgressObserver.h" />
@@ -107,6 +107,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TempDirectory.h" />
     <ClInclude Include="winston_tar.bin.h" />
     <ClInclude Include="elevate.bin.h" />
   </ItemGroup>
@@ -116,7 +117,7 @@
     <None Include="elevate.h.tpl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="detectfx.cpp" />
+    <ClCompile Include="Prereqs.cpp" />
     <ClCompile Include="winston_install.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -138,7 +139,7 @@
   <!-- Embedded files -->
   <PropertyGroup>
     <WinstonTar>$(SolutionDir)winston\bin\dist\winston.tar</WinstonTar>
-    <APPVEYOR_BUILD_VERSION Condition="'$(APPVEYOR_BUILD_VERSION)' == ''">0.0.1.0</APPVEYOR_BUILD_VERSION>
+    <APPVEYOR_BUILD_VERSION Condition="'$(APPVEYOR_BUILD_VERSION)' == ''">9.9.9.9</APPVEYOR_BUILD_VERSION>
     <BuildVer>$(APPVEYOR_BUILD_VERSION)</BuildVer>
   </PropertyGroup>
   <!-- Embedding Winston -->

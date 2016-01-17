@@ -1,17 +1,12 @@
 #include "stdafx.h"
-//------------------------------------------------------------------------------
-// This file contains simple implementation showing how a chainer can launch
-// the .NET 4.5 Setup.exe with /pipe command line and uses the MmioChainer class
-// to listen for progress.
-//------------------------------------------------------------------------------
-
 #include "MmioChainer.h"
 #include "IProgressObserver.h"
 #include "export_types.h"
 #include "winston_tar.bin.h"
 #include "elevate.bin.h"
-#include "detectfx.h"
+#include "Prereqs.h"
 #include "DownloadStatus.h"
+#include "TempDirectory.h"
 
 /*
 The classes:
@@ -43,6 +38,73 @@ MmioChainerBase
 					class methods.
 */
 
+BOOL CreateProcessElevatedIfNeeded(
+	LPCTSTR               lpApplicationName,
+	LPTSTR                lpCommandLine,
+	LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	BOOL                  bInheritHandles,
+	DWORD                 dwCreationFlags,
+	LPVOID                lpEnvironment,
+	LPCTSTR               lpCurrentDirectory,
+	LPSTARTUPINFO         lpStartupInfo,
+	LPPROCESS_INFORMATION lpProcessInformation,
+	LPCWSTR elevateDll)
+{
+	BOOL result = CreateProcess(
+		lpApplicationName,
+		lpCommandLine,
+		lpProcessAttributes,
+		lpThreadAttributes,
+		bInheritHandles,
+		dwCreationFlags,
+		lpEnvironment,
+		lpCurrentDirectory,
+		lpStartupInfo,
+		lpProcessInformation);
+	if (!result && GetLastError() == ERROR_ELEVATION_REQUIRED)
+	{
+		HMODULE libHandle = LoadLibrary(elevateDll);
+		auto createProcessElevated = reinterpret_cast<DLL_CreateProcessElevatedWType>(GetProcAddress(libHandle, "CreateProcessElevatedW"));
+		result = createProcessElevated(
+			lpApplicationName,
+			lpCommandLine,
+			lpProcessAttributes,
+			lpThreadAttributes,
+			bInheritHandles,
+			dwCreationFlags,
+			lpEnvironment,
+			lpCurrentDirectory,
+			lpStartupInfo,
+			lpProcessInformation);
+	}
+	return result;
+}
+
+BOOL CreateProcessElevatedIfNeeded(
+	LPTSTR lpCommandLine,
+	LPCTSTR lpCurrentDirectory,
+	LPSTARTUPINFO& lpStartupInfo, // out
+	LPPROCESS_INFORMATION& lpProcessInformation, // out
+	LPCWSTR elevateDll)
+{
+	lpStartupInfo = new STARTUPINFO();
+	lpStartupInfo->cb = sizeof(STARTUPINFO);
+	lpProcessInformation = new PROCESS_INFORMATION();
+	return CreateProcessElevatedIfNeeded(
+		nullptr,
+		lpCommandLine,
+		nullptr,
+		nullptr,
+		FALSE,
+		0,
+		nullptr,
+		lpCurrentDirectory,
+		lpStartupInfo,
+		lpProcessInformation,
+		elevateDll);
+}
+
 // From https://msdn.microsoft.com/en-us/library/ff859983.aspx
 class Server : public ChainerSample::MmioChainer, public ChainerSample::IProgressObserver
 {
@@ -55,40 +117,25 @@ public:
 	bool Launch(const std::wstring& args, const std::wstring& exe, const std::wstring& workingDir, const std::wstring& elevateDll)
 	{
 		std::wstring cmdline = exe + L" /pipe winston-install-net46 " + args;
-		auto cmdlineCStr = const_cast<LPWSTR>(cmdline.c_str());
-		STARTUPINFO si = { 0 };
-		si.cb = sizeof(si);
-		PROCESS_INFORMATION pi = { 0 };
-
-		// Launch the Setup.exe which installs the .NET 4.5 Framework
-		BOOL bLaunchedSetup = CreateProcess(
-			nullptr,
-			cmdlineCStr,
-			nullptr,
-			nullptr,
-			FALSE,
-			0,
-			nullptr,
+		LPSTARTUPINFO si;
+		LPPROCESS_INFORMATION pi;
+		BOOL setupSuccess = CreateProcessElevatedIfNeeded(
+			const_cast<LPWSTR>(cmdline.c_str()),
 			workingDir.c_str(),
-			&si,
-			&pi);
-		if (!bLaunchedSetup && GetLastError() == ERROR_ELEVATION_REQUIRED)
-		{
-			HMODULE libHandle = LoadLibrary(elevateDll.c_str());
-			auto createProcessElevated = reinterpret_cast<DLL_CreateProcessElevatedWType>(GetProcAddress(libHandle, "CreateProcessElevatedW"));
-			bLaunchedSetup = createProcessElevated(nullptr, cmdlineCStr, nullptr, nullptr, FALSE, 0, nullptr, workingDir.c_str(), &si, &pi);
-		}
+			si,
+			pi,
+			elevateDll.c_str());
 
 		// If successful 
-		if (bLaunchedSetup != 0)
+		if (setupSuccess)
 		{
 			IProgressObserver& observer = dynamic_cast<IProgressObserver&>(*this);
-			Run(pi.hProcess, observer);
+			Run(pi->hProcess, observer);
 
 			DWORD dwResult = GetResult();
 			if (E_PENDING == dwResult)
 			{
-				GetExitCodeProcess(pi.hProcess, &dwResult);
+				GetExitCodeProcess(pi->hProcess, &dwResult);
 			}
 
 			printf("Result: %08X\n  ", dwResult);
@@ -99,9 +146,8 @@ public:
 			HRESULT hrInternalResult = GetInternalResult();
 			printf("Internal result: %08X\n", hrInternalResult);
 
-
-			CloseHandle(pi.hThread);
-			CloseHandle(pi.hProcess);
+			CloseHandle(pi->hThread);
+			CloseHandle(pi->hProcess);
 		}
 		else
 		{
@@ -109,7 +155,7 @@ public:
 			ReportLastError();
 		}
 
-		return (bLaunchedSetup != 0);
+		return setupSuccess;
 	}
 
 private: // IProgressObserver
@@ -173,7 +219,7 @@ private: // IProgressObserver
 	{
 		// This HRESULT is communicated over MMIO and may be different than process
 		// exit code of the Chainee Setup.exe itself.
-		printf("\r\nFinished HRESULT: 0x%08X\r\n", hr);
+		//printf("\r\nFinished HRESULT: 0x%08X\r\n", hr);
 	}
 	//------------------------------------------------------------------------------
 		// SendMessage
@@ -240,7 +286,13 @@ int octal_string_to_int(const char *current_char, unsigned int size)
 	return output;
 }
 
-std::wstring extractFile(std::wstring directory, std::wstring filename, unsigned char* file, size_t length)
+inline std::wstring uniqifier()
+{
+	auto uniq = std::to_wstring(rand() % 999999999 + 1000000000);
+	return uniq;
+}
+
+std::wstring extractFile(const std::wstring& directory, const std::wstring& filename, unsigned char* file, size_t length)
 {
 	auto fn = directory + std::wstring(L"\\") + filename;
 	std::fstream f(fn, std::fstream::out | std::fstream::binary);
@@ -253,26 +305,55 @@ void downloadFile(LPCWSTR url, LPCWSTR filename, DownloadStatus* status)
 	URLDownloadToFile(nullptr, url, filename, 0, status);
 }
 
-int removeDirectory(std::wstring dir)
+bool NetFxBootstrap(const TempDirectory& prereqs, const std::wstring& elevateDll)
 {
-	std::vector<wchar_t> buf(dir.begin(), dir.end());
-	// Double-null termination is expected by this API
-	buf.push_back(0);
-	buf.push_back(0);
+	if (IsNetfx46Installed())
+	{
+		std::wcout << L"netfx true" << std::endl;
+		return true;
+	}
+	std::wcout << L"netfx false" << std::endl;
+	auto netFxInstall = prereqs.Path() + std::wstring(L"\\NDP46-KB3045560-Web.exe");
+	std::wcout << L"Downloading .NET 4.6" << std::endl;
+	DownloadStatus status;
+	//downloadFile(L"https://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe", netFxInstall.c_str(), &status);
+	downloadFile(L"https://download.microsoft.com/download/3/5/9/35980F81-60F4-4DE3-88FC-8F962B97253B/NDP461-KB3102438-Web.exe", netFxInstall.c_str(), &status);
+	std::wcout << std::endl;
+	std::wstring args = L"/q /norestart /ChainingPackage Winston";
+	std::wcout << L"Installing .NET 4.6" << std::endl;
+	auto result = Server().Launch(args, netFxInstall, prereqs.Path(), elevateDll);
+	std::wcout << L"result " << result << std::endl;
+	return result;
+}
 
-	SHFILEOPSTRUCT file_op = {
-		nullptr,
-		FO_DELETE,
-		buf.data(),
-		L"",
-		FOF_NOCONFIRMATION |
-		FOF_NOERRORUI |
-		FOF_SILENT,
-		false,
-		0,
-		L"" };
-	int ret = SHFileOperation(&file_op);
-	return ret; // returns 0 on success, non zero on failure.
+DWORD VCRedistx86Bootstrap(const TempDirectory& prereqs, const std::wstring& elevateDll)
+{
+	if(IsVCRedist2015x86Installed())
+	{
+		return 0;
+	}
+	auto vcredistX86 = prereqs.Path() + std::wstring(L"\\vc_redist.x86.exe");
+	std::wcout << L"Downloading Visual C++ 2015 redistributable (x86)" << std::endl;
+	DownloadStatus status;
+	downloadFile(L"https://download.microsoft.com/download/C/E/5/CE514EAE-78A8-4381-86E8-29108D78DBD4/VC_redist.x86.exe", vcredistX86.c_str(), &status);
+	std::wcout << std::endl;
+	std::wstring cmdline = vcredistX86 + L" /install /quiet /norestart";
+	std::wcout << L"Installing Visual C++ 2015 redistributable (x86)" << std::endl;
+	LPSTARTUPINFO si;
+	LPPROCESS_INFORMATION pi;
+	BOOL success = CreateProcessElevatedIfNeeded(const_cast<LPWSTR>(cmdline.c_str()), prereqs.PathCStr(), si, pi, elevateDll.c_str());
+	if(!success)
+	{
+		return GetLastError();
+	}
+
+	WaitForSingleObject(pi->hProcess, INFINITE);
+	DWORD result;
+	GetExitCodeProcess(pi->hProcess, &result);
+	CloseHandle(pi->hThread);
+	CloseHandle(pi->hProcess);
+	std::wcout << L"Finished" << std::endl;
+	return result;
 }
 
 // Main entry point for program
@@ -283,27 +364,19 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	GetTempPath(512, tmp);
 	std::wstring tmpDir(tmp);
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	auto uniq = std::to_wstring(rand() % 999999999 + 1000000000);
-	auto installSource = tmpDir + std::wstring(L"\\winston_install_") + uniq;
+	TempDirectory installSource(tmpDir + std::wstring(L"\\winston_install_") + uniqifier());
+	TempDirectory prereqs(tmpDir + std::wstring(L"\\winston_prereqs_") + uniqifier());
+	auto elevateDll = extractFile(prereqs.Path(), std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
+	auto elevateExe = extractFile(prereqs.Path(), std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
 
-
-	CreateDirectory(installSource.c_str(), nullptr);
-
-	if (!IsNetfx46Installed())
+	bool netfxSuccess = NetFxBootstrap(prereqs, elevateDll);
+	if (!netfxSuccess)
 	{
-		auto prereqs = tmpDir + std::wstring(L"\\winston_prereqs_") + uniq;
-		CreateDirectory(prereqs.c_str(), nullptr);
-		//auto netFxInstall = extractFile(prereqs, std::wstring(L"NDP46-KB3045560-Web.exe"), netfx_setup, netfx_setup_length);
-		auto netFxInstall = installSource + std::wstring(L"NDP46-KB3045560-Web.exe");
-		DownloadStatus status;
-		downloadFile(L"https://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe", netFxInstall.c_str(), &status);
-		auto elevateDll = extractFile(prereqs, std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
-		auto elevateExe = extractFile(prereqs, std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
-		std::wstring args = L"/q /norestart /ChainingPackage Winston";
-		std::wcout << L"Installing .NET 4.6" << std::endl;
-		auto netfxResult = Server().Launch(args, netFxInstall, installSource, elevateDll);
-		removeDirectory(prereqs);
+		return 1;
 	}
+
+	DWORD vcX86result = VCRedistx86Bootstrap(prereqs, elevateDll);
+	std::wcout << L"Result: " << vcX86result << std::endl;
 
 	auto tar = winston_tar;
 	auto data = reinterpret_cast<const char*>(tar);
@@ -320,7 +393,7 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		{
 			break;
 		}
-		std::wstring path = installSource + std::wstring(L"\\") + converter.from_bytes(name);
+		std::wstring path = installSource.Path() + std::wstring(L"\\") + converter.from_bytes(name);
 
 		switch (rec[156])
 		{
@@ -354,12 +427,12 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	PROCESS_INFORMATION pi = { 0 };
 
 	std::wstring qt(L"\"");
-	std::wstring cmdline = installSource + std::wstring(L"\\winston.cmd");
+	std::wstring cmdline = installSource.Path() + std::wstring(L"\\winston.cmd");
 	std::wstring fullCmd = qt + cmdline + qt + std::wstring(L" selfinstall");
 	std::vector<wchar_t> buf(fullCmd.begin(), fullCmd.end());
 	buf.push_back(0);
 
-	BOOL installSuccess = ::CreateProcess(
+	BOOL installSuccess = CreateProcess(
 		nullptr,
 		buf.data(),
 		nullptr,
@@ -367,11 +440,13 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		FALSE,
 		0,
 		nullptr,
-		installSource.c_str(),
+		installSource.PathCStr(),
 		&si,
 		&pi);
 
-	// TODO: make exception safe
-	removeDirectory(installSource);
-	return 0;
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
+
+	return installSuccess ? 0 : 1;
 }
