@@ -11,3 +11,5 @@ extern bool IsNetfx45Installed();
 extern bool IsNetfx451Installed();
 extern bool IsNetfx452Installed();
 extern bool IsNetfx46Installed();
+extern bool IsVCRedist2015x86Installed();
+extern bool IsVCRedist2015x64Installed();
