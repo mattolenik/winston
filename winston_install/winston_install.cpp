@@ -375,8 +375,8 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		return 1;
 	}
 
-	DWORD vcX86result = VCRedistx86Bootstrap(prereqs, elevateDll);
-	std::wcout << L"Result: " << vcX86result << std::endl;
+	//DWORD vcX86result = VCRedistx86Bootstrap(prereqs, elevateDll);
+	//std::wcout << L"Result: " << vcX86result << std::endl;
 
 	auto tar = winston_tar;
 	auto data = reinterpret_cast<const char*>(tar);
