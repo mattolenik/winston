@@ -1,2 +1,5 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:Boolean x:Key="/Default/CodeInspection/ExcludedFiles/FileMasksToSkip/=_002A_002Ebin_002Ecpp/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/CodeInspection/ExcludedFiles/FileMasksToSkip/=_002A_002Ebin_002Ecpp/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=E676EE0B_002D5393_002D4323_002DB78D_002D3CBAF0298595_002Ff_003Aelevate_005Fdll_002Ebin_002Ecpp/@EntryIndexedValue">ExplicitlyExcluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=E676EE0B_002D5393_002D4323_002DB78D_002D3CBAF0298595_002Ff_003Aelevate_005Fexe_002Ebin_002Ecpp/@EntryIndexedValue">ExplicitlyExcluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=E676EE0B_002D5393_002D4323_002DB78D_002D3CBAF0298595_002Ff_003Awinston_005Ftar_002Ebin_002Ecpp/@EntryIndexedValue">ExplicitlyExcluded</s:String></wpf:ResourceDictionary>
