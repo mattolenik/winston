@@ -114,7 +114,7 @@ public:
 	Server() :ChainerSample::MmioChainer(L"winston-install-net46", L"winston-install-event")
 	{}
 
-	bool Launch(const std::wstring& args, const std::wstring& exe, const std::wstring& workingDir, const std::wstring& elevateDll)
+	BOOL Launch(const std::wstring& args, const std::wstring& exe, const std::wstring& workingDir, const std::wstring& elevateDll)
 	{
 		std::wstring cmdline = exe + L" /pipe winston-install-net46 " + args;
 		LPSTARTUPINFO si;
@@ -305,7 +305,7 @@ void downloadFile(LPCWSTR url, LPCWSTR filename, DownloadStatus* status)
 	URLDownloadToFile(nullptr, url, filename, 0, status);
 }
 
-bool NetFxBootstrap(const TempDirectory& prereqs, const std::wstring& elevateDll)
+BOOL NetFxBootstrap(const TempDirectory& prereqs, const std::wstring& elevateDll)
 {
 	if (IsNetfx46Installed())
 	{
@@ -369,7 +369,7 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	auto elevateDll = extractFile(prereqs.Path(), std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
 	auto elevateExe = extractFile(prereqs.Path(), std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
 
-	bool netfxSuccess = NetFxBootstrap(prereqs, elevateDll);
+	auto netfxSuccess = NetFxBootstrap(prereqs, elevateDll);
 	if (!netfxSuccess)
 	{
 		return 1;

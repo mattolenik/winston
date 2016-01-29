@@ -123,7 +123,7 @@
     </Content>
     <None Include="packages.config" />
     <Content Include="repos\default.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="updatepath.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
