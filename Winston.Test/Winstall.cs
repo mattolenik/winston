@@ -13,17 +13,17 @@ namespace Winston.Test
     public class Winstall : IDisposable
     {
         readonly TempDirectory winstonHome;
-        readonly string winstonAppExePath;
+        readonly string winstonExePath;
 
-        public Winstall(string winstonAppExePath)
+        public Winstall(string winstonExePath)
         {
             winstonHome = new TempDirectory("winston-home-test");
-            this.winstonAppExePath = winstonAppExePath;
+            this.winstonExePath = winstonExePath;
         }
 
         public async Task Install()
         {
-            //var process = new TestProcess(winstonAppExePath, "selfinstall"
+            //var process = new TestProcess(winstonExePath, "selfinstall"
             await Task.Yield();
         }
 

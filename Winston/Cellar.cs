@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using NativeInjector;
 using Newtonsoft.Json;
 using Winston.OS;
-using Winston.Serialization;
 using Winston.User;
 using YamlDotNet.Serialization;
 using Environment = Winston.OS.Environment;
+using static NativeInjector.Utils;
 
 namespace Winston
 {
@@ -61,6 +64,15 @@ namespace Winston
         {
             var dir = Paths.GetDirectory(installPath);
             Environment.AddToPath(dir, @"winston\cellar");
+            var pid = ParentProcessId((uint)Process.GetCurrentProcess().Id);
+            if (pid == null)
+            {
+                throw new Exception("Unable to get parent process ID");
+            }
+            var here = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string dll32 = Path.Combine(here, EnvUpdate.Dll32Name);
+            string dll64 = Path.Combine(here, EnvUpdate.Dll64Name);
+            Injector.Inject(pid.Value, dll32, dll64, EnvUpdate.SharedMemName(pid.Value), EnvUpdate.Prepend(installPath));
         }
 
         static void PathUnlink(string installPath)

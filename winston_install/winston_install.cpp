@@ -427,7 +427,7 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	PROCESS_INFORMATION pi = { 0 };
 
 	std::wstring qt(L"\"");
-	std::wstring cmdline = installSource.Path() + std::wstring(L"\\winston.cmd");
+	std::wstring cmdline = installSource.Path() + std::wstring(L"\\winston.exe");
 	std::wstring fullCmd = qt + cmdline + qt + std::wstring(L" selfinstall");
 	std::vector<wchar_t> buf(fullCmd.begin(), fullCmd.end());
 	buf.push_back(0);

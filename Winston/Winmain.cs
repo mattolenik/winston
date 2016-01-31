@@ -141,7 +141,7 @@ namespace Winston
         static void PrintUsage()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var ver = FileVersionInfo.GetVersionInfo(assembly.Location);
+            var ver = AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
             var message = $@"
 To add an app:                  winston add nameOfApp
                                 winston install nameOfApp
@@ -159,7 +159,7 @@ To refresh app repos:           winston refresh
 
 For anything else:              winston help
             
-Winston v{ver.ProductVersion}";
+Winston v{ver}";
             Console.WriteLine(message);
         }
     }

@@ -13,8 +13,6 @@ namespace Winston
 {
     static class InstallWorkflow
     {
-        const string PowerShellUniq = "#winston582390";
-
         public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames)
             => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
 
@@ -85,7 +83,7 @@ namespace Winston
         public static async Task SelfInstall(Cellar cellar, string installFromDir)
         {
             var fullDir = Path.GetFullPath(installFromDir);
-            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winstonapp.exe"));
+            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winston.exe"));
             var pkg = new Package
             {
                 Name = ver.ProductName,
@@ -102,7 +100,7 @@ namespace Winston
         public static async Task Bootstrap(string installSource, string destination)
         {
             var installSourceFull = Path.GetFullPath(installSource);
-            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(installSourceFull, "winstonapp.exe"));
+            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(installSourceFull, "winston.exe"));
             var pkg = new Package
             {
                 Name = ver.ProductName,
@@ -117,33 +115,24 @@ namespace Winston
             var cfg = new Config { WinstonDir = "../../../" };
             var cfgFile = Path.Combine(destination, "cellar", "winston", "latest", "config.yml");
             Yml.Save(cfg, cfgFile);
-            var wrapper = 
-@"@echo off
-cd cellar\Winston\latest
-winstonapp %*
-IF %ERRORLEVEL% EQU 2 updatepath.cmd
-IF %ERRORLEVEL% EQU 3 updatepath.cmd
-IF %ERRORLEVEL% EQU 4 updatepath.cmd
-cd ..\..\..";
-            File.WriteAllText(Path.Combine(destination, "winston.cmd"), wrapper);
         }
 
         static void SetupPowerShell()
         {
-            var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var profile = Path.Combine(docs, @"WindowsPowerShell\Microsoft.PowerShell_profile.ps1");
-            var modules = Path.Combine(docs, @"WindowsPowerShell\Modules\Winston\");
-            Directory.CreateDirectory(modules);
-            File.Copy("winston.psm1", Path.Combine(modules, "winston.psm1"), true);
+//            var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+//            var profile = Path.Combine(docs, @"WindowsPowerShell\Microsoft.PowerShell_profile.ps1");
+//            var modules = Path.Combine(docs, @"WindowsPowerShell\Modules\Winston\");
+//            Directory.CreateDirectory(modules);
+//            File.Copy("winston.psm1", Path.Combine(modules, "winston.psm1"), true);
 
-            var line = $"Import-Module winston.psm1 {PowerShellUniq}";
-            var oldProfile = File.Exists(profile) ? File.ReadAllLines(profile) : new string[] { };
-            // Filter old lines and concat new line
-            var newProfile =
-                oldProfile
-                    .Where(l => !l.ContainsInvIgnoreCase(PowerShellUniq))
-                    .Concat(new[] { line });
-            File.WriteAllLines(profile, newProfile);
+//            var line = $"Import-Module winston.psm1 {PowerShellUniq}";
+//            var oldProfile = File.Exists(profile) ? File.ReadAllLines(profile) : new string[] { };
+//            // Filter old lines and concat new line
+//            var newProfile =
+//                oldProfile
+//                    .Where(l => !l.ContainsInvIgnoreCase(PowerShellUniq))
+//                    .Concat(new[] { line });
+//            File.WriteAllLines(profile, newProfile);
         }
     }
 }

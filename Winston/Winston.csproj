@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Winston</RootNamespace>
-    <AssemblyName>WinstonApp</AssemblyName>
+    <AssemblyName>winston</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <UpdateRequired>false</UpdateRequired>
@@ -52,8 +52,12 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="NativeInjector, Version=0.1.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NativeInjector.0.1.0.1 - Copy\lib\net46\NativeInjector.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -78,6 +82,7 @@
   <ItemGroup>
     <Compile Include="Cache\Indexes.cs" />
     <Compile Include="Cache\Tables.cs" />
+    <Compile Include="EnvUpdate.cs" />
     <Compile Include="ExitCodes.cs" />
     <Compile Include="Installers\HttpPackageInstaller.cs" />
     <Compile Include="Installers\IFileExtractor.cs" />
@@ -118,9 +123,6 @@
     <Compile Include="Serialization\Yml.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="winston.psm1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="packages.config" />
     <Content Include="repos\default.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -134,8 +136,11 @@
     <Content Include="tools\7z.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="winston.cmd">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="$(SolutionDir)\EnvUpdate\bin\32\$(Configuration)\EnvUpdate.32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(SolutionDir)\EnvUpdate\bin\64\$(Configuration)\EnvUpdate.64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
@@ -158,7 +163,7 @@
     <Dist>$(ProjectDir)bin\dist\</Dist>
     <DistTar>$(Dist)winston.tar</DistTar>
   </PropertyGroup>
-  <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles" Condition="'$(Configuration)' == 'Release' ">
+  <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles">
     <Exec Command="del /F /Q &quot;$(DistTar)&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.pdb&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.xml&quot; 2&gt;nul" IgnoreExitCode="true" />
