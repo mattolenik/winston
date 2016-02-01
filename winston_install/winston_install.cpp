@@ -8,6 +8,7 @@
 #include "DownloadStatus.h"
 #include "TempDirectory.h"
 #include "winston_install.h"
+using namespace std::string_literals;
 
 /*
 The classes:
@@ -295,7 +296,7 @@ inline std::wstring uniqifier()
 
 std::wstring extractFile(const std::wstring& directory, const std::wstring& filename, unsigned char* file, size_t length)
 {
-	auto fn = directory + std::wstring(L"\\") + filename;
+	auto fn = directory + L"\\"s + filename;
 	std::fstream f(fn, std::fstream::out | std::fstream::binary);
 	f.write(reinterpret_cast<const char*>(file), length);
 	return fn;
@@ -312,7 +313,7 @@ BOOL NetFxBootstrap(const TempDirectory& prereqs, const std::wstring& elevateDll
 	{
 		return true;
 	}
-	auto netFxInstall = prereqs.Path() + std::wstring(L"\\NDP46-KB3045560-Web.exe");
+	auto netFxInstall = prereqs.Path() + L"\\NDP46-KB3045560-Web.exe"s;
     println(L"Downloading .NET 4.6");
 	DownloadStatus status;
 	//downloadFile(L"https://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe", netFxInstall.c_str(), &status);
@@ -332,7 +333,7 @@ DWORD VCRedistx86Bootstrap(const TempDirectory& prereqs, const std::wstring& ele
 	{
 		return 0;
 	}
-	auto vcredistX86 = prereqs.Path() + std::wstring(L"\\vc_redist.x86.exe");
+	auto vcredistX86 = prereqs.Path() + L"\\vc_redist.x86.exe"s;
     println(L"Downloading Visual C++ 2015 redistributable (x86)");
 	DownloadStatus status;
 	downloadFile(L"https://download.microsoft.com/download/C/E/5/CE514EAE-78A8-4381-86E8-29108D78DBD4/VC_redist.x86.exe", vcredistX86.c_str(), &status);
@@ -378,10 +379,10 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	GetTempPath(512, tmp);
 	std::wstring tmpDir(tmp);
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	TempDirectory installSource(tmpDir + std::wstring(L"\\winston_install_") + uniqifier());
-	TempDirectory prereqs(tmpDir + std::wstring(L"\\winston_prereqs_") + uniqifier());
-	auto elevateDll = extractFile(prereqs.Path(), std::wstring(L"elevate.dll"), elevate_dll, elevate_dll_length);
-	auto elevateExe = extractFile(prereqs.Path(), std::wstring(L"elevate.exe"), elevate_exe, elevate_exe_length);
+	TempDirectory installSource(tmpDir + L"\\winston_install_"s + uniqifier());
+	TempDirectory prereqs(tmpDir + L"\\winston_prereqs_"s + uniqifier());
+	auto elevateDll = extractFile(prereqs.Path(), L"elevate.dll"s, elevate_dll, elevate_dll_length);
+	auto elevateExe = extractFile(prereqs.Path(), L"elevate.exe"s, elevate_exe, elevate_exe_length);
 
 	auto netfxSuccess = NetFxBootstrap(prereqs, elevateDll);
 	if (!netfxSuccess)
@@ -407,7 +408,7 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		{
 			break;
 		}
-		std::wstring path = installSource.Path() + std::wstring(L"\\") + converter.from_bytes(name);
+		std::wstring path = installSource.Path() + L"\\"s + converter.from_bytes(name);
 
 		switch (rec[156])
 		{
@@ -441,8 +442,8 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	PROCESS_INFORMATION pi = { 0 };
 
 	std::wstring qt(L"\"");
-	std::wstring cmdline = installSource.Path() + std::wstring(L"\\winston.exe");
-	std::wstring fullCmd = qt + cmdline + qt + std::wstring(L" selfinstall");
+	std::wstring cmdline = installSource.Path() + L"\\winston.exe"s;
+	std::wstring fullCmd = qt + cmdline + qt + L" selfinstall"s;
 	std::vector<wchar_t> buf(fullCmd.begin(), fullCmd.end());
 	buf.push_back(0);
 
