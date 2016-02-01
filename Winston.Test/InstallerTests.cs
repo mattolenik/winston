@@ -4,9 +4,9 @@ using Xunit;
 
 namespace Winston.Test
 {
-    class InstallerTests
+    public class InstallerTests
     {
-        [Fact]
+        [Fact(Skip="Work in progress")]
         public void BootstrapsCorrectly()
         {
             var path = Paths.GetDirectory(typeof(Winmain).Assembly.Location);
