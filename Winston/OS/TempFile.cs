@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Winston.OS
 {
-    sealed class TempFile : IDisposable
+    public sealed class TempFile : IDisposable
     {
         public string Path { get; } = System.IO.Path.GetTempFileName();
 

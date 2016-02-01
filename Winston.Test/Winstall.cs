@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Winston.OS;
 
 namespace Winston.Test
@@ -13,18 +9,19 @@ namespace Winston.Test
     public class Winstall : IDisposable
     {
         readonly TempDirectory winstonHome;
-        readonly string winstonExePath;
+        readonly string sourceDir;
 
-        public Winstall(string winstonExePath)
+        public Winstall(string winstonSourceDir)
         {
             winstonHome = new TempDirectory("winston-home-test");
-            this.winstonExePath = winstonExePath;
+            sourceDir = winstonSourceDir;
         }
 
-        public async Task Install()
+        public int Bootstrap()
         {
-            //var process = new TestProcess(winstonExePath, "selfinstall"
-            await Task.Yield();
+            var process = new TestProcess(sourceDir, $"bootstrap \"{sourceDir}\" \"{winstonHome.Path}\"");
+            var result = process.Run(TimeSpan.FromSeconds(10));
+            return result.ExitCode;
         }
 
         public void Dispose()

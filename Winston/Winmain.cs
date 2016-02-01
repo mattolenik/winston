@@ -38,8 +38,8 @@ namespace Winston
 
             if (verb == "bootstrap")
             {
-                var source = verbArgs.FirstOrDefault();
-                var dest = verbArgs.Skip(1).FirstOrDefault();
+                var source = verbArgs.First();
+                var dest = verbArgs.Skip(1).First();
                 await Bootstrap(source, dest);
                 return 0;
             }

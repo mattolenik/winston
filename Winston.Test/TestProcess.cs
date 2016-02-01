@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -18,15 +15,17 @@ namespace Winston.Test
                 FileName = path,
                 Arguments = arguments,
                 UseShellExecute = false,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
             };
         }
 
-        public async Task<Process> Run(TimeSpan timeout)
+        public Process Run(TimeSpan timeout)
         {
             var process = new Process { StartInfo = info };
             process.Start();
-            await process.WaitForExitAsync(timeout);
+            process.WaitForExit((int)timeout.TotalMilliseconds);
             if (!process.HasExited)
             {
                 process.Kill();

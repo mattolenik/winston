@@ -1,36 +1,41 @@
-﻿using System.IO;
-using NSpec;
+﻿using System;
+using System.IO;
+using FluentAssertions;
+using Xunit;
 using Winston.User;
 
 namespace Winston.Test.User
 {
-    class ConsoleUserAdapterTest : nspec
+    public class ConsoleUserAdapterTest : IDisposable
     {
-        StringWriter writer;
-        StringReader reader;
-        ConsoleUserAdapter adapter;
+        readonly StringWriter writer;
+        readonly ConsoleUserAdapter adapter;
 
-        void before_each()
+        public ConsoleUserAdapterTest()
         {
             writer = new StringWriter();
-            reader = new StringReader("ans1");
+            var reader = new StringReader("ans1");
             adapter = new ConsoleUserAdapter(writer, reader);
         }
 
-        void describe_adapter()
+        [Fact]
+        public async void AskAndAnswer()
         {
-            itAsync["can ask and receive an answer"] = async () =>
-            {
-                var answer = await adapter.Ask(new Question("", "Question", "ans1", "ans2"));
-                answer.should_be("ans1");
-            };
+            var answer = await adapter.Ask(new Question("", "Question", "ans1", "ans2"));
+            answer.Should().Be("ans1");
+        }
 
-            it["can receive a message"] = () =>
-            {
-                adapter.Message("msg");
-                var output = writer.GetStringBuilder().ToString();
-                output.should_contain("msg");
-            };
+        [Fact]
+        public void ReceiveMessage()
+        {
+            adapter.Message("msg");
+            var output = writer.GetStringBuilder().ToString();
+            output.Should().Contain("msg");
+        }
+
+        public void Dispose()
+        {
+            writer.Dispose();
         }
     }
 }

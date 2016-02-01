@@ -1,91 +1,108 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using NSpec;
 using Winston.Cache;
 using Winston.OS;
+using Xunit;
+using FluentAssertions;
 
 namespace Winston.Test
 {
-    class CacheTest : nspec
+    public class CacheFixture : IDisposable
     {
-        SqliteCache cache;
-        TempDirectory dir;
-        TempFile repoFile;
-        Repo repo;
+        public SqliteCache Cache { get; private set; }
+        public TempDirectory Dir { get; private set; }
+        public TempFile RepoFile { get; private set; }
+        public Repo Repo { get; private set; }
 
-        void before_each() => Task.Run(async () =>
+        public CacheFixture()
         {
-            dir = new TempDirectory("winston-test-");
-            cache = await SqliteCache.Create(dir);
-            repo = new Repo("test")
+            Task.Run(async () =>
             {
-                Packages = new List<Package>
+                Dir = new TempDirectory("winston-test-");
+                Cache = await SqliteCache.Create(Dir);
+                Repo = new Repo("test")
                 {
-                    new Package { Name = "Pkg 1" },
-                    new Package { Name = "Pkg 2", Description = "packages with even numbers, two" },
-                    new Package { Name = "Pkg 3", Description = "number three is odd" },
-                    new Package { Name = "Pkg 4", Description = "packages with even numbers, four" },
-                }
-            };
-            repoFile = new TempFile();
-            var json = repo.ToJson();
-            File.WriteAllText(repoFile, json);
-            await cache.AddRepo(repoFile);
-        }).Wait();
-
-        void after_each()
-        {
-            cache?.Dispose();
-            dir?.Dispose();
+                    Packages = new List<Package>
+                    {
+                        new Package {Name = "Pkg 1"},
+                        new Package {Name = "Pkg 2", Description = "packages with even numbers, two"},
+                        new Package {Name = "Pkg 3", Description = "number three is odd"},
+                        new Package {Name = "Pkg 4", Description = "packages with even numbers, four"},
+                    }
+                };
+                RepoFile = new TempFile();
+                var json = Repo.ToJson();
+                File.WriteAllText(RepoFile, json);
+                await Cache.AddRepo(RepoFile);
+            });
         }
 
-        void describe_cache()
+        public void Dispose()
         {
-            itAsync["can find by name"] = async () =>
-            {
-                var pkg = await cache.ByName("Pkg 1");
-                pkg?.Name.should_be("Pkg 1");
-            };
+            Cache?.Dispose();
+            Dir?.Dispose();
+        }
+    }
 
-            itAsync["can find by names"] = async () =>
-            {
-                var pkgs = await cache.ByNames(new[] { "Pkg 1", "Pkg 2" });
-                pkgs.Where(p => p.Name == "Pkg 1").should_not_be_empty();
-                pkgs.Where(p => p.Name == "Pkg 2").should_not_be_empty();
-            };
+    public class CacheTest : IClassFixture<CacheFixture>
+    {
+        readonly CacheFixture fixture;
 
-            itAsync["can find by title search"] = async () =>
-            {
-                var pkgs = await cache.Search("Pkg");
-                pkgs.Count().should_be(repo.Packages.Count);
-            };
+        public CacheTest(CacheFixture fixture)
+        {
+            this.fixture = fixture;
+        }
 
-            itAsync["can find by desc search"] = async () =>
-            {
-                var pkgs = await cache.Search("even");
-                pkgs.Count().should_be(2);
-                pkgs.should_contain(p => p.Name == "Pkg 2");
-                pkgs.should_contain(p => p.Name == "Pkg 4");
-            };
+        [Fact]
+        public async void FindByName()
+        {
+            var pkg = await fixture.Cache.ByName("Pkg 1");
+            pkg?.Name.Should().Be("Pkg 1");
+        }
 
-            itAsync["can get all"] = async () =>
-            {
-                var pkgs = await cache.All();
-                pkgs.Count().should_be(repo.Packages.Count);
-            };
+        [Fact]
+        public async void FindByNames()
+        {
+            var pkgs = await fixture.Cache.ByNames(new[] { "Pkg 1", "Pkg 2" });
+            pkgs.Where(p => p.Name == "Pkg 1").Should().NotBeEmpty();
+            pkgs.Where(p => p.Name == "Pkg 2").Should().NotBeEmpty();
+        }
 
-            itAsync["can be refreshed"] = async () =>
-            {
-                var result = cache.DB.Query("delete from Packages");
-                var pkgs = await cache.All();
-                pkgs.should_be_empty();
-                await cache.Refresh();
-                pkgs = await cache.All();
-                pkgs.Count().should_be(repo.Packages.Count);
-            };
+        [Fact]
+        public async void FindByTitleSearch()
+        { var pkgs = await fixture.Cache.Search("Pkg");
+            pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
+        }
+
+        [Fact]
+        public async void FindByDescriptionSearch()
+        {
+            var pkgs = await fixture.Cache.Search("even");
+            pkgs.Count().Should().Be(2);
+            pkgs.Should().Contain(p => p.Name == "Pkg 2");
+            pkgs.Should().Contain(p => p.Name == "Pkg 4");
+        }
+
+        [Fact]
+        public async void GetAll()
+        {
+            var pkgs = await fixture.Cache.All();
+            pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
+        }
+
+        [Fact]
+        public async void Refreshed()
+        {
+            var result = fixture.Cache.DB.Query("delete from Packages");
+            var pkgs = await fixture.Cache.All();
+            pkgs.Should().BeEmpty();
+            await fixture.Cache.Refresh();
+            pkgs = await fixture.Cache.All();
+            pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
         }
     }
 }
