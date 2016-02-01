@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using fastJSON;
 using Winston.Cache;
 using Winston.OS;
 using Xunit;
@@ -28,14 +29,14 @@ namespace Winston.Test
                 {
                     Packages = new List<Package>
                     {
-                        new Package {Name = "Pkg 1"},
+                        new Package {Name = "Pkg 1", URL = new Uri("http://winston.ms/test")},
                         new Package {Name = "Pkg 2", Description = "packages with even numbers, two"},
                         new Package {Name = "Pkg 3", Description = "number three is odd"},
                         new Package {Name = "Pkg 4", Description = "packages with even numbers, four"},
                     }
                 };
                 RepoFile = new TempFile();
-                var json = Repo.ToJson();
+                var json = JSON.ToJSON(Repo);
                 File.WriteAllText(RepoFile, json);
                 await Cache.AddRepo(RepoFile);
             }).Wait();
@@ -48,11 +49,11 @@ namespace Winston.Test
         }
     }
 
-    public class CacheTest : IClassFixture<CacheFixture>
+    public class CacheTest : IClassFixture<JsonConfig>, IClassFixture<CacheFixture>
     {
         readonly CacheFixture fixture;
 
-        public CacheTest(CacheFixture fixture)
+        public CacheTest(JsonConfig cfg, CacheFixture fixture)
         {
             this.fixture = fixture;
         }
@@ -74,7 +75,8 @@ namespace Winston.Test
 
         [Fact]
         public async void FindByTitleSearch()
-        { var pkgs = await fixture.Cache.Search("Pkg");
+        {
+            var pkgs = await fixture.Cache.Search("Pkg");
             pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
         }
 

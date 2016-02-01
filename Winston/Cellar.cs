@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using fastJSON;
 using NativeInjector;
-using Newtonsoft.Json;
 using Winston.OS;
 using Winston.User;
 using YamlDotNet.Serialization;
@@ -123,7 +123,7 @@ namespace Winston
                     .Select(x => new
                     {
                         File = new FileInfo(x),
-                        Pkg = JsonConvert.DeserializeObject<Package>(File.ReadAllText(x))
+                        Pkg = JSON.ToObject<Package>(File.ReadAllText(x))
                     });
             var list = pkgs.Select(pkg => Path.Combine(pkg.File.DirectoryName, pkg.Pkg.Path ?? ""));
             // TODO: env variable injection

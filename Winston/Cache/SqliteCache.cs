@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using Newtonsoft.Json;
+using fastJSON;
 
 namespace Winston.Cache
 {
@@ -83,7 +83,10 @@ namespace Winston.Cache
         async Task LoadRepo(string uriOrPath) => await Task.Run(() =>
         {
             // TODO: non-crash handling of missing or failed repos
-            if (!LocalFileRepo.CanLoad(uriOrPath)) throw new Exception("Can't load repo " + uriOrPath);
+            if (!LocalFileRepo.CanLoad(uriOrPath))
+            {
+                throw new Exception("Can't load repo " + uriOrPath);
+            }
 
             Repo r;
             if (!LocalFileRepo.TryLoad(uriOrPath, out r))
@@ -96,10 +99,7 @@ namespace Winston.Cache
                 {
                     foreach (var pkg in r.Packages)
                     {
-                        var json = JsonConvert.SerializeObject(
-                            pkg,
-                            Formatting.None,
-                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                        var json = JSON.ToJSON(pkg, new JSONParameters {SerializeNullValues = false});
                         var result = Db.Execute(
                             @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
                             new { Name = pkg.Name, Desc = pkg.Description, Data = json },
@@ -133,7 +133,7 @@ namespace Winston.Cache
             var result = await Db.QueryAsync<string>("select PackageData from Packages where Name = @Name", new { Name = pkgName });
             var json = result.SingleOrDefault();
             if (json == null) return null;
-            var pkg = JsonConvert.DeserializeObject<Package>(json);
+            var pkg = JSON.ToObject<Package>(json);
             return pkg;
         }
 
@@ -166,7 +166,7 @@ namespace Winston.Cache
                 var single = json.SingleOrDefault();
                 if (single != null)
                 {
-                    var pkg = JsonConvert.DeserializeObject<Package>(single);
+                    var pkg = JSON.ToObject<Package>(single);
                     result.Add(pkg);
                 }
             }
@@ -177,7 +177,7 @@ namespace Winston.Cache
         public async Task<IEnumerable<Package>> All()
         {
             var result = await Db.QueryAsync<string>("select PackageData from Packages");
-            var pkgs = result.Select(JsonConvert.DeserializeObject<Package>);
+            var pkgs = result.Select(JSON.ToObject<Package>);
             return pkgs;
         }
 
@@ -215,7 +215,7 @@ namespace Winston
                 var resolvedPath = path.IsAbsoluteUri ? path.LocalPath : uriOrPath;
                 if (File.Exists(resolvedPath))
                 {
-                    repo = JsonConvert.DeserializeObject<Repo>(File.ReadAllText(resolvedPath));
+                    repo = JSON.ToObject<Repo>(File.ReadAllText(resolvedPath));
                     repo.URL = uriOrPath;
                     return true;
                 }
