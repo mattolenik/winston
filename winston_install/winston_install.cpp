@@ -309,10 +309,8 @@ BOOL NetFxBootstrap(const TempDirectory& prereqs, const std::wstring& elevateDll
 {
 	if (IsNetfx46Installed())
 	{
-		std::wcout << L"netfx true" << std::endl;
 		return true;
 	}
-	std::wcout << L"netfx false" << std::endl;
 	auto netFxInstall = prereqs.Path() + std::wstring(L"\\NDP46-KB3045560-Web.exe");
 	std::wcout << L"Downloading .NET 4.6" << std::endl;
 	DownloadStatus status;
@@ -354,6 +352,18 @@ DWORD VCRedistx86Bootstrap(const TempDirectory& prereqs, const std::wstring& ele
 	CloseHandle(pi->hProcess);
 	std::wcout << L"Finished" << std::endl;
 	return result;
+}
+
+bool hasArg(int argc, wchar_t* argv[], wchar_t* arg)
+{
+    for (int i = 0; i < argc; i++)
+    {
+        if (lstrcmpi(argv[i], arg) == 0)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 // Main entry point for program
@@ -443,6 +453,12 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		installSource.PathCStr(),
 		&si,
 		&pi);
+
+    if (installSuccess)
+    {
+        std::wcout << L"Installation complete" << std::endl;
+        Sleep(3000);
+    }
 
 	WaitForSingleObject(pi.hProcess, INFINITE);
 	CloseHandle(pi.hThread);
