@@ -171,7 +171,7 @@
     <ReplaceInFile Source="elevate.bin.h" Destination="elevate.bin.h" Old="_EXE_SIZE_" New="$(ElevateExeSize)" />
   </Target>
   <Target Name="Compact" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
-    <Exec Command="tools\upx.exe &quot;$(OutputPath)winston_install.exe&quot;" />
+    <Exec Command="tools\upx.exe --lzma &quot;$(OutputPath)winston_install.exe&quot;" />
     <Exec Command="tools\stampver.exe -f&quot;$(BuildVer)&quot; -p&quot;$(BuildVer)&quot; &quot;$(OutputPath)winston_install.exe&quot;" />
   </Target>
 </Project>
