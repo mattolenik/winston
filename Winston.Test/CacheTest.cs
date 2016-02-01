@@ -38,7 +38,7 @@ namespace Winston.Test
                 var json = Repo.ToJson();
                 File.WriteAllText(RepoFile, json);
                 await Cache.AddRepo(RepoFile);
-            });
+            }).Wait();
         }
 
         public void Dispose()
@@ -97,7 +97,7 @@ namespace Winston.Test
         [Fact]
         public async void Refreshed()
         {
-            var result = fixture.Cache.DB.Query("delete from Packages");
+            var result = fixture.Cache.Db.Query("delete from Packages");
             var pkgs = await fixture.Cache.All();
             pkgs.Should().BeEmpty();
             await fixture.Cache.Refresh();
