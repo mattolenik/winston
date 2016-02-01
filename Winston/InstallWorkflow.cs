@@ -109,7 +109,7 @@ namespace Winston
                 Type = PackageType.Shell,
                 Version = ver.FileVersion
             };
-            // Save config to tell Winston to live in ${destination}, making it portable to that directory
+            // Save config to tell Winston to live in {destination}, making it portable to that directory
             var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), destination);
             await cellar.Add(pkg);
             var cfg = new Config { WinstonDir = "../../../" };

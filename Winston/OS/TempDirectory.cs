@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Winston.OS
 {
-    sealed class TempDirectory : IDisposable
+    public sealed class TempDirectory : IDisposable
     {
         public string Path { get; }
 

@@ -1,13 +1,15 @@
-﻿using System.Threading.Tasks;
-using NSpec;
+﻿using System;
+using System.Threading.Tasks;
+using FluentAssertions;
+using Xunit;
 using Winston.User;
 
 namespace Winston.Test.User
 {
-    class UserProxyTest : nspec
+    public class UserProxyTest : IDisposable
     {
-        UserProxy proxy;
-        TestAdapter adapter;
+        readonly UserProxy proxy;
+        readonly TestAdapter adapter;
 
         class TestAdapter : IUserAdapter
         {
@@ -28,31 +30,29 @@ namespace Winston.Test.User
             }
         }
 
-        void before_each()
+        public UserProxyTest()
         {
             adapter = new TestAdapter();
             proxy = new UserProxy(adapter);
         }
 
-        void after_each()
+        public void Dispose()
         {
             proxy?.Dispose();
         }
 
-        void describe_asking()
+        [Fact]
+        public void GetsAnAnswer()
         {
-            it["gets an answer"] = () =>
-            {
-                adapter.Answer = "ans1";
-                var ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
-                ans.Wait();
-                ans.Result.should_be("ans1");
+            adapter.Answer = "ans1";
+            var ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
+            ans.Wait();
+            ans.Result.Should().Be("ans1");
 
-                adapter.Answer = "ans2";
-                ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
-                ans.Wait();
-                ans.Result.should_be("ans2");
-            };
+            adapter.Answer = "ans2";
+            ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
+            ans.Wait();
+            ans.Result.Should().Be("ans2");
         }
     }
 }

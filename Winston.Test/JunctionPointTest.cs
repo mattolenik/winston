@@ -1,24 +1,23 @@
+using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentAssertions;
 using Winston.OS;
+using Xunit;
 
 namespace Winston.Test
 {
-    [TestClass]
-    class JunctionPointTest
+    public class JunctionPointTest
     {
         string tempFolder;
 
-        [TestInitialize]
-        public void CreateTempFolder()
+        public JunctionPointTest()
         {
             tempFolder = Path.GetTempFileName();
             File.Delete(tempFolder);
             Directory.CreateDirectory(tempFolder);
         }
 
-        [TestCleanup]
-        public void DeleteTempFolder()
+        public void Dispose()
         {
             if (tempFolder != null)
             {
@@ -32,21 +31,21 @@ namespace Winston.Test
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Exists_NoSuchFile()
         {
-            Assert.IsFalse(JunctionPoint.Exists(Path.Combine(tempFolder, "$$$NoSuchFolder$$$")));
+            JunctionPoint.Exists(Path.Combine(tempFolder, "$$$NoSuchFolder$$$")).Should().BeFalse();
         }
 
-        [TestMethod]
+        [Fact]
         public void Exists_IsADirectory()
         {
             File.Create(Path.Combine(tempFolder, "AFile")).Close();
 
-            Assert.IsFalse(JunctionPoint.Exists(Path.Combine(tempFolder, "AFile")));
+            JunctionPoint.Exists(Path.Combine(tempFolder, "AFile")).Should().BeFalse();
         }
 
-        [TestMethod]
+        [Fact]
         public void Create_VerifyExists_GetTarget_Delete()
         {
             string targetFolder = Path.Combine(tempFolder, "ADirectory");
@@ -56,37 +55,33 @@ namespace Winston.Test
             File.Create(Path.Combine(targetFolder, "AFile")).Close();
 
             // Verify behavior before junction point created.
-            Assert.IsFalse(File.Exists(Path.Combine(junctionPoint, "AFile")),
-                "File should not be located until junction point created.");
+            File.Exists(Path.Combine(junctionPoint, "AFile")).Should().BeFalse("File should not be located until junction point created.");
 
-            Assert.IsFalse(JunctionPoint.Exists(junctionPoint), "Junction point not created yet.");
+            JunctionPoint.Exists(junctionPoint).Should().BeFalse("Junction point not created yet.");
 
             // Create junction point and confirm its properties.
             JunctionPoint.Create(junctionPoint, targetFolder, false /*don't overwrite*/);
 
-            Assert.IsTrue(JunctionPoint.Exists(junctionPoint), "Junction point exists now.");
+            JunctionPoint.Exists(junctionPoint).Should().BeTrue("Junction point exists now.");
 
-            Assert.AreEqual(targetFolder, JunctionPoint.GetTarget(junctionPoint));
+            targetFolder.ShouldBeEquivalentTo(JunctionPoint.GetTarget(junctionPoint));
 
-            Assert.IsTrue(File.Exists(Path.Combine(junctionPoint, "AFile")),
-                "File should be accessible via the junction point.");
+            File.Exists(Path.Combine(junctionPoint, "AFile")).Should().BeTrue("File should be accessible via the junction point.");
 
             // Delete junction point.
             JunctionPoint.Delete(junctionPoint);
 
-            Assert.IsFalse(JunctionPoint.Exists(junctionPoint), "Junction point should not exist now.");
+            JunctionPoint.Exists(junctionPoint).Should().BeFalse("Junction point should not exist now.");
 
-            Assert.IsFalse(File.Exists(Path.Combine(junctionPoint, "AFile")),
-                "File should not be located after junction point deleted.");
+            File.Exists(Path.Combine(junctionPoint, "AFile")).Should().BeFalse("File should not be located after junction point deleted.");
 
-            Assert.IsFalse(Directory.Exists(junctionPoint), "Ensure directory was deleted too.");
+            Directory.Exists(junctionPoint).Should().BeFalse("Ensure directory was deleted too.");
 
             // Cleanup
             File.Delete(Path.Combine(targetFolder, "AFile"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [Fact]
         public void Create_ThrowsIfOverwriteNotSpecifiedAndDirectoryExists()
         {
             string targetFolder = Path.Combine(tempFolder, "ADirectory");
@@ -94,10 +89,11 @@ namespace Winston.Test
 
             Directory.CreateDirectory(junctionPoint);
 
-            JunctionPoint.Create(junctionPoint, targetFolder, false);
+            Action test = () => JunctionPoint.Create(junctionPoint, targetFolder, false);
+            test.ShouldThrow<IOException>();
         }
 
-        [TestMethod]
+        [Fact]
         public void Create_OverwritesIfSpecifiedAndDirectoryExists()
         {
             string targetFolder = Path.Combine(tempFolder, "ADirectory");
@@ -108,63 +104,63 @@ namespace Winston.Test
 
             JunctionPoint.Create(junctionPoint, targetFolder, true);
 
-            Assert.AreEqual(targetFolder, JunctionPoint.GetTarget(junctionPoint));
+            targetFolder.Should().Be(JunctionPoint.GetTarget(junctionPoint));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [Fact]
         public void Create_ThrowsIfTargetDirectoryDoesNotExist()
         {
             string targetFolder = Path.Combine(tempFolder, "ADirectory");
             string junctionPoint = Path.Combine(tempFolder, "SymLink");
 
-            JunctionPoint.Create(junctionPoint, targetFolder, false);
+            Action test = () => JunctionPoint.Create(junctionPoint, targetFolder, false);
+            test.ShouldThrow<IOException>();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [Fact]
         public void GetTarget_NonExistentJunctionPoint()
         {
-            JunctionPoint.GetTarget(Path.Combine(tempFolder, "SymLink"));
+            Action test = () => JunctionPoint.GetTarget(Path.Combine(tempFolder, "SymLink"));
+            test.ShouldThrow<IOException>();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [Fact]
         public void GetTarget_CalledOnADirectoryThatIsNotAJunctionPoint()
         {
-            JunctionPoint.GetTarget(tempFolder);
+            Action test = () => JunctionPoint.GetTarget(tempFolder);
+            test.ShouldThrow<IOException>();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [Fact]
         public void GetTarget_CalledOnAFile()
         {
             File.Create(Path.Combine(tempFolder, "AFile")).Close();
 
-            JunctionPoint.GetTarget(Path.Combine(tempFolder, "AFile"));
+            Action test = () => JunctionPoint.GetTarget(Path.Combine(tempFolder, "AFile"));
+            test.ShouldThrow<IOException>();
         }
 
-        [TestMethod]
+        [Fact]
         public void Delete_NonExistentJunctionPoint()
         {
             // Should do nothing.
             JunctionPoint.Delete(Path.Combine(tempFolder, "SymLink"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [Fact]
         public void Delete_CalledOnADirectoryThatIsNotAJunctionPoint()
         {
-            JunctionPoint.Delete(tempFolder);
+            Action test = () => JunctionPoint.Delete(tempFolder);
+            test.ShouldThrow<IOException>();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [Fact]
         public void Delete_CalledOnAFile()
         {
             File.Create(Path.Combine(tempFolder, "AFile")).Close();
 
-            JunctionPoint.Delete(Path.Combine(tempFolder, "AFile"));
+            Action test = () => JunctionPoint.Delete(Path.Combine(tempFolder, "AFile"));
+            test.ShouldThrow<IOException>();
         }
     }
 }
