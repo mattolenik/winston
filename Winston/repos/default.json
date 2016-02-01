@@ -83,6 +83,13 @@
             "FileType": "Archive"
         },
         {
+            "Name": "upx",
+            "Description": "UPX is a free, portable, extendable, high-performance executable packer for several executable formats.",
+            "URL": "http://upx.sourceforge.net/download/upx391w.zip",
+            "Path": "upx391w",
+            "FileType": "Archive"
+        },
+        {
             "Name": "lessmsi",
             "Description": "A tool to view and extract the contents of an Windows Installer (.msi) file",
             "URL": "https://github.com/activescott/lessmsi/releases/download/v1.3/lessmsi-v1.3.zip"
