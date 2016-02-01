@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using fastJSON;
 
 namespace Winston
 {
@@ -16,6 +15,10 @@ namespace Winston
         public string URL { get; set; }
 
         public List<Package> Packages { get; set; }
+
+        public Repo()
+        {
+        }
 
         public Repo(string url)
         {
@@ -44,7 +47,7 @@ namespace Winston
 
         public override int GetHashCode()
         {
-            return URL.GetHashCode();
+            return URL?.GetHashCode() ?? 0;
         }
 
         public static bool operator ==(Repo left, Repo right)
@@ -60,16 +63,17 @@ namespace Winston
 
     public enum PackageType
     {
-        UI, Shell
+        Nil = -1, UI, Shell
     }
 
     public enum PackageFileType
     {
-        Archive, Binary
+        Nil = -1, Archive, Binary
     }
 
     public enum Platform
     {
+        Nil = -1,
         Any = 0,
         x64 = 1,
         x86 = 2
@@ -91,18 +95,15 @@ namespace Winston
 
         public string Path { get; set; }
 
-        [JsonConverter(typeof (StringEnumConverter))]
-        public PackageType? Type { get; set; }
+        public PackageType Type { get; set; }
 
-        [JsonConverter(typeof (StringEnumConverter))]
-        public PackageFileType? FileType { get; set; }
+        public PackageFileType FileType { get; set; }
 
         public List<string> Preserve { get; set; } = new List<string>();
 
         public List<string> Ignore { get; set; } = new List<string>();
 
-        [JsonConverter(typeof (StringEnumConverter))]
-        public Platform? Platform { get; set; }
+        public Platform Platform { get; set; }
 
         public List<Package> Variants { get; set; } = new List<Package>();
 
@@ -124,11 +125,11 @@ namespace Winston
                 URL = URL ?? other.URL,
                 Filename = Filename ?? other.Filename,
                 Path = Path ?? other.Path,
-                Type = Type ?? other.Type,
-                FileType = FileType ?? other.FileType,
+                Type = Type != PackageType.Nil ? Type : other.Type,
+                FileType = FileType != PackageFileType.Nil ? FileType : other.FileType,
                 Preserve = Preserve ?? other.Preserve,
                 Ignore = Ignore ?? other.Ignore,
-                Platform = Platform ?? other.Platform,
+                Platform = Platform != Platform.Nil ? Platform : other.Platform,
                 Variants = Variants ?? other.Variants,
                 Version = Version ?? other.Version
             };

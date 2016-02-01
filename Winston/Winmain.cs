@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using fastJSON;
 using Winston.Cache;
+using Winston.Serialization;
 using Winston.User;
 using static Winston.InstallWorkflow;
 
@@ -15,6 +16,7 @@ namespace Winston
     {
         static int Main(string[] args)
         {
+            JsonConfig.Init();
             int result = -1;
             Task.Run(async () =>
             {
@@ -101,7 +103,7 @@ namespace Winston
                     case "show":
                         {
                             var pkg = await cache.ByName(verbArgs.First());
-                            Console.WriteLine(JsonConvert.SerializeObject(pkg, Formatting.Indented));
+                            Console.WriteLine(JSON.ToNiceJSON(pkg, new JSONParameters {SerializeNullValues = false}));
                             break;
                         }
                     case "refresh":
