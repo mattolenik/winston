@@ -108,6 +108,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TempDirectory.h" />
+    <ClInclude Include="winston_install.h" />
     <ClInclude Include="winston_tar.bin.h" />
     <ClInclude Include="elevate.bin.h" />
   </ItemGroup>

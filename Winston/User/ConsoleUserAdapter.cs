@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.GotDotNet;
 
@@ -63,56 +64,63 @@ namespace Winston.User
             {
                 lock (progressLock)
                 {
-                    if (p != result.Last)
-                    {
-                        try
-                        {
-                            ConsoleEx.WriteAt(result.ProgressPrefix.Length, result.Row, p.ToString());
-                        }
-                        catch (Exception) { }
-                        result.Last = p;
-                    }
-                }
-            };
-            result.CompletedDownload = () =>
-            {
-                lock (progressLock)
-                {
+                    var pos = roundDotPos(p, result.ProgressPrefix);
                     try
                     {
-                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
+                        for (int i = result.Last.Value; i < pos; i++)
+                        {
+                            ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
+                        }
+                        Console.Out.Flush();
                     }
                     catch (Exception) { }
+                    result.Last = pos;
                 }
             };
             result.UpdateInstall = p =>
             {
                 lock (progressLock)
                 {
+                    var pos = roundDotPos(p, result.ProgressPrefix);
                     try
                     {
-                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, p.ToString());
+                        for (int i = result.Last.Value; i < pos; i++)
+                        {
+                            ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
+                        }
+                        Console.Out.Flush();
                     }
                     catch (Exception) { }
-                    result.Last = p;
+                    result.Last = pos;
+                }
+            };
+            result.CompletedDownload = () =>
+            {
+                lock (progressLock)
+                {
+                    ConsoleEx.WriteAt(70, result.Row, "downloaded");
+                    Console.Out.Flush();
                 }
             };
             result.CompletedInstall = () =>
             {
                 lock (progressLock)
                 {
-                    try
-                    {
-                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + 3, result.Row, " completed");
-                    }
-                    catch (Exception) { }
+                    ConsoleEx.WriteAt(70, result.Row, ".installed");
+                    Console.Out.Flush();
                 }
             };
+
             result.Row = startRow + lastProgressRow;
             result.ProgressPrefix = result.Name + ": ";
             ConsoleEx.WriteAt(0, result.Row, result.ProgressPrefix);
             lastProgressRow++;
             return result;
+        }
+
+        int roundDotPos(int p, string prefix)
+        {
+            return (int)Math.Round((p / 100.0) * (80.0 - prefix.Length));
         }
     }
 }

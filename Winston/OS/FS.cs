@@ -11,7 +11,7 @@ namespace Winston.OS
     {
         // From http://stackoverflow.com/questions/677221/copy-folders-in-c-sharp-using-system-io
         //
-        static void CopyDir(string source, string destination)
+        static void CopyDir(string source, string destination, Progress progress, int total, ref int current)
         {
             var src = new DirectoryInfo(source);
             var dest = new DirectoryInfo(destination);
@@ -26,6 +26,8 @@ namespace Winston.OS
             foreach (var file in files)
             {
                 file.CopyTo(Path.Combine(dest.FullName, file.Name), true);
+                current++;
+                progress.UpdateInstall((int)Math.Round((double)current / total * 100.0));
             }
 
             // Process subdirectories
@@ -36,11 +38,17 @@ namespace Winston.OS
                 var destinationDir = Path.Combine(dest.FullName, dir.Name);
 
                 // Call CopyDirectory() recursively.
-                FS.CopyDir(dir.FullName, destinationDir);
+                CopyDir(dir.FullName, destinationDir, progress, total, ref current);
             }
         }
 
-        public static Task CopyDirectory(string source, string destination) => Task.Run(() => CopyDir(source, destination));
+        public static Task CopyDirectory(string source, string destination, Progress progress) => Task.Run(() =>
+        {
+            progress.UpdateInstall(0);
+            var total = Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories).Count();
+            int current = 0;
+            CopyDir(source, destination, progress, total, ref current);
+        });
 
         public static async Task<string> GetSHA1(string file) => await Task.Run(() =>
         {

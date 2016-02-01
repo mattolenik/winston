@@ -7,6 +7,7 @@
 #include "Prereqs.h"
 #include "DownloadStatus.h"
 #include "TempDirectory.h"
+#include "winston_install.h"
 
 /*
 The classes:
@@ -167,11 +168,11 @@ private: // IProgressObserver
 	{
 		if (lastValue == -1)
 		{
-			std::wcout << "Progress: ";
+            print(L"Progress: ");
 		}
 		if (lastSpin >= 0)
 		{
-			std::wcout << L'\b';
+            print(L'\b');
 		}
 		auto value = static_cast<int>(ceil(ubProgressSoFar / 255.0 * 100.0));
 		if (value != lastValue)
@@ -180,26 +181,26 @@ private: // IProgressObserver
 			auto percent = std::to_wstring(value);
 			if (lastLength > 0)
 			{
-				std::wcout << std::wstring(lastLength, L'\b');
+                print(std::wstring(lastLength, L'\b'));
 			}
 			lastLength = percent.size();
-			std::wcout << percent;
+            print(percent);
 		}
 
 		switch (lastSpin)
 		{
 		case -1:
 		case 0:
-			std::wcout << L'-';
+            print(L'-');
 			break;
 		case 1:
-			std::wcout << L'\\';
+            print(L'\\');
 			break;
 		case 2:
-			std::wcout << L'|';
+            print(L'|');
 			break;
 		case 3:
-			std::wcout << L'/';
+            print(L'/');
 			break;
 		}
 		lastSpin++;
@@ -312,15 +313,16 @@ BOOL NetFxBootstrap(const TempDirectory& prereqs, const std::wstring& elevateDll
 		return true;
 	}
 	auto netFxInstall = prereqs.Path() + std::wstring(L"\\NDP46-KB3045560-Web.exe");
-	std::wcout << L"Downloading .NET 4.6" << std::endl;
+    println(L"Downloading .NET 4.6");
 	DownloadStatus status;
 	//downloadFile(L"https://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe", netFxInstall.c_str(), &status);
 	downloadFile(L"https://download.microsoft.com/download/3/5/9/35980F81-60F4-4DE3-88FC-8F962B97253B/NDP461-KB3102438-Web.exe", netFxInstall.c_str(), &status);
-	std::wcout << std::endl;
+    println("");
 	std::wstring args = L"/q /norestart /ChainingPackage Winston";
-	std::wcout << L"Installing .NET 4.6" << std::endl;
+    println(L"Installing .NET 4.6");
 	auto result = Server().Launch(args, netFxInstall, prereqs.Path(), elevateDll);
-	std::wcout << L"result " << result << std::endl;
+    print(L"result ");
+    println(result);
 	return result;
 }
 
@@ -331,12 +333,12 @@ DWORD VCRedistx86Bootstrap(const TempDirectory& prereqs, const std::wstring& ele
 		return 0;
 	}
 	auto vcredistX86 = prereqs.Path() + std::wstring(L"\\vc_redist.x86.exe");
-	std::wcout << L"Downloading Visual C++ 2015 redistributable (x86)" << std::endl;
+    println(L"Downloading Visual C++ 2015 redistributable (x86)");
 	DownloadStatus status;
 	downloadFile(L"https://download.microsoft.com/download/C/E/5/CE514EAE-78A8-4381-86E8-29108D78DBD4/VC_redist.x86.exe", vcredistX86.c_str(), &status);
-	std::wcout << std::endl;
+    println("");
 	std::wstring cmdline = vcredistX86 + L" /install /quiet /norestart";
-	std::wcout << L"Installing Visual C++ 2015 redistributable (x86)" << std::endl;
+    println(L"Installing Visual C++ 2015 redistributable (x86)");
 	LPSTARTUPINFO si;
 	LPPROCESS_INFORMATION pi;
 	BOOL success = CreateProcessElevatedIfNeeded(const_cast<LPWSTR>(cmdline.c_str()), prereqs.PathCStr(), si, pi, elevateDll.c_str());
@@ -350,7 +352,7 @@ DWORD VCRedistx86Bootstrap(const TempDirectory& prereqs, const std::wstring& ele
 	GetExitCodeProcess(pi->hProcess, &result);
 	CloseHandle(pi->hThread);
 	CloseHandle(pi->hProcess);
-	std::wcout << L"Finished" << std::endl;
+    println(L"Finished");
 	return result;
 }
 
@@ -369,6 +371,8 @@ bool hasArg(int argc, wchar_t* argv[], wchar_t* arg)
 // Main entry point for program
 int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 {
+    quiet = hasArg(argc, argv, L"/q");
+    println(logo);
 	srand(static_cast<unsigned int>(time(nullptr)));
 	wchar_t tmp[512];
 	GetTempPath(512, tmp);
@@ -386,7 +390,7 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 	}
 
 	//DWORD vcX86result = VCRedistx86Bootstrap(prereqs, elevateDll);
-	//std::wcout << L"Result: " << vcX86result << std::endl;
+	//println(L"Result: ");
 
 	auto tar = winston_tar;
 	auto data = reinterpret_cast<const char*>(tar);
@@ -454,9 +458,9 @@ int __cdecl wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 		&si,
 		&pi);
 
-    if (installSuccess)
+    if (installSuccess && !quiet)
     {
-        std::wcout << L"Installation complete" << std::endl;
+        // Sleep so the window doesn't disappear so fast that it isn't seen and user thinks something is wrong
         Sleep(3000);
     }
 

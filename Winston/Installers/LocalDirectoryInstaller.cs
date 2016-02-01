@@ -25,7 +25,7 @@ namespace Winston.Installers
         public async Task<DirectoryInfo> Install(Progress progress)
         {
             var installDir = Path.Combine(pkgDir, pkg.ResolveVersion() ?? "default");
-            await FS.CopyDirectory(pkg.URL.LocalPath, installDir);
+            await FS.CopyDirectory(pkg.URL.LocalPath, installDir, progress);
             return new DirectoryInfo(installDir);
         }
 
