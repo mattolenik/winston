@@ -10,7 +10,7 @@ namespace Winston.OS
     /// Provides access to NTFS junction points in .NET
     /// From here: http://www.codeproject.com/Articles/15633/Manipulating-NTFS-Junction-Points-in-NET
     /// </summary>
-    static class JunctionPoint
+    public static class JunctionPoint
     {
         /// <summary>
         /// The file or directory is not a reparse point.

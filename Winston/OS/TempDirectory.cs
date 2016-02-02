@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 
 namespace Winston.OS
 {
@@ -17,6 +16,7 @@ namespace Winston.OS
         public void Dispose()
         {
             Delete(Path);
+            Directory.Delete(Path, true);
         }
 
         void Delete(string dir)
@@ -32,7 +32,15 @@ namespace Winston.OS
 
             foreach (var d in dirs)
             {
-                Delete(d);
+                var fi = new FileInfo(d);
+                if (fi.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                {
+                    JunctionPoint.Delete(d);
+                }
+                else
+                {
+                    Delete(d);
+                }
             }
         }
 
