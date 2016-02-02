@@ -113,7 +113,6 @@
     <ClInclude Include="elevate.bin.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="version.tpl" />
     <None Include="winston_tar.h.tpl" />
     <None Include="elevate.h.tpl" />
   </ItemGroup>
@@ -130,9 +129,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="winston_install.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\package.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
