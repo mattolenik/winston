@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Winston.User
 {
-    class HeadlessUserAdapter:IUserAdapter
+    class HeadlessUserAdapter : IUserAdapter
     {
         public Task<string> Ask(Question question)
         {
@@ -19,7 +19,13 @@ namespace Winston.User
 
         public Progress NewProgress(string name)
         {
-            return null;
+            return new Progress()
+            {
+                CompletedDownload = () => { },
+                CompletedInstall = () => { },
+                UpdateDownload = _ => { },
+                UpdateInstall = _ => { }
+            };
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Winston.OS;
 
 namespace Winston.Test
@@ -17,10 +18,13 @@ namespace Winston.Test
             sourceDir = winstonSourceDir;
         }
 
-        public int Bootstrap()
+        public int Bootstrap(TimeSpan timeout)
         {
-            var process = new TestProcess(sourceDir, $"bootstrap \"{sourceDir}\" \"{winstonHome.Path}\"");
-            var result = process.Run(TimeSpan.FromSeconds(10));
+            var winstonExe = Path.Combine(sourceDir, "winston.exe");
+            var process = new TestProcess(winstonExe, $"bootstrap \"{sourceDir}\" \"{winstonHome.Path}\"");
+            var result = process.Run(timeout);
+            Console.WriteLine(process.StdOut);
+            Console.WriteLine(process.StdErr);
             return result.ExitCode;
         }
 

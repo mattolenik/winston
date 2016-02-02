@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace Winston.Test
 {
     class TestProcess
     {
         readonly ProcessStartInfo info;
+
+        public string StdOut { get; private set; }
+
+        public string StdErr { get; private set; }
 
         public TestProcess(string path, string arguments)
         {
@@ -30,6 +33,8 @@ namespace Winston.Test
             {
                 process.Kill();
             }
+            StdOut = process.StandardOutput.ReadToEnd();
+            StdErr = process.StandardError.ReadToEnd();
             return process;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using FluentAssertions;
 using Xunit;
 
@@ -6,13 +7,14 @@ namespace Winston.Test
 {
     public class InstallerTests
     {
-        [Fact(Skip="Work in progress")]
+        [Fact]
         public void BootstrapsCorrectly()
         {
-            var path = Paths.GetDirectory(typeof(Winmain).Assembly.Location);
+            var uri = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var path = Paths.GetDirectory(Uri.UnescapeDataString(uri.AbsolutePath));
             using (var installer = new Winstall(path))
             {
-                var res = installer.Bootstrap();
+                var res = installer.Bootstrap(TimeSpan.FromSeconds(60));
                 res.Should().Be(0);
             }
         }
