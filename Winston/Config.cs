@@ -10,6 +10,12 @@ namespace Winston
         /// The directory in which Winston will install itself.
         /// </summary>
         public string WinstonDir { get; set; }
+
+        /// <summary>
+        /// Whether or not to write to the registry and update the user's PATH.
+        /// Usually false for bootstrapped/embedded installations.
+        /// </summary>
+        public bool WriteRegistryPath { get; set; }
     }
 
     public interface IConfigProvider
@@ -23,7 +29,8 @@ namespace Winston
 
         static readonly Config Default = new Config
         {
-            WinstonDir = Path.Combine(Paths.AppData, @"winston\")
+            WinstonDir = Path.Combine(Paths.AppData, @"winston\"),
+            WriteRegistryPath = true
         };
 
         readonly string path = Path.Combine(new Uri(Paths.ExecutingDir).LocalPath, "config.yml");

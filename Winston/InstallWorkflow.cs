@@ -13,6 +13,8 @@ namespace Winston
 {
     static class InstallWorkflow
     {
+        static readonly string cellarDirName = "cellar";
+
         public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames)
             => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
 
@@ -97,7 +99,7 @@ namespace Winston
             SetupPowerShell();
         }
 
-        public static async Task Bootstrap(string installSource, string destination)
+        public static async Task Bootstrap(string installSource, string destination, Config config)
         {
             var installSourceFull = Path.GetFullPath(installSource);
             var ver = FileVersionInfo.GetVersionInfo(Path.Combine(installSourceFull, "winston.exe"));
@@ -110,10 +112,16 @@ namespace Winston
                 Version = ver.FileVersion
             };
             // Save config to tell Winston to live in {destination}, making it portable to that directory
-            var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), destination);
+            var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), config);
             await cellar.Add(pkg);
-            var cfg = new Config { WinstonDir = "../../../" };
-            var cfgFile = Path.Combine(destination, "cellar", "winston", "latest", "config.yml");
+            var cfg = new Config
+            {
+                WinstonDir = "../../../",
+                WriteRegistryPath = false
+            };
+            var cfgDir = Path.Combine(destination, cellarDirName, "winston", "latest");
+            Directory.CreateDirectory(cfgDir);
+            var cfgFile = Path.Combine(cfgDir, "config.yml");
             Yml.Save(cfg, cfgFile);
         }
 

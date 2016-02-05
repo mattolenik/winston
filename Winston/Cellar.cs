@@ -18,16 +18,18 @@ namespace Winston
     public class Cellar
     {
         readonly UserProxy user;
+        readonly Config cfg;
 
         public string CellarPath { get; }
 
         public string BinPath { get; }
 
-        public Cellar(UserProxy user, string winstonDir)
+        public Cellar(UserProxy user, Config cfg)
         {
             this.user = user;
-            CellarPath = Path.Combine(winstonDir, @"cellar\");
-            BinPath = Path.Combine(winstonDir, @"bin\");
+            this.cfg = cfg;
+            CellarPath = Path.Combine(cfg.WinstonDir, @"cellar\");
+            BinPath = Path.Combine(cfg.WinstonDir, @"bin\");
             Path.GetTempPath();
             Directory.CreateDirectory(CellarPath);
             Directory.CreateDirectory(BinPath);
@@ -40,8 +42,12 @@ namespace Winston
             var progress = user.NewProgress(pkg.Name);
             var installDir = await client.Install(progress);
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
-            var pathVal = Path.Combine(junctionPath, pkg.Path ?? "");
-            PathLink(pathVal);
+            var path = Path.Combine(junctionPath, pkg.Path ?? "");
+            if (cfg.WriteRegistryPath)
+            {
+                UpdateRegistryPath(path);
+            }
+            InjectPathIntoParent(path);
             progress.CompletedInstall();
         }
 
@@ -60,10 +66,13 @@ namespace Winston
             return junction;
         }
 
-        static void PathLink(string installPath)
+        static void UpdateRegistryPath(string installPath)
         {
-            var dir = Paths.GetDirectory(installPath);
-            Environment.AddToPath(dir, @"winston\cellar");
+            Environment.AddToPath(installPath, @"winston\cellar");
+        }
+
+        static void InjectPathIntoParent(string installPath)
+        {
             var pid = ParentProcessId((uint)Process.GetCurrentProcess().Id);
             if (pid == null)
             {

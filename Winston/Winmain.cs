@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,7 +19,6 @@ namespace Winston
             int result = -1;
             Task.Run(async () =>
             {
-                //System.Diagnostics.Debugger.Launch();
                 var cfg = new ConfigProvider();
                 result = await AsyncMain(args, cfg);
             }).Wait();
@@ -40,9 +38,10 @@ namespace Winston
 
             if (verb == "bootstrap")
             {
-                var source = verbArgs.First();
-                var dest = verbArgs.Skip(1).First();
-                await Bootstrap(source, dest);
+                var uri = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+                var source = Paths.GetDirectory(Uri.UnescapeDataString(uri.AbsolutePath));
+                var dest = verbArgs.First();
+                await Bootstrap(source, dest, cfg.Config);
                 return 0;
             }
             Directory.CreateDirectory(cfg.Config.WinstonDir);
@@ -50,7 +49,7 @@ namespace Winston
             using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
             using (var cache = await SqliteCache.Create(cfg.Config.WinstonDir))
             {
-                var cellar = new Cellar(user, cfg.Config.WinstonDir);
+                var cellar = new Cellar(user, cfg.Config);
                 // TODO: find a better way to setup repos
                 // Set up default repo
                 if (verb != "selfinstall" && cache.Empty())

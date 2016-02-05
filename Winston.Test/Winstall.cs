@@ -21,7 +21,7 @@ namespace Winston.Test
         public int Bootstrap(TimeSpan timeout)
         {
             var winstonExe = Path.Combine(sourceDir, "winston.exe");
-            var process = new TestProcess(winstonExe, $"bootstrap \"{sourceDir}\" \"{winstonHome.Path}\"");
+            var process = new TestProcess(winstonExe, $"bootstrap \"{winstonHome.Path}\"");
             var result = process.Run(timeout);
             Console.WriteLine(process.StdOut);
             Console.WriteLine(process.StdErr);
