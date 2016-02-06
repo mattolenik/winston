@@ -8,7 +8,7 @@ namespace Winston.User
 {
     class HeadlessUserAdapter : IUserAdapter
     {
-        public Task<string> Ask(Question question)
+        public Task<string> AskAsync(Question question)
         {
             return null;
         }
@@ -19,7 +19,7 @@ namespace Winston.User
 
         public Progress NewProgress(string name)
         {
-            return new Progress()
+            return new Progress
             {
                 CompletedDownload = () => { },
                 CompletedInstall = () => { },

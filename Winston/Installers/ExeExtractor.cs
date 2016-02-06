@@ -25,7 +25,7 @@ namespace Winston.Installers
             return result;
         }
 
-        public async Task<string> Install(Progress progress)
+        public async Task<string> InstallAsync(Progress progress)
         {
             return await Task.Run(() =>
             {
@@ -35,7 +35,7 @@ namespace Winston.Installers
             });
         }
 
-        public async Task<Exception> Validate()
+        public async Task<Exception> ValidateAsync()
         {
             return await Task.Run(() =>
             {

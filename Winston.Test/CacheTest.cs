@@ -24,7 +24,7 @@ namespace Winston.Test
             Task.Run(async () =>
             {
                 Dir = new TempDirectory("winston-test-");
-                Cache = await SqliteCache.Create(Dir);
+                Cache = await SqliteCache.CreateAsync(Dir);
                 Repo = new Repo("test")
                 {
                     Packages = new List<Package>
@@ -38,7 +38,7 @@ namespace Winston.Test
                 RepoFile = new TempFile();
                 var json = JSON.ToJSON(Repo);
                 File.WriteAllText(RepoFile, json);
-                await Cache.AddRepo(RepoFile);
+                await Cache.AddRepoAsync(RepoFile);
             }).Wait();
         }
 
@@ -61,14 +61,14 @@ namespace Winston.Test
         [Fact]
         public async void FindByName()
         {
-            var pkg = await fixture.Cache.ByName("Pkg 1");
+            var pkg = await fixture.Cache.ByNameAsync("Pkg 1");
             pkg?.Name.Should().Be("Pkg 1");
         }
 
         [Fact]
         public async void FindByNames()
         {
-            var pkgs = await fixture.Cache.ByNames(new[] { "Pkg 1", "Pkg 2" });
+            var pkgs = await fixture.Cache.ByNamesAsync(new[] { "Pkg 1", "Pkg 2" });
             pkgs.Where(p => p.Name == "Pkg 1").Should().NotBeEmpty();
             pkgs.Where(p => p.Name == "Pkg 2").Should().NotBeEmpty();
         }
@@ -76,14 +76,14 @@ namespace Winston.Test
         [Fact]
         public async void FindByTitleSearch()
         {
-            var pkgs = await fixture.Cache.Search("Pkg");
+            var pkgs = await fixture.Cache.SearchAsync("Pkg");
             pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
         }
 
         [Fact]
         public async void FindByDescriptionSearch()
         {
-            var pkgs = await fixture.Cache.Search("even");
+            var pkgs = await fixture.Cache.SearchAsync("even");
             pkgs.Count().Should().Be(2);
             pkgs.Should().Contain(p => p.Name == "Pkg 2");
             pkgs.Should().Contain(p => p.Name == "Pkg 4");
@@ -92,7 +92,7 @@ namespace Winston.Test
         [Fact]
         public async void GetAll()
         {
-            var pkgs = await fixture.Cache.All();
+            var pkgs = await fixture.Cache.AllAsync();
             pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
         }
 
@@ -100,10 +100,10 @@ namespace Winston.Test
         public async void Refreshed()
         {
             var result = fixture.Cache.Db.Query("delete from Packages");
-            var pkgs = await fixture.Cache.All();
+            var pkgs = await fixture.Cache.AllAsync();
             pkgs.Should().BeEmpty();
-            await fixture.Cache.Refresh();
-            pkgs = await fixture.Cache.All();
+            await fixture.Cache.RefreshAsync();
+            pkgs = await fixture.Cache.AllAsync();
             pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
         }
     }

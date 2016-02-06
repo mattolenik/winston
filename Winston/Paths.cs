@@ -25,11 +25,13 @@ namespace Winston
                     .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                     .ToLowerInvariant();
             }
+#pragma warning disable CC0003
             catch
             {
                 // Invalid URI
                 return null;
             }
+#pragma warning restore CC0003
         }
 
         class NormPathComparer : IEqualityComparer<string>
@@ -60,7 +62,7 @@ namespace Winston
 
         public static string GetRelativePath(string from, string to)
         {
-            var path1 = new Uri(@from);
+            var path1 = new Uri(from);
             var path2 = new Uri(to);
             var diff = path1.MakeRelativeUri(path2);
             return diff.OriginalString.Replace('/', '\\');

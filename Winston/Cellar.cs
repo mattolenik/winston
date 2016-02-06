@@ -35,12 +35,12 @@ namespace Winston
             Directory.CreateDirectory(BinPath);
         }
 
-        public async Task Add(Package pkg)
+        public async Task AddAsync(Package pkg)
         {
             var pkgDir = Path.Combine(CellarPath, pkg.Name);
             var client = new PackageClient(pkg, pkgDir);
             var progress = user.NewProgress(pkg.Name);
-            var installDir = await client.Install(progress);
+            var installDir = await client.InstallAsync(progress);
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
             var path = Path.Combine(junctionPath, pkg.Path ?? "");
             if (cfg.WriteRegistryPath)
@@ -79,8 +79,8 @@ namespace Winston
                 throw new Exception("Unable to get parent process ID");
             }
             var here = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string dll32 = Path.Combine(here, EnvUpdate.Dll32Name);
-            string dll64 = Path.Combine(here, EnvUpdate.Dll64Name);
+            var dll32 = Path.Combine(here, EnvUpdate.Dll32Name);
+            var dll64 = Path.Combine(here, EnvUpdate.Dll64Name);
             Injector.Inject(pid.Value, dll32, dll64, EnvUpdate.SharedMemName(pid.Value), EnvUpdate.Prepend(installPath));
         }
 
@@ -89,7 +89,7 @@ namespace Winston
             Environment.RemoveFromPath(installPath);
         }
 
-        public async Task Remove(string name)
+        public async Task RemoveAsync(string name)
         {
             var pkgDir = Path.Combine(CellarPath, name);
             if (!Directory.Exists(pkgDir))
@@ -110,7 +110,7 @@ namespace Winston
             await Task.Run(() => Directory.Delete(pkgDir, true));
         }
 
-        public async Task<Package[]> List()
+        public async Task<Package[]> ListAsync()
         {
             var pkgFiles = Directory.GetFiles(CellarPath, "pkg.json", SearchOption.AllDirectories);
             var tasks = pkgFiles.Select(async p => await Task.Run(() =>
@@ -125,7 +125,7 @@ namespace Winston
             return res;
         }
 
-        public async Task Restore() => await Task.Run(() =>
+        public async Task RestoreAsync() => await Task.Run(() =>
         {
             var pkgs =
                 Directory.GetFiles(CellarPath, "pkg.json", SearchOption.AllDirectories)

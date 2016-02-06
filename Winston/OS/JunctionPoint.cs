@@ -12,6 +12,7 @@ namespace Winston.OS
     /// </summary>
     static class JunctionPoint
     {
+#pragma warning disable CC0074 // Make field readonly
         /// <summary>
         /// The file or directory is not a reparse point.
         /// </summary>
@@ -130,13 +131,13 @@ namespace Winston.OS
 
             /// <summary>
             /// Size, in bytes, of the data after the Reserved member. This can be calculated by:
-            /// (4 * sizeof(ushort)) + SubstituteNameLength + PrintNameLength + 
+            /// (4 * sizeof(ushort)) + SubstituteNameLength + PrintNameLength +
             /// (namesAreNullTerminated ? 2 * sizeof(char) : 0);
             /// </summary>
             public ushort ReparseDataLength;
 
             /// <summary>
-            /// Reserved; do not use. 
+            /// Reserved; do not use.
             /// </summary>
             public ushort Reserved;
 
@@ -158,7 +159,7 @@ namespace Winston.OS
 
             /// <summary>
             /// Length, in bytes, of the print name string. If this string is null-terminated,
-            /// PrintNameLength does not include space for the null character. 
+            /// PrintNameLength does not include space for the null character.
             /// </summary>
             public ushort PrintNameLength;
 
@@ -185,6 +186,8 @@ namespace Winston.OS
             ECreationDisposition dwCreationDisposition,
             EFileAttributes dwFlagsAndAttributes,
             IntPtr hTemplateFile);
+
+#pragma warning restore CC0074 // Make field readonly
 
         /// <summary>
         /// Creates a junction point from the specified directory to the specified target directory.
@@ -216,28 +219,30 @@ namespace Winston.OS
 
             using (SafeFileHandle handle = OpenReparsePoint(junctionPoint, EFileAccess.GenericWrite))
             {
-                byte[] targetDirBytes = Encoding.Unicode.GetBytes(NonInterpretedPathPrefix + Path.GetFullPath(targetDir));
+                var targetDirBytes = Encoding.Unicode.GetBytes(NonInterpretedPathPrefix + Path.GetFullPath(targetDir));
 
-                REPARSE_DATA_BUFFER reparseDataBuffer = new REPARSE_DATA_BUFFER();
+                var reparseDataBuffer = new REPARSE_DATA_BUFFER
+                {
+                    ReparseTag = IO_REPARSE_TAG_MOUNT_POINT,
+                    ReparseDataLength = (ushort) (targetDirBytes.Length + 12),
+                    SubstituteNameOffset = 0,
+                    SubstituteNameLength = (ushort) targetDirBytes.Length,
+                    PrintNameOffset = (ushort) (targetDirBytes.Length + 2),
+                    PrintNameLength = 0,
+                    PathBuffer = new byte[0x3ff0]
+                };
 
-                reparseDataBuffer.ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;
-                reparseDataBuffer.ReparseDataLength = (ushort)(targetDirBytes.Length + 12);
-                reparseDataBuffer.SubstituteNameOffset = 0;
-                reparseDataBuffer.SubstituteNameLength = (ushort)targetDirBytes.Length;
-                reparseDataBuffer.PrintNameOffset = (ushort)(targetDirBytes.Length + 2);
-                reparseDataBuffer.PrintNameLength = 0;
-                reparseDataBuffer.PathBuffer = new byte[0x3ff0];
                 Array.Copy(targetDirBytes, reparseDataBuffer.PathBuffer, targetDirBytes.Length);
 
-                int inBufferSize = Marshal.SizeOf(reparseDataBuffer);
-                IntPtr inBuffer = Marshal.AllocHGlobal(inBufferSize);
+                var inBufferSize = Marshal.SizeOf(reparseDataBuffer);
+                var inBuffer = Marshal.AllocHGlobal(inBufferSize);
 
                 try
                 {
                     Marshal.StructureToPtr(reparseDataBuffer, inBuffer, false);
 
                     int bytesReturned;
-                    bool result = DeviceIoControl(handle.DangerousGetHandle(), FSCTL_SET_REPARSE_POINT,
+                    var result = DeviceIoControl(handle.DangerousGetHandle(), FSCTL_SET_REPARSE_POINT,
                         inBuffer, targetDirBytes.Length + 20, IntPtr.Zero, 0, out bytesReturned, IntPtr.Zero);
 
                     if (!result)
@@ -268,22 +273,24 @@ namespace Winston.OS
                 return;
             }
 
-            using (SafeFileHandle handle = OpenReparsePoint(junctionPoint, EFileAccess.GenericWrite))
+            using (var handle = OpenReparsePoint(junctionPoint, EFileAccess.GenericWrite))
             {
-                REPARSE_DATA_BUFFER reparseDataBuffer = new REPARSE_DATA_BUFFER();
+                var reparseDataBuffer = new REPARSE_DATA_BUFFER
+                {
 
-                reparseDataBuffer.ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;
-                reparseDataBuffer.ReparseDataLength = 0;
-                reparseDataBuffer.PathBuffer = new byte[0x3ff0];
+                    ReparseTag = IO_REPARSE_TAG_MOUNT_POINT,
+                    ReparseDataLength = 0,
+                    PathBuffer = new byte[0x3ff0]
+                };
 
-                int inBufferSize = Marshal.SizeOf(reparseDataBuffer);
-                IntPtr inBuffer = Marshal.AllocHGlobal(inBufferSize);
+                var inBufferSize = Marshal.SizeOf(reparseDataBuffer);
+                var inBuffer = Marshal.AllocHGlobal(inBufferSize);
                 try
                 {
                     Marshal.StructureToPtr(reparseDataBuffer, inBuffer, false);
 
                     int bytesReturned;
-                    bool result = DeviceIoControl(handle.DangerousGetHandle(), FSCTL_DELETE_REPARSE_POINT,
+                    var result = DeviceIoControl(handle.DangerousGetHandle(), FSCTL_DELETE_REPARSE_POINT,
                         inBuffer, 8, IntPtr.Zero, 0, out bytesReturned, IntPtr.Zero);
 
                     if (!result)
@@ -319,7 +326,7 @@ namespace Winston.OS
 
             using (SafeFileHandle handle = OpenReparsePoint(path, EFileAccess.GenericRead))
             {
-                string target = InternalGetTarget(handle);
+                var target = InternalGetTarget(handle);
                 return target != null;
             }
         }
@@ -338,7 +345,7 @@ namespace Winston.OS
         {
             using (SafeFileHandle handle = OpenReparsePoint(junctionPoint, EFileAccess.GenericRead))
             {
-                string target = InternalGetTarget(handle);
+                var target = InternalGetTarget(handle);
                 if (target == null)
                     throw new IOException("Path is not a junction point.");
 
@@ -348,31 +355,31 @@ namespace Winston.OS
 
         static string InternalGetTarget(SafeFileHandle handle)
         {
-            int outBufferSize = Marshal.SizeOf(typeof(REPARSE_DATA_BUFFER));
-            IntPtr outBuffer = Marshal.AllocHGlobal(outBufferSize);
+            var outBufferSize = Marshal.SizeOf(typeof(REPARSE_DATA_BUFFER));
+            var outBuffer = Marshal.AllocHGlobal(outBufferSize);
 
             try
             {
                 int bytesReturned;
-                bool result = DeviceIoControl(handle.DangerousGetHandle(), FSCTL_GET_REPARSE_POINT,
+                var result = DeviceIoControl(handle.DangerousGetHandle(), FSCTL_GET_REPARSE_POINT,
                     IntPtr.Zero, 0, outBuffer, outBufferSize, out bytesReturned, IntPtr.Zero);
 
                 if (!result)
                 {
-                    int error = Marshal.GetLastWin32Error();
+                    var error = Marshal.GetLastWin32Error();
                     if (error == ERROR_NOT_A_REPARSE_POINT)
                         return null;
 
                     ThrowLastWin32Error("Unable to get information about junction point.");
                 }
 
-                REPARSE_DATA_BUFFER reparseDataBuffer = (REPARSE_DATA_BUFFER)
+                var reparseDataBuffer = (REPARSE_DATA_BUFFER)
                     Marshal.PtrToStructure(outBuffer, typeof(REPARSE_DATA_BUFFER));
 
                 if (reparseDataBuffer.ReparseTag != IO_REPARSE_TAG_MOUNT_POINT)
                     return null;
 
-                string targetDir = Encoding.Unicode.GetString(reparseDataBuffer.PathBuffer,
+                var targetDir = Encoding.Unicode.GetString(reparseDataBuffer.PathBuffer,
                     reparseDataBuffer.SubstituteNameOffset, reparseDataBuffer.SubstituteNameLength);
 
                 if (targetDir.StartsWith(NonInterpretedPathPrefix))
@@ -388,7 +395,7 @@ namespace Winston.OS
 
         static SafeFileHandle OpenReparsePoint(string reparsePoint, EFileAccess accessMode)
         {
-            SafeFileHandle reparsePointHandle = new SafeFileHandle(CreateFile(reparsePoint, accessMode,
+            var reparsePointHandle = new SafeFileHandle(CreateFile(reparsePoint, accessMode,
                 EFileShare.Read | EFileShare.Write | EFileShare.Delete,
                 IntPtr.Zero, ECreationDisposition.OpenExisting,
                 EFileAttributes.BackupSemantics | EFileAttributes.OpenReparsePoint, IntPtr.Zero), true);

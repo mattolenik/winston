@@ -5,6 +5,7 @@ namespace Winston
 {
     static class WinApi
     {
+#pragma warning disable CC0057 // Unused parameters
         // http://www.pinvoke.net/default.aspx/user32.sendmessagetimeout
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessageTimeout(
@@ -33,5 +34,6 @@ namespace Winston
 
         // http://www.pinvoke.net/default.aspx/Constants/HWND.html
         public static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);
+#pragma warning restore CC0057 // Unused parameters
     }
 }

@@ -15,12 +15,12 @@ namespace Winston
     {
         static readonly string cellarDirName = "cellar";
 
-        public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames)
-            => await AddApps(cellar, user, cache, appNames as IEnumerable<string>);
+        public static async Task AddAppsAsync(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames)
+            => await AddAppsAsync(cellar, user, cache, appNames as IEnumerable<string>);
 
-        public static async Task AddApps(Cellar cellar, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
+        public static async Task AddAppsAsync(Cellar cellar, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
         {
-            var pkgs = await cache.ByNames(appNames);
+            var pkgs = await cache.ByNamesAsync(appNames);
             var pkgsList = pkgs as List<Package> ?? pkgs.ToList();
             if (!pkgsList.Any())
             {
@@ -29,17 +29,17 @@ namespace Winston
             }
             var unique = pkgsList.Where(p => p.Variants.Count == 0);
             var ambiguous = pkgsList.Where(p => p.Variants.Count > 0);
-            var choiceTasks = ambiguous.Select(async choices => await Disambiguate(user, SelectPlatform(choices)));
+            var choiceTasks = ambiguous.Select(async choices => await DisambiguateAsync(user, SelectPlatform(choices)));
             var chosen = Task.WhenAll(choiceTasks).Result;
             // TODO: break this up
-            Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.Add(p)).ToArray());
+            Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.AddAsync(p)).ToArray());
         }
 
-        public static async Task RemoveApps(Cellar cellar, IEnumerable<string> apps) => await RemoveApps(cellar, apps.ToArray());
+        public static async Task RemoveAppsAsync(Cellar cellar, IEnumerable<string> apps) => await RemoveAppsAsync(cellar, apps.ToArray());
 
-        public static async Task RemoveApps(Cellar cellar, params string[] apps)
+        public static async Task RemoveAppsAsync(Cellar cellar, params string[] apps)
         {
-            await Task.WhenAll(apps.Select(async appName => await cellar.Remove(appName)));
+            await Task.WhenAll(apps.Select(async appName => await cellar.RemoveAsync(appName)));
         }
 
         static IEnumerable<Package> SelectPlatform(Package pkg)
@@ -49,13 +49,13 @@ namespace Winston
         }
 
         // TODO: abstract away from text/console
-        static async Task<Package> Disambiguate(UserProxy queue, IEnumerable<Package> choices)
+        static async Task<Package> DisambiguateAsync(UserProxy queue, IEnumerable<Package> choices)
         {
             var first = choices.FirstOrDefault();
             if (first != null) return first;
 
             var sb = new StringBuilder();
-            var msg = "\nMultiple packages found, please select which to install:\n\n";
+            const string msg = "\nMultiple packages found, please select which to install:\n\n";
             sb.Append(msg);
 
             var choicesArray = choices as Package[] ?? choices.ToArray();
@@ -77,12 +77,12 @@ namespace Winston
             // TODO: make Question generic to avoid conversion
             var chs = Enumerable.Range(1, choicesArray.Length).Select(x => x.ToString());
             var q = new Question(preamble, "Which package number?", chs);
-            var answer = await queue.Ask(q);
+            var answer = await queue.AskAsync(q);
             var ansInt = int.Parse(answer) - 1;
             return choicesArray[ansInt];
         }
 
-        public static async Task SelfInstall(Cellar cellar, string installFromDir)
+        public static async Task SelfInstallAsync(Cellar cellar, string installFromDir)
         {
             var fullDir = Path.GetFullPath(installFromDir);
             var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winston.exe"));
@@ -94,12 +94,10 @@ namespace Winston
                 Type = PackageType.Shell,
                 Version = ver.FileVersion
             };
-            await cellar.Add(pkg);
-
-            SetupPowerShell();
+            await cellar.AddAsync(pkg);
         }
 
-        public static async Task Bootstrap(string installSource, string destination, Config config)
+        public static async Task BootstrapAsync(string installSource, string destination, Config config)
         {
             var installSourceFull = Path.GetFullPath(installSource);
             var ver = FileVersionInfo.GetVersionInfo(Path.Combine(installSourceFull, "winston.exe"));
@@ -113,7 +111,7 @@ namespace Winston
             };
             // Save config to tell Winston to live in {destination}, making it portable to that directory
             var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), config);
-            await cellar.Add(pkg);
+            await cellar.AddAsync(pkg);
             var cfg = new Config
             {
                 WinstonDir = "../../../",
@@ -123,24 +121,6 @@ namespace Winston
             Directory.CreateDirectory(cfgDir);
             var cfgFile = Path.Combine(cfgDir, "config.yml");
             Yml.Save(cfg, cfgFile);
-        }
-
-        static void SetupPowerShell()
-        {
-//            var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-//            var profile = Path.Combine(docs, @"WindowsPowerShell\Microsoft.PowerShell_profile.ps1");
-//            var modules = Path.Combine(docs, @"WindowsPowerShell\Modules\Winston\");
-//            Directory.CreateDirectory(modules);
-//            File.Copy("winston.psm1", Path.Combine(modules, "winston.psm1"), true);
-
-//            var line = $"Import-Module winston.psm1 {PowerShellUniq}";
-//            var oldProfile = File.Exists(profile) ? File.ReadAllLines(profile) : new string[] { };
-//            // Filter old lines and concat new line
-//            var newProfile =
-//                oldProfile
-//                    .Where(l => !l.ContainsInvIgnoreCase(PowerShellUniq))
-//                    .Concat(new[] { line });
-//            File.WriteAllLines(profile, newProfile);
         }
     }
 }

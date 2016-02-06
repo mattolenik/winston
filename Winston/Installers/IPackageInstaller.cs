@@ -6,7 +6,7 @@ namespace Winston.Installers
 {
     public interface IPackageInstaller : IDisposable
     {
-        Task<DirectoryInfo> Install(Progress progress );
-        Task<Exception> Validate();
+        Task<DirectoryInfo> InstallAsync(Progress progress );
+        Task<Exception> ValidateAsync();
     }
 }

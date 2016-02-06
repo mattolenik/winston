@@ -22,14 +22,14 @@ namespace Winston.Installers
             this.pkgDir = pkgDir;
         }
 
-        public async Task<DirectoryInfo> Install(Progress progress)
+        public async Task<DirectoryInfo> InstallAsync(Progress progress)
         {
             var installDir = Path.Combine(pkgDir, pkg.ResolveVersion() ?? "default");
-            await FS.CopyDirectory(pkg.URL.LocalPath, installDir, progress);
+            await FS.CopyDirectoryAsync(pkg.URL.LocalPath, installDir, progress);
             return new DirectoryInfo(installDir);
         }
 
-        public Task<Exception> Validate()
+        public Task<Exception> ValidateAsync()
         {
             return Task.FromResult(null as Exception);
         }

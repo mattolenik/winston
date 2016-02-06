@@ -54,19 +54,19 @@ namespace Winston.Installers
             return null;
         }
 
-        public async Task<string> Install(Progress progress)
+        public async Task<string> InstallAsync(Progress progress)
         {
-            await Extract(packageFile, appDir, progress);
+            await ExtractAsync(packageFile, appDir, progress);
             return Path.Combine(appDir, filename ?? "");
         }
 
-        public Task<Exception> Validate()
+        public static Task<Exception> ValidateAsync()
         {
             // TODO: verify all files get extracted by comparing them to the ZIP header?
             return Task.FromResult<Exception>(null);
         }
 
-        static async Task Extract(string filename, string destination, Progress progress)
+        static async Task ExtractAsync(string filename, string destination, Progress progress)
         {
             Directory.Delete(destination, true);
             var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -79,21 +79,23 @@ namespace Winston.Installers
                 RedirectStandardInput = true,
                 UseShellExecute = false
             };
-            var proc = new Process { StartInfo = si };
-            proc.Start();
-            var exited = await proc.WaitForExitAsync(ExtractionTimeout);
-            if (!exited)
+            using (var proc = new Process { StartInfo = si })
             {
-                proc.Kill();
-                throw new TimeoutException($"Extraction of '{filename}' took longer than {ExtractionTimeout}, aborting");
+                proc.Start();
+                var exited = await proc.WaitForExitAsync(ExtractionTimeout);
+                if (!exited)
+                {
+                    proc.Kill();
+                    throw new TimeoutException($"Extraction of '{filename}' took longer than {ExtractionTimeout}, aborting");
+                }
+                if (proc.ExitCode != 0)
+                {
+                    // TODO: better exception type
+                    throw new Exception(
+                        $"Failed to extract archive '{filename}'. 7zip exit code: {proc.ExitCode}");
+                }
+                progress.CompletedInstall();
             }
-            if (proc.ExitCode != 0)
-            {
-                // TODO: better exception type
-                throw new Exception(
-                    $"Failed to extract archive '{filename}'. 7zip exit code: {proc.ExitCode}");
-            }
-            progress.CompletedInstall();
         }
     }
 }

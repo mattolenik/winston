@@ -42,15 +42,15 @@ namespace Winston.OS
             }
         }
 
-        public static Task CopyDirectory(string source, string destination, Progress progress) => Task.Run(() =>
+        public static Task CopyDirectoryAsync(string source, string destination, Progress progress) => Task.Run(() =>
         {
             progress.UpdateInstall(0);
             var total = Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories).Count();
-            int current = 0;
+            var current = 0;
             CopyDir(source, destination, progress, total, ref current);
         });
 
-        public static async Task<string> GetSHA1(string file) => await Task.Run(() =>
+        public static async Task<string> GetSHA1Async(string file) => await Task.Run(() =>
         {
             using (var f = File.OpenRead(file))
             {
@@ -60,9 +60,11 @@ namespace Winston.OS
 
         public static string GetSHA1(Stream stream)
         {
-            var sha = new SHA1CryptoServiceProvider();
-            var hash = sha.ComputeHash(stream);
-            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            using (var sha = new SHA1CryptoServiceProvider())
+            {
+                var hash = sha.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
         }
 
         internal static IList<string> ParsePaths(string pathVar)

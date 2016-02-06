@@ -22,8 +22,9 @@ namespace Winston.Serialization
             {
                 result = Load<T>(path);
             }
-            catch
+            catch(Exception ex)
             {
+                Console.Error.WriteLine(ex);
                 result = default(T);
                 return false;
             }

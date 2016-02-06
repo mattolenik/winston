@@ -4,7 +4,7 @@ namespace Winston.User
 {
     public interface IUserAdapter
     {
-        Task<string> Ask(Question question);
+        Task<string> AskAsync(Question question);
         void Message(string message);
         Progress NewProgress(string name);
     }

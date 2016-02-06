@@ -27,10 +27,10 @@ namespace Winston.User
             catch (Exception) { }
         }
 
-        public async Task<string> Ask(Question question) => await Task.Run(() =>
+        public async Task<string> AskAsync(Question question) => await Task.Run(() =>
         {
             output.WriteLine(question.Preamble);
-            bool match = false;
+            var match = false;
             string response = null;
             while (!match)
             {
@@ -64,7 +64,7 @@ namespace Winston.User
             {
                 lock (progressLock)
                 {
-                    var pos = roundDotPos(p, result.ProgressPrefix);
+                    var pos = RoundDotPos(p, result.ProgressPrefix);
                     try
                     {
                         for (int i = result.Last.Value; i < pos; i++)
@@ -81,7 +81,7 @@ namespace Winston.User
             {
                 lock (progressLock)
                 {
-                    var pos = roundDotPos(p, result.ProgressPrefix);
+                    var pos = RoundDotPos(p, result.ProgressPrefix);
                     try
                     {
                         for (int i = result.Last.Value; i < pos; i++)
@@ -118,7 +118,7 @@ namespace Winston.User
             return result;
         }
 
-        int roundDotPos(int p, string prefix)
+        static int RoundDotPos(int p, string prefix)
         {
             return (int)Math.Round((p / 100.0) * (80.0 - prefix.Length));
         }

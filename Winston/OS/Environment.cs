@@ -8,11 +8,13 @@ namespace Winston.OS
 {
     static class Environment
     {
+        const string EnvironmentKey = "EnvironmentKey";
+
         public static void AddToPath(string path, string scrub = null)
         {
             using (var cu = Registry.CurrentUser)
             {
-                var env = cu.OpenSubKey("Environment", true);
+                var env = cu.OpenSubKey(EnvironmentKey, true);
                 var pathVar = env.GetValue("PATH", "") as string;
                 var paths = FS.ParsePaths(pathVar);
 
@@ -36,7 +38,7 @@ namespace Winston.OS
         {
             using (var cu = Registry.CurrentUser)
             {
-                var env = cu.OpenSubKey("Environment", true);
+                var env = cu.OpenSubKey(EnvironmentKey, true);
                 var pathVar = env.GetValue("PATH", "", RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
                 var paths = FS.ParsePaths(pathVar);
                 var without =
@@ -51,8 +53,8 @@ namespace Winston.OS
         {
             // Send WM_SETTINGCHANGE message to all windows. Explorer will pick this up and new
             // cmd processes will see the new PATH variable.
-            IntPtr lParamA = Marshal.StringToHGlobalAnsi("Environment");
-            IntPtr lParamU = Marshal.StringToHGlobalUni("Environment");
+            var lParamA = Marshal.StringToHGlobalAnsi(EnvironmentKey);
+            var lParamU = Marshal.StringToHGlobalUni(EnvironmentKey);
             try
             {
                 // Be sure to send both Unicode and ANSI messages

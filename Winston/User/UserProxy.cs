@@ -23,13 +23,13 @@ namespace Winston.User
                 while (!cancel.Token.IsCancellationRequested)
                 {
                     var q = await buf.ReceiveAsync(cancel.Token);
-                    var answer = await adapter.Ask(q);
+                    var answer = await adapter.AskAsync(q);
                     await q.answerBlock.SendAsync(answer);
                 }
             });
         }
 
-        public async Task<string> Ask(Question question)
+        public async Task<string> AskAsync(Question question)
         {
             var b = new WriteOnceBlock<string>(s => s);
             question.answerBlock = b;
@@ -48,6 +48,6 @@ namespace Winston.User
             return adapter.NewProgress(name);
         }
 
-        public void Dispose() => cancel?.Dispose();
+        public void Dispose() => cancel.Dispose();
     }
 }

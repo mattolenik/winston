@@ -9,7 +9,9 @@ namespace Winston.User
 
         public string Query { get; }
         public IEnumerable<string> Answers { get; }
+#pragma warning disable CC0052 // Make field readonly
         internal WriteOnceBlock<string> answerBlock;
+#pragma warning restore CC0052 // Make field readonly
 
         public Question(string preamble, string query, params string[] answers) :
             this(preamble, query, answers as IEnumerable<string>)

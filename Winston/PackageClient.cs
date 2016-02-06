@@ -16,7 +16,7 @@ namespace Winston
             this.pkgDir = pkgDir;
         }
 
-        public async Task<DirectoryInfo>Install(Progress progress)
+        public async Task<DirectoryInfo> InstallAsync(Progress progress)
         {
             var installer = LocalDirectoryInstaller.TryCreate(pkg, pkgDir) ??
                             HttpPackageInstaller.TryCreate(pkg, pkgDir);
@@ -25,8 +25,8 @@ namespace Winston
             {
                 throw new InvalidOperationException($"Could not find suitable installer for package {pkg}");
             }
-            var installPath = await installer.Install(progress);
-            var error = await installer.Validate();
+            var installPath = await installer.InstallAsync(progress);
+            var error = await installer.ValidateAsync();
             if (error != null)
             {
                 throw error;

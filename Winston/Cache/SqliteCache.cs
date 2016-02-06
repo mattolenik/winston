@@ -20,15 +20,15 @@ namespace Winston.Cache
             SQLiteConnection.CreateFile(dbPath);
         }
 
-        public static async Task<SqliteCache> Create(string winstonDir)
+        public static async Task<SqliteCache> CreateAsync(string winstonDir)
         {
             var dbPath = Path.Combine(winstonDir, "cache.sqlite");
             var cache = new SqliteCache(dbPath);
-            await cache.Load();
+            await cache.LoadAsync();
             return cache;
         }
 
-        async Task<bool> TryCreateTables() => await Task.Run(() =>
+        async Task<bool> TryCreateTablesAsync() => await Task.Run(() =>
         {
             using (var t = Db.BeginTransaction())
             {
@@ -41,20 +41,21 @@ namespace Winston.Cache
                     result = Db.Execute(Tables.PackageSearch.CreateStatement, transaction: t);
                     t.Commit();
                 }
-                catch
+                catch (Exception ex)
                 {
                     t.Rollback();
+                    Console.Error.WriteLine(ex);
                     return false;
                 }
             }
             return true;
         });
 
-        async Task Load()
+        async Task LoadAsync()
         {
             Db = new SQLiteConnection($"Data Source={dbPath}");
             await Db.OpenAsync();
-            var canContinue = await TryCreateTables();
+            var canContinue = await TryCreateTablesAsync();
             if (!canContinue)
             {
                 // If the expected schema can't be created, delete
@@ -65,7 +66,7 @@ namespace Winston.Cache
                 Db = new SQLiteConnection($"Data Source={dbPath}");
                 await Db.OpenAsync();
                 // If table creation still fails, throw
-                canContinue = await TryCreateTables();
+                canContinue = await TryCreateTablesAsync();
                 if (!canContinue)
                 {
                     throw new Exception("Unable to create cache database");
@@ -73,14 +74,14 @@ namespace Winston.Cache
             }
         }
 
-        public async Task AddRepo(string uriOrPath)
+        public async Task AddRepoAsync(string uriOrPath)
         {
             uriOrPath = new Uri(uriOrPath).AbsoluteUri;
             var result = Db.Execute("insert or replace into Sources (URI) values (@URI)", new { URI = uriOrPath });
-            await LoadRepo(uriOrPath);
+            await LoadRepoAsync(uriOrPath);
         }
 
-        async Task LoadRepo(string uriOrPath) => await Task.Run(() =>
+        async Task LoadRepoAsync(string uriOrPath) => await Task.Run(() =>
         {
             // TODO: non-crash handling of missing or failed repos
             if (!LocalFileRepo.CanLoad(uriOrPath))
@@ -119,16 +120,16 @@ namespace Winston.Cache
             }
         });
 
-        public async Task Refresh()
+        public async Task RefreshAsync()
         {
             var repos = await Db.QueryAsync<string>("select URI from Sources");
             foreach (var repo in repos)
             {
-                await LoadRepo(repo);
+                await LoadRepoAsync(repo);
             }
         }
 
-        public async Task<Package> ByName(string pkgName)
+        public async Task<Package> ByNameAsync(string pkgName)
         {
             var result = await Db.QueryAsync<string>("select PackageData from Packages where Name = @Name", new { Name = pkgName });
             var json = result.SingleOrDefault();
@@ -137,14 +138,14 @@ namespace Winston.Cache
             return pkg;
         }
 
-        public async Task<IList<Package>> ByNames(IEnumerable<string> names)
+        public async Task<IList<Package>> ByNamesAsync(IEnumerable<string> names)
         {
             // SQLite is going to end up executing these all in serial anyway,
             // little point in making this code parallel.
             var result = new List<Package>();
             foreach (var name in names)
             {
-                var match = await ByName(name);
+                var match = await ByNameAsync(name);
                 if (match != null)
                 {
                     result.Add(match);
@@ -153,7 +154,7 @@ namespace Winston.Cache
             return result;
         }
 
-        public async Task<IList<Package>> Search(string query)
+        public async Task<IList<Package>> SearchAsync(string query)
         {
             var nameMatches = await Db.QueryAsync<string>("select distinct Name from PackageSearch where Name match @query", new { query });
             var descMatches = await Db.QueryAsync<string>("select distinct Name from PackageSearch where Desc match @query", new { query });
@@ -174,7 +175,7 @@ namespace Winston.Cache
             return result;
         }
 
-        public async Task<IEnumerable<Package>> All()
+        public async Task<IEnumerable<Package>> AllAsync()
         {
             var result = await Db.QueryAsync<string>("select PackageData from Packages");
             var pkgs = result.Select(JSON.ToObject<Package>);

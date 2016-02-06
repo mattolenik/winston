@@ -30,7 +30,7 @@ namespace Winston.Installers
             tmpFile = new TempFile();
         }
 
-        public async Task<DirectoryInfo> Install(Progress progress)
+        public async Task<DirectoryInfo> InstallAsync(Progress progress)
         {
             using (var c = new WebClient())
             {
@@ -38,7 +38,7 @@ namespace Winston.Installers
                 await c.DownloadFileTaskAsync(pkg.URL, tmpFile);
                 progress.CompletedDownload();
 
-                var hash = await FS.GetSHA1(tmpFile);
+                var hash = await FS.GetSHA1Async(tmpFile);
                 // Only check when SHA1 is specified in the package metadata
                 if (!string.IsNullOrWhiteSpace(pkg.SHA1) &&
                     !string.Equals(hash, pkg.SHA1, StringComparison.OrdinalIgnoreCase))
@@ -76,7 +76,7 @@ namespace Winston.Installers
 
                 if (archive != null)
                 {
-                    var p = await archive.Install(progress);
+                    var p = await archive.InstallAsync(progress);
                     progress.CompletedInstall();
                 }
                 else
@@ -89,7 +89,7 @@ namespace Winston.Installers
         }
 
 
-        public Task<Exception> Validate()
+        public Task<Exception> ValidateAsync()
         {
             return Task.FromResult(null as Exception);
         }
