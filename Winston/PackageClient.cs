@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Winston.Installers;
+using Winston.Packaging;
 
 namespace Winston
 {

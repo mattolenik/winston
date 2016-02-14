@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Winston.Packaging;
 
 namespace Winston.Installers
 {

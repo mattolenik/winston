@@ -9,6 +9,7 @@ using Winston.Cache;
 using Winston.OS;
 using Xunit;
 using FluentAssertions;
+using Winston.Packaging;
 
 namespace Winston.Test
 {
@@ -17,7 +18,7 @@ namespace Winston.Test
         public SqliteCache Cache { get; private set; }
         public TempDirectory Dir { get; private set; }
         public TempFile RepoFile { get; private set; }
-        public Repo Repo { get; private set; }
+        public PackageSource PackageSource { get; private set; }
 
         public CacheFixture()
         {
@@ -25,7 +26,7 @@ namespace Winston.Test
             {
                 Dir = new TempDirectory("winston-test-");
                 Cache = await SqliteCache.CreateAsync(Dir);
-                Repo = new Repo("test")
+                PackageSource = new PackageSource("test")
                 {
                     Packages = new List<Package>
                     {
@@ -36,7 +37,7 @@ namespace Winston.Test
                     }
                 };
                 RepoFile = new TempFile();
-                var json = JSON.ToJSON(Repo);
+                var json = JSON.ToJSON(PackageSource);
                 File.WriteAllText(RepoFile, json);
                 await Cache.AddRepoAsync(RepoFile);
             }).Wait();
@@ -77,7 +78,7 @@ namespace Winston.Test
         public async void FindByTitleSearch()
         {
             var pkgs = await fixture.Cache.SearchAsync("Pkg");
-            pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
+            pkgs.Count().Should().Be(fixture.PackageSource.Packages.Count);
         }
 
         [Fact]
@@ -93,7 +94,7 @@ namespace Winston.Test
         public async void GetAll()
         {
             var pkgs = await fixture.Cache.AllAsync();
-            pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
+            pkgs.Count().Should().Be(fixture.PackageSource.Packages.Count);
         }
 
         [Fact]
@@ -104,7 +105,7 @@ namespace Winston.Test
             pkgs.Should().BeEmpty();
             await fixture.Cache.RefreshAsync();
             pkgs = await fixture.Cache.AllAsync();
-            pkgs.Count().Should().Be(fixture.Repo.Packages.Count);
+            pkgs.Count().Should().Be(fixture.PackageSource.Packages.Count);
         }
     }
 }

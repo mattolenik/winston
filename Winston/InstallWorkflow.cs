@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Winston.Cache;
+using Winston.Packaging;
 using Winston.Serialization;
 using Winston.User;
 

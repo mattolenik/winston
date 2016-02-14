@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\Indexes.cs" />
+    <Compile Include="Cache\LocalFileRepo.cs" />
     <Compile Include="Cache\Tables.cs" />
     <Compile Include="EnvUpdate.cs" />
     <Compile Include="ExitCodes.cs" />
@@ -97,7 +98,11 @@
     <Compile Include="Installers\Content.cs" />
     <Compile Include="Installers\ExeExtractor.cs" />
     <Compile Include="Installers\IPackageInstaller.cs" />
+    <Compile Include="Packaging\Package.cs" />
     <Compile Include="PackageClient.cs" />
+    <Compile Include="Packaging\PackageFileType.cs" />
+    <Compile Include="Packaging\PackageType.cs" />
+    <Compile Include="Packaging\Platform.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -116,7 +121,7 @@
     <Compile Include="User\Question.cs" />
     <Compile Include="User\UserProxy.cs" />
     <Compile Include="Reflect.cs" />
-    <Compile Include="Repo.cs" />
+    <Compile Include="Packaging\PackageSource.cs" />
     <Compile Include="OS\TempFile.cs" />
     <Compile Include="WinApi.cs" />
     <Compile Include="Winmain.cs" />

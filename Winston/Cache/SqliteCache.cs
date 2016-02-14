@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using fastJSON;
+using Winston.Packaging;
 
 namespace Winston.Cache
 {
@@ -86,10 +87,10 @@ namespace Winston.Cache
             // TODO: non-crash handling of missing or failed repos
             if (!LocalFileRepo.CanLoad(uriOrPath))
             {
-                throw new Exception("Can't load repo " + uriOrPath);
+                throw new Exception("Can't load PackageSource " + uriOrPath);
             }
 
-            Repo r;
+            PackageSource r;
             if (!LocalFileRepo.TryLoad(uriOrPath, out r))
             {
                 throw new Exception($"Unable to load repo with URI: {uriOrPath}");
@@ -195,39 +196,4 @@ namespace Winston.Cache
 namespace Winston
 {
     // TODO: find a better way to do this
-    static class LocalFileRepo
-    {
-        public static bool CanLoad(string uriOrPath)
-        {
-            Uri p;
-            return Uri.TryCreate(uriOrPath, UriKind.RelativeOrAbsolute, out p);
-        }
-
-        public static bool TryLoad(string uriOrPath, out Repo repo)
-        {
-            try
-            {
-                Uri path;
-                if (!Uri.TryCreate(uriOrPath, UriKind.RelativeOrAbsolute, out path))
-                {
-                    repo = null;
-                    return false;
-                }
-                var resolvedPath = path.IsAbsoluteUri ? path.LocalPath : uriOrPath;
-                if (File.Exists(resolvedPath))
-                {
-                    repo = JSON.ToObject<Repo>(File.ReadAllText(resolvedPath));
-                    repo.URL = uriOrPath;
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Unable to refresh repo");
-                Console.Error.WriteLine(e);
-            }
-            repo = null;
-            return false;
-        }
-    }
 }

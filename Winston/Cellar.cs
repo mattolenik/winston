@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using fastJSON;
 using NativeInjector;
 using Winston.OS;
+using Winston.Packaging;
 using Winston.User;
 using YamlDotNet.Serialization;
 using Environment = Winston.OS.Environment;
@@ -76,7 +77,6 @@ namespace Winston
 
         static void InjectPathIntoParent(string installPath)
         {
-            Debugger.Launch();
             var pid = ParentProcessId((uint)Process.GetCurrentProcess().Id);
             if (pid == null)
             {

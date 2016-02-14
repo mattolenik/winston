@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using fastJSON;
 using Winston.OS;
+using Winston.Packaging;
 using Winston.Serialization;
 
 namespace Winston.Installers

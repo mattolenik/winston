@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.IO;
 using System.Threading.Tasks;
+using Winston.Packaging;
 
 namespace Winston.Installers
 {
