@@ -49,7 +49,7 @@ namespace Winston
             using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
             using (var cache = await SqliteCache.CreateAsync(cfg.Config.WinstonDir))
             {
-                var cellar = new Cellar(user, cfg.Config.WinstonDir);
+                var repo = new Repo(user, cfg.Config.WinstonDir);
                 // TODO: find a better way to setup repos
                 // Set up default repo
                 if (verb != "selfinstall" && cache.Empty())
@@ -63,13 +63,13 @@ namespace Winston
                     case "add":
                     case "install":
                         {
-                            await AddAppsAsync(cellar, user, cache, verbArgs);
+                            await AddAppsAsync(repo, user, cache, verbArgs);
                             return ExitCodes.Install;
                         }
                     case "remove":
                     case "uninstall":
                         {
-                            await RemoveAppsAsync(cellar, verbArgs);
+                            await RemoveAppsAsync(repo, verbArgs);
                             return ExitCodes.Uninstall;
                         }
                     case "search":
@@ -83,7 +83,7 @@ namespace Winston
                         }
                     case "list":
                         {
-                            var pkgs = await cellar.ListAsync();
+                            var pkgs = await repo.ListAsync();
                             foreach (var pkg in pkgs)
                             {
                                 Console.WriteLine(pkg.ToString());
@@ -112,7 +112,7 @@ namespace Winston
                         }
                     case "restore":
                         {
-                            await cellar.RestoreAsync();
+                            await repo.RestoreAsync();
                             return ExitCodes.Restore;
                         }
                     case "help":
@@ -122,7 +122,7 @@ namespace Winston
                         }
                     case "selfinstall":
                         {
-                            await SelfInstallAsync(cellar, verbArgs.FirstOrDefault() ?? ".");
+                            await SelfInstallAsync(repo, verbArgs.FirstOrDefault() ?? ".");
                             break;
                         }
                     default:

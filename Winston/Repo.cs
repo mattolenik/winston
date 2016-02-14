@@ -16,28 +16,28 @@ using static NativeInjector.Utils;
 
 namespace Winston
 {
-    public class Cellar
+    public class Repo
     {
         readonly UserProxy user;
 
-        public string CellarPath { get; }
+        public string RepoPath { get; }
 
         public string BinPath { get; }
 
-        public Cellar(UserProxy user, string root)
+        public Repo(UserProxy user, string root)
         {
             this.user = user;
             root = Path.GetFullPath(root);
-            CellarPath = Path.Combine(root, @"cellar\");
+            RepoPath = Path.Combine(root, @"repo\");
             BinPath = Path.Combine(root, @"bin\");
             Path.GetTempPath();
-            Directory.CreateDirectory(CellarPath);
+            Directory.CreateDirectory(RepoPath);
             Directory.CreateDirectory(BinPath);
         }
 
         public async Task<string> AddAsync(Package pkg, bool inject = true, bool writeRegistryPath = true)
         {
-            var pkgDir = Path.Combine(CellarPath, pkg.Name);
+            var pkgDir = Path.Combine(RepoPath, pkg.Name);
             var client = new PackageClient(pkg, pkgDir);
             var progress = user.NewProgress(pkg.Name);
             var installDir = await client.InstallAsync(progress);
@@ -72,7 +72,7 @@ namespace Winston
 
         static void UpdateRegistryPath(string installPath)
         {
-            Environment.AddToPath(installPath, @"winston\cellar");
+            Environment.AddToPath(installPath, @"winston\repo");
         }
 
         static void InjectPathIntoParent(string installPath)
@@ -95,7 +95,7 @@ namespace Winston
 
         public async Task RemoveAsync(string name)
         {
-            var pkgDir = Path.Combine(CellarPath, name);
+            var pkgDir = Path.Combine(RepoPath, name);
             if (!Directory.Exists(pkgDir))
             {
                 return;
@@ -116,7 +116,7 @@ namespace Winston
 
         public async Task<Package[]> ListAsync()
         {
-            var pkgFiles = Directory.GetFiles(CellarPath, "pkg.json", SearchOption.AllDirectories);
+            var pkgFiles = Directory.GetFiles(RepoPath, "pkg.json", SearchOption.AllDirectories);
             var tasks = pkgFiles.Select(async p => await Task.Run(() =>
             {
                 var deserializer = new Deserializer();
@@ -132,7 +132,7 @@ namespace Winston
         public async Task RestoreAsync() => await Task.Run(() =>
         {
             var pkgs =
-                Directory.GetFiles(CellarPath, "pkg.json", SearchOption.AllDirectories)
+                Directory.GetFiles(RepoPath, "pkg.json", SearchOption.AllDirectories)
                     .Select(x => new
                     {
                         File = new FileInfo(x),

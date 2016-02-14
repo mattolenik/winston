@@ -11,11 +11,11 @@ namespace Winston.Packaging
 
         public string Maintainer { get; set; }
 
-        public Uri URL { get; set; }
+        public Uri Location { get; set; }
 
         public string Filename { get; set; }
 
-        public string SHA1 { get; set; }
+        public string Sha1 { get; set; }
 
         public string Path { get; set; }
 
@@ -36,7 +36,7 @@ namespace Winston.Packaging
         public string ResolveVersion()
         {
             // TODO: check if null check is sufficient or if IsNullOrWhitespace is needed. Depends on serialization behavior.
-            return Version ?? SHA1;
+            return Version ?? Sha1;
         }
 
         public Package Merge(Package other)
@@ -46,7 +46,7 @@ namespace Winston.Packaging
                 Name = Name ?? other.Name,
                 Description = Description ?? other.Description,
                 Maintainer = Maintainer ?? other.Maintainer,
-                URL = URL ?? other.URL,
+                Location = Location ?? other.Location,
                 Filename = Filename ?? other.Filename,
                 Path = Path ?? other.Path,
                 Type = Type != PackageType.Nil ? Type : other.Type,
@@ -61,7 +61,7 @@ namespace Winston.Packaging
 
         public override string ToString()
         {
-            var result = $"- Name: {Name}\n  URI: {URL}\n";
+            var result = $"- Name: {Name}\n  URI: {Location}\n";
             if (Version != null) result += $"Version: {Version}";
             return result;
         }

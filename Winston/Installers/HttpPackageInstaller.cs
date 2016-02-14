@@ -17,7 +17,7 @@ namespace Winston.Installers
 
         public static IPackageInstaller TryCreate(Package pkg, string pkgDir)
         {
-            if (pkg.URL.Scheme == "http" || pkg.URL.Scheme == "https")
+            if (pkg.Location.Scheme == "http" || pkg.Location.Scheme == "https")
             {
                 return new HttpPackageInstaller(pkg, pkgDir);
             }
@@ -36,15 +36,15 @@ namespace Winston.Installers
             using (var c = new WebClient())
             {
                 c.DownloadProgressChanged += (sender, args) => progress.UpdateDownload(args.ProgressPercentage);
-                await c.DownloadFileTaskAsync(pkg.URL, tmpFile);
+                await c.DownloadFileTaskAsync(pkg.Location, tmpFile);
                 progress.CompletedDownload();
 
                 var hash = await FS.GetSHA1Async(tmpFile);
-                // Only check when SHA1 is specified in the package metadata
-                if (!string.IsNullOrWhiteSpace(pkg.SHA1) &&
-                    !string.Equals(hash, pkg.SHA1, StringComparison.OrdinalIgnoreCase))
+                // Only check when Sha1 is specified in the package metadata
+                if (!string.IsNullOrWhiteSpace(pkg.Sha1) &&
+                    !string.Equals(hash, pkg.Sha1, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new InvalidDataException($"SHA1 hash of remote file {pkg.URL} did not match {pkg.SHA1}");
+                    throw new InvalidDataException($"SHA1 hash of remote file {pkg.Location} did not match {pkg.Sha1}");
                 }
                 var version = pkg.ResolveVersion() ?? hash;
 
@@ -62,16 +62,16 @@ namespace Winston.Installers
                 switch (pkg?.FileType)
                 {
                     case PackageFileType.Archive:
-                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL);
+                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.Location);
                         break;
 
                     case PackageFileType.Binary:
-                        archive = ExeExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL);
+                        archive = ExeExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.Location);
                         break;
 
                     default:
-                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL) ??
-                                      ExeExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.URL);
+                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.Location) ??
+                                      ExeExtractor.TryCreate(pkg, installDir, tmpFile, c.ResponseHeaders, pkg.Location);
                         break;
                 }
 
@@ -82,7 +82,7 @@ namespace Winston.Installers
                 }
                 else
                 {
-                    throw new NotSupportedException("Unable to identify type of package at URL: " + pkg.URL);
+                    throw new NotSupportedException("Unable to identify type of package at Location: " + pkg.Location);
                 }
 
                 return new DirectoryInfo(installDir);

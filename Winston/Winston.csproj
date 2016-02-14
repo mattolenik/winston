@@ -99,7 +99,7 @@
     <Compile Include="Installers\ExeExtractor.cs" />
     <Compile Include="Installers\IPackageInstaller.cs" />
     <Compile Include="Packaging\Package.cs" />
-    <Compile Include="PackageClient.cs" />
+    <Compile Include="Packaging\PackageClient.cs" />
     <Compile Include="Packaging\PackageFileType.cs" />
     <Compile Include="Packaging\PackageType.cs" />
     <Compile Include="Packaging\Platform.cs" />
@@ -110,7 +110,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Cache\SqliteCache.cs" />
-    <Compile Include="Cellar.cs" />
+    <Compile Include="Repo.cs" />
     <Compile Include="Serialization\JsonConfig.cs" />
     <Compile Include="Serialization\YmlUriConverter.cs" />
     <Compile Include="OS\TempDirectory.cs" />

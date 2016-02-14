@@ -30,7 +30,7 @@ namespace Winston.Test
                 {
                     Packages = new List<Package>
                     {
-                        new Package {Name = "Pkg 1", URL = new Uri("http://winston.ms/test")},
+                        new Package {Name = "Pkg 1", Location = new Uri("http://winston.ms/test")},
                         new Package {Name = "Pkg 2", Description = "packages with even numbers, two"},
                         new Package {Name = "Pkg 3", Description = "number three is odd"},
                         new Package {Name = "Pkg 4", Description = "packages with even numbers, four"},

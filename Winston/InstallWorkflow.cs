@@ -14,10 +14,10 @@ namespace Winston
 {
     static class InstallWorkflow
     {
-        public static async Task AddAppsAsync(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames)
-            => await AddAppsAsync(cellar, user, cache, appNames as IEnumerable<string>);
+        public static async Task AddAppsAsync(Repo repo, UserProxy user, SqliteCache cache, params string[] appNames)
+            => await AddAppsAsync(repo, user, cache, appNames as IEnumerable<string>);
 
-        public static async Task AddAppsAsync(Cellar cellar, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
+        public static async Task AddAppsAsync(Repo repo, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
         {
             var pkgs = await cache.ByNamesAsync(appNames);
             var pkgsList = pkgs as List<Package> ?? pkgs.ToList();
@@ -31,15 +31,15 @@ namespace Winston
             var choiceTasks = ambiguous.Select(async choices => await DisambiguateAsync(user, SelectPlatform(choices)));
             var chosen = Task.WhenAll(choiceTasks).Result;
             // TODO: break this up
-            var ap = unique.Union(chosen).Select(async p => await cellar.AddAsync(p));
+            var ap = unique.Union(chosen).Select(async p => await repo.AddAsync(p));
             await Task.WhenAll(ap);
         }
 
-        public static async Task RemoveAppsAsync(Cellar cellar, IEnumerable<string> apps) => await RemoveAppsAsync(cellar, apps.ToArray());
+        public static async Task RemoveAppsAsync(Repo repo, IEnumerable<string> apps) => await RemoveAppsAsync(repo, apps.ToArray());
 
-        public static async Task RemoveAppsAsync(Cellar cellar, params string[] apps)
+        public static async Task RemoveAppsAsync(Repo repo, params string[] apps)
         {
-            await Task.WhenAll(apps.Select(async appName => await cellar.RemoveAsync(appName)));
+            await Task.WhenAll(apps.Select(async appName => await repo.RemoveAsync(appName)));
         }
 
         static IEnumerable<Package> SelectPlatform(Package pkg)
@@ -82,7 +82,7 @@ namespace Winston
             return choicesArray[ansInt];
         }
 
-        public static async Task<string> SelfInstallAsync(Cellar cellar, string installFromDir)
+        public static async Task<string> SelfInstallAsync(Repo repo, string installFromDir)
         {
             var fullDir = Path.GetFullPath(installFromDir);
             var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winston.exe"));
@@ -90,11 +90,11 @@ namespace Winston
             {
                 Name = ver.ProductName,
                 Description = ver.Comments,
-                URL = new Uri(fullDir),
+                Location = new Uri(fullDir),
                 Type = PackageType.Shell,
                 Version = ver.FileVersion
             };
-            return await cellar.AddAsync(pkg);
+            return await repo.AddAsync(pkg);
         }
 
         public static async Task<string> BootstrapAsync(string installSource, string destination)
@@ -105,12 +105,12 @@ namespace Winston
             {
                 Name = ver.ProductName,
                 Description = ver.Comments,
-                URL = new Uri(installSourceFull),
+                Location = new Uri(installSourceFull),
                 Type = PackageType.Shell,
                 Version = ver.FileVersion
             };
-            var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), destination);
-            var pkgDir = await cellar.AddAsync(pkg: pkg, inject: true, writeRegistryPath: false);
+            var repo = new Repo(new UserProxy(new HeadlessUserAdapter()), destination);
+            var pkgDir = await repo.AddAsync(pkg: pkg, inject: true, writeRegistryPath: false);
             var cfg = new Config
             {
                 // This resolves to {destination}, relative to {pkgDir}
