@@ -5,7 +5,7 @@
     "Packages": [
         {
             "Name": "testapp",
-            "URL": "https://www.dropbox.com/s/8tfjdtzlxqkbqc0/TestApp.zip?dl=1",
+            "Location": "https://www.dropbox.com/s/8tfjdtzlxqkbqc0/TestApp.zip?dl=1",
             "Filename": "TestApp.exe",
             "Preserve": [
                 "testapp.ini"
@@ -15,25 +15,25 @@
                 "*.gif"
             ],
             "Type": "Shell",
-            "SHA1": "f59b7a76cc9df2ca09caa5a52922cce73eb0b99d"
+            "Sha1": "f59b7a76cc9df2ca09caa5a52922cce73eb0b99d"
         },
         {
             "Name": "cmder",
-            "URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder.zip"
+            "Location": "https://github.com/bliker/cmder/releases/download/v1.2/cmder.zip"
         },
         {
             "Name": "cmder-mini",
-            "URL": "https://github.com/bliker/cmder/releases/download/v1.2/cmder_mini.zip"
+            "Location": "https://github.com/bliker/cmder/releases/download/v1.2/cmder_mini.zip"
         },
         {
             "Name": "plink",
-            "URL": "http://the.earth.li/~sgtatham/putty/latest/x86/plink.exe",
+            "Location": "http://the.earth.li/~sgtatham/putty/latest/x86/plink.exe",
             "Type": "Shell"
         },
         {
             "Name": "7zip",
             "Description": "7zip archive tool",
-            "URL": "http://www.7-zip.org/a/7z1505-extra.7z",
+            "Location": "http://www.7-zip.org/a/7z1505-extra.7z",
             "Path": ".",
             "Platform": "x86",
             "Variants": [
@@ -47,7 +47,7 @@
         {
             "Name": "7zip-test",
             "Description": "7zip archive tool",
-            "URL": "https://www.dropbox.com/s/shdca56rutphg3r/7z1505-extra.7z?dl=1",
+            "Location": "https://www.dropbox.com/s/shdca56rutphg3r/7z1505-extra.7z?dl=1",
             "Path": ".",
             "Platform": "x86",
             "Variants": [
@@ -60,57 +60,57 @@
         {
             "Name": "dmd2",
             "Description": "Digital Mars D compiler and tools",
-            "URL": "http://downloads.dlang.org/releases/2.x/2.068.0/dmd.2.068.0.windows.zip",
+            "Location": "http://downloads.dlang.org/releases/2.x/2.068.0/dmd.2.068.0.windows.zip",
             "Path": "dmd2/windows/bin"
         },
         {
             "Name": "dmd2-test",
             "Description": "Digital Mars D compiler and tools",
-            "URL": "https://www.dropbox.com/s/a5n0hvqiulx10u8/dmd.2.068.0.windows.zip?dl=1",
+            "Location": "https://www.dropbox.com/s/a5n0hvqiulx10u8/dmd.2.068.0.windows.zip?dl=1",
             "Path": "dmd2/windows/bin"
         },
         {
             "Name": "clink",
             "Description": "Powerful Bash-style command line editing for cmd.exe",
-            "URL": "https://github.com/mridgers/clink/releases/download/0.4.4/clink_0.4.4.zip",
+            "Location": "https://github.com/mridgers/clink/releases/download/0.4.4/clink_0.4.4.zip",
             "Path": "clink_0.4.4"
         },
         {
             "Name": "gow",
             "Description": "The lightweight alternative to Cygwin. Unix command line utilities for Windows.",
-            "URL": "https://github.com/bmatzelle/gow/releases/download/v0.8.0/Gow-0.8.0.exe",
+            "Location": "https://github.com/bmatzelle/gow/releases/download/v0.8.0/Gow-0.8.0.exe",
             "Path": "bin",
             "FileType": "Archive"
         },
         {
             "Name": "upx",
             "Description": "UPX is a free, portable, extendable, high-performance executable packer for several executable formats.",
-            "URL": "http://upx.sourceforge.net/download/upx391w.zip",
+            "Location": "http://upx.sourceforge.net/download/upx391w.zip",
             "Path": "upx391w",
             "FileType": "Archive"
         },
         {
             "Name": "lessmsi",
             "Description": "A tool to view and extract the contents of an Windows Installer (.msi) file",
-            "URL": "https://github.com/activescott/lessmsi/releases/download/v1.3/lessmsi-v1.3.zip"
+            "Location": "https://github.com/activescott/lessmsi/releases/download/v1.3/lessmsi-v1.3.zip"
         },
         {
             "Name": "aria2",
             "Description": "A multi-protocol & multi-source, cross platform download utility",
-            "URL": "http://downloads.sourceforge.net/project/aria2/stable/aria2-1.19.0/aria2-1.19.0-win-64bit-build1.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Faria2%2Ffiles%2Fstable%2Faria2-1.19.0%2F&ts=1440912523&use_mirror=iweb",
+            "Location": "http://downloads.sourceforge.net/project/aria2/stable/aria2-1.19.0/aria2-1.19.0-win-64bit-build1.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Faria2%2Ffiles%2Fstable%2Faria2-1.19.0%2F&ts=1440912523&use_mirror=iweb",
             "Path": "aria2-1.19.0-win-64bit-build1"
         },
         {
             "Name": "nuget",
             "Description": "NuGet is the package manager for the Microsoft development platform including .NET. The NuGet client tools provide the ability to produce and consume packages.",
             "FileType": "Binary",
-            "URL": "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+            "Location": "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
         },
         {
             "Name": "ckan",
             "Description": "The Comprehensive Kerbal Archive Network",
             "FileType": "Binary",
-            "URL": "https://github.com/KSP-CKAN/CKAN/releases/download/v1.16.0/ckan.exe"
+            "Location": "https://github.com/KSP-CKAN/CKAN/releases/download/v1.16.0/ckan.exe"
         }
     ]
 }

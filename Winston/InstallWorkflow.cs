@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Winston.Cache;
@@ -85,14 +86,16 @@ namespace Winston
         public static async Task<string> SelfInstallAsync(Repo repo, string installFromDir)
         {
             var fullDir = Path.GetFullPath(installFromDir);
-            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winston.exe"));
+            var winstonExe = Path.Combine(fullDir, "winston.exe");
+            var ver = FileVersionInfo.GetVersionInfo(winstonExe);
+            var asmVersion = Assembly.LoadFile(winstonExe).GetName().Version.ToString();
             var pkg = new Package
             {
                 Name = ver.ProductName,
                 Description = ver.Comments,
                 Location = new Uri(fullDir),
                 Type = PackageType.Shell,
-                Version = ver.FileVersion
+                Version = asmVersion,
             };
             return await repo.AddAsync(pkg);
         }
@@ -100,14 +103,16 @@ namespace Winston
         public static async Task<string> BootstrapAsync(string installSource, string destination)
         {
             var installSourceFull = Path.GetFullPath(installSource);
-            var ver = FileVersionInfo.GetVersionInfo(Path.Combine(installSourceFull, "winston.exe"));
+            var winstonExe = Path.Combine(installSourceFull, "winston.exe");
+            var ver = FileVersionInfo.GetVersionInfo(winstonExe);
+            var asmVersion = Assembly.LoadFile(winstonExe).GetName().Version.ToString();
             var pkg = new Package
             {
                 Name = ver.ProductName,
                 Description = ver.Comments,
                 Location = new Uri(installSourceFull),
                 Type = PackageType.Shell,
-                Version = ver.FileVersion
+                Version = asmVersion
             };
             var repo = new Repo(new UserProxy(new HeadlessUserAdapter()), destination);
             var pkgDir = await repo.AddAsync(pkg: pkg, inject: true, writeRegistryPath: false);

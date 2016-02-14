@@ -44,12 +44,12 @@ namespace Winston
                 await BootstrapAsync(source, dest);
                 return 0;
             }
-            Directory.CreateDirectory(cfg.Config.WinstonDir);
+            Directory.CreateDirectory(cfg.ResolvedWinstonDir);
 
             using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
-            using (var cache = await SqliteCache.CreateAsync(cfg.Config.WinstonDir))
+            using (var cache = await SqliteCache.CreateAsync(cfg.ResolvedWinstonDir))
             {
-                var repo = new Repo(user, cfg.Config.WinstonDir);
+                var repo = new Repo(user, cfg.ResolvedWinstonDir);
                 // TODO: find a better way to setup repos
                 // Set up default repo
                 if (verb != "selfinstall" && cache.Empty())

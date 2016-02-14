@@ -83,8 +83,10 @@
     <Compile Include="Cache\Indexes.cs" />
     <Compile Include="Cache\LocalFileRepo.cs" />
     <Compile Include="Cache\Tables.cs" />
+    <Compile Include="ConfigProvider.cs" />
     <Compile Include="EnvUpdate.cs" />
     <Compile Include="ExitCodes.cs" />
+    <Compile Include="IConfigProvider.cs" />
     <Compile Include="Installers\HttpPackageInstaller.cs" />
     <Compile Include="Installers\IFileExtractor.cs" />
     <Compile Include="OS\Environment.cs" />
