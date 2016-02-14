@@ -18,24 +18,23 @@ namespace Winston
     public class Cellar
     {
         readonly UserProxy user;
-        readonly Config cfg;
 
         public string CellarPath { get; }
 
         public string BinPath { get; }
 
-        public Cellar(UserProxy user, Config cfg)
+        public Cellar(UserProxy user, string root)
         {
             this.user = user;
-            this.cfg = cfg;
-            CellarPath = Path.Combine(cfg.WinstonDir, @"cellar\");
-            BinPath = Path.Combine(cfg.WinstonDir, @"bin\");
+            root = Path.GetFullPath(root);
+            CellarPath = Path.Combine(root, @"cellar\");
+            BinPath = Path.Combine(root, @"bin\");
             Path.GetTempPath();
             Directory.CreateDirectory(CellarPath);
             Directory.CreateDirectory(BinPath);
         }
 
-        public async Task AddAsync(Package pkg)
+        public async Task<string> AddAsync(Package pkg, bool inject = true, bool writeRegistryPath = true)
         {
             var pkgDir = Path.Combine(CellarPath, pkg.Name);
             var client = new PackageClient(pkg, pkgDir);
@@ -43,12 +42,16 @@ namespace Winston
             var installDir = await client.InstallAsync(progress);
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
             var path = Path.Combine(junctionPath, pkg.Path ?? "");
-            if (cfg.WriteRegistryPath)
+            if (writeRegistryPath)
             {
                 UpdateRegistryPath(path);
             }
-            InjectPathIntoParent(path);
+            if (inject)
+            {
+                InjectPathIntoParent(path);
+            }
             progress.CompletedInstall();
+            return path;
         }
 
         static string CreateCurrentJunction(string pkgDir, string installDir)
@@ -73,6 +76,7 @@ namespace Winston
 
         static void InjectPathIntoParent(string installPath)
         {
+            Debugger.Launch();
             var pid = ParentProcessId((uint)Process.GetCurrentProcess().Id);
             if (pid == null)
             {

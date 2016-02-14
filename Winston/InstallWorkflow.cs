@@ -13,8 +13,6 @@ namespace Winston
 {
     static class InstallWorkflow
     {
-        static readonly string cellarDirName = "cellar";
-
         public static async Task AddAppsAsync(Cellar cellar, UserProxy user, SqliteCache cache, params string[] appNames)
             => await AddAppsAsync(cellar, user, cache, appNames as IEnumerable<string>);
 
@@ -32,7 +30,8 @@ namespace Winston
             var choiceTasks = ambiguous.Select(async choices => await DisambiguateAsync(user, SelectPlatform(choices)));
             var chosen = Task.WhenAll(choiceTasks).Result;
             // TODO: break this up
-            Task.WaitAll(unique.Union(chosen).Select(async p => await cellar.AddAsync(p)).ToArray());
+            var ap = unique.Union(chosen).Select(async p => await cellar.AddAsync(p));
+            await Task.WhenAll(ap);
         }
 
         public static async Task RemoveAppsAsync(Cellar cellar, IEnumerable<string> apps) => await RemoveAppsAsync(cellar, apps.ToArray());
@@ -82,7 +81,7 @@ namespace Winston
             return choicesArray[ansInt];
         }
 
-        public static async Task SelfInstallAsync(Cellar cellar, string installFromDir)
+        public static async Task<string> SelfInstallAsync(Cellar cellar, string installFromDir)
         {
             var fullDir = Path.GetFullPath(installFromDir);
             var ver = FileVersionInfo.GetVersionInfo(Path.Combine(fullDir, "winston.exe"));
@@ -94,10 +93,10 @@ namespace Winston
                 Type = PackageType.Shell,
                 Version = ver.FileVersion
             };
-            await cellar.AddAsync(pkg);
+            return await cellar.AddAsync(pkg);
         }
 
-        public static async Task BootstrapAsync(string installSource, string destination, Config config)
+        public static async Task<string> BootstrapAsync(string installSource, string destination)
         {
             var installSourceFull = Path.GetFullPath(installSource);
             var ver = FileVersionInfo.GetVersionInfo(Path.Combine(installSourceFull, "winston.exe"));
@@ -109,18 +108,18 @@ namespace Winston
                 Type = PackageType.Shell,
                 Version = ver.FileVersion
             };
-            // Save config to tell Winston to live in {destination}, making it portable to that directory
-            var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), config);
-            await cellar.AddAsync(pkg);
+            var cellar = new Cellar(new UserProxy(new HeadlessUserAdapter()), destination);
+            var pkgDir = await cellar.AddAsync(pkg: pkg, inject: true, writeRegistryPath: false);
             var cfg = new Config
             {
+                // This resolves to {destination}, relative to {pkgDir}
                 WinstonDir = "../../../",
                 WriteRegistryPath = false
             };
-            var cfgDir = Path.Combine(destination, cellarDirName, "winston", "latest");
-            Directory.CreateDirectory(cfgDir);
-            var cfgFile = Path.Combine(cfgDir, "config.yml");
+            Directory.CreateDirectory(pkgDir);
+            var cfgFile = Path.Combine(pkgDir, "config.yml");
             Yml.Save(cfg, cfgFile);
+            return pkgDir;
         }
     }
 }

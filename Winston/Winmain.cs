@@ -41,7 +41,7 @@ namespace Winston
                 var uri = new Uri(Assembly.GetExecutingAssembly().CodeBase);
                 var source = Paths.GetDirectory(Uri.UnescapeDataString(uri.AbsolutePath));
                 var dest = verbArgs.First();
-                await BootstrapAsync(source, dest, cfg.Config);
+                await BootstrapAsync(source, dest);
                 return 0;
             }
             Directory.CreateDirectory(cfg.Config.WinstonDir);
@@ -49,7 +49,7 @@ namespace Winston
             using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
             using (var cache = await SqliteCache.CreateAsync(cfg.Config.WinstonDir))
             {
-                var cellar = new Cellar(user, cfg.Config);
+                var cellar = new Cellar(user, cfg.Config.WinstonDir);
                 // TODO: find a better way to setup repos
                 // Set up default repo
                 if (verb != "selfinstall" && cache.Empty())

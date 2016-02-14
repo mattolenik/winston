@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,7 +9,9 @@ namespace Winston.OS
 {
     static class Environment
     {
-        const string EnvironmentKey = "EnvironmentKey";
+#pragma warning disable CC0021 // Use nameof
+        const string EnvironmentKey = "Environment";
+#pragma warning restore CC0021 // Use nameof
 
         public static void AddToPath(string path, string scrub = null)
         {
