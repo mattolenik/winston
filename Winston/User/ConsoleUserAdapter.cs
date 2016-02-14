@@ -20,11 +20,7 @@ namespace Winston.User
         {
             this.output = output;
             this.input = input;
-            try
-            {
-                this.startRow = Console.CursorTop;
-            }
-            catch (Exception) { }
+            this.startRow = Console.CursorTop;
         }
 
         public async Task<string> AskAsync(Question question) => await Task.Run(() =>
@@ -48,11 +44,7 @@ namespace Winston.User
 
         public void Message(string message)
         {
-            try
-            {
-                ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
-            }
-            catch (Exception) { }
+            ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
             output.WriteLine(message);
             lastPrintRow++;
         }
@@ -65,15 +57,11 @@ namespace Winston.User
                 lock (progressLock)
                 {
                     var pos = RoundDotPos(p, result.ProgressPrefix);
-                    try
+                    for (int i = result.Last ?? 0; i < pos; i++)
                     {
-                        for (int i = result.Last.Value; i < pos; i++)
-                        {
-                            ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
-                        }
-                        Console.Out.Flush();
+                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
                     }
-                    catch (Exception) { }
+                    Console.Out.Flush();
                     result.Last = pos;
                 }
             };
@@ -82,15 +70,11 @@ namespace Winston.User
                 lock (progressLock)
                 {
                     var pos = RoundDotPos(p, result.ProgressPrefix);
-                    try
+                    for (int i = result.Last ?? 0; i < pos; i++)
                     {
-                        for (int i = result.Last.Value; i < pos; i++)
-                        {
-                            ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
-                        }
-                        Console.Out.Flush();
+                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
                     }
-                    catch (Exception) { }
+                    Console.Out.Flush();
                     result.Last = pos;
                 }
             };

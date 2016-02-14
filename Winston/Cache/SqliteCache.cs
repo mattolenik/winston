@@ -35,11 +35,10 @@ namespace Winston.Cache
             {
                 try
                 {
-                    // TODO: check results?
-                    var result = Db.Execute(Tables.Packages.CreateStatement, transaction: t);
-                    result = Db.Execute(Tables.Sources.CreateStatement, transaction: t);
-                    result = Db.Execute(Indexes.PackageIndex.CreateStatement, transaction: t);
-                    result = Db.Execute(Tables.PackageSearch.CreateStatement, transaction: t);
+                    Db.Execute(Tables.Packages.CreateStatement, transaction: t);
+                    Db.Execute(Tables.Sources.CreateStatement, transaction: t);
+                    Db.Execute(Indexes.PackageIndex.CreateStatement, transaction: t);
+                    Db.Execute(Tables.PackageSearch.CreateStatement, transaction: t);
                     t.Commit();
                 }
                 catch (Exception ex)
@@ -82,7 +81,7 @@ namespace Winston.Cache
             await LoadRepoAsync(uriOrPath);
         }
 
-        async Task LoadRepoAsync(string uriOrPath) => await Task.Run(() =>
+        async Task LoadRepoAsync(string uriOrPath)
         {
             // TODO: non-crash handling of missing or failed repos
             if (!LocalFileRepo.CanLoad(uriOrPath))
@@ -102,11 +101,11 @@ namespace Winston.Cache
                     foreach (var pkg in r.Packages)
                     {
                         var json = JSON.ToJSON(pkg, new JSONParameters {SerializeNullValues = false});
-                        var result = Db.Execute(
+                        await Db.ExecuteAsync(
                             @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
                             new { Name = pkg.Name, Desc = pkg.Description, Data = json },
                             transaction: t);
-                        result = Db.Execute(
+                        await Db.ExecuteAsync(
                             @"insert or replace into PackageSearch (Name, Desc) values (@Name, @Desc)",
                             new { Name = pkg.Name, Desc = pkg.Description },
                             transaction: t);
@@ -119,7 +118,7 @@ namespace Winston.Cache
                     throw;
                 }
             }
-        });
+        }
 
         public async Task RefreshAsync()
         {
@@ -191,9 +190,4 @@ namespace Winston.Cache
             return result == 0;
         }
     }
-}
-
-namespace Winston
-{
-    // TODO: find a better way to do this
 }

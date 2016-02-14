@@ -43,7 +43,6 @@
                 }
             ]
         },
-        
         {
             "Name": "7zip-test",
             "Description": "7zip archive tool",
