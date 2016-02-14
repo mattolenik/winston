@@ -14,7 +14,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winston_install", "winston_
 		{A9C75236-1DCD-4C2A-B975-9121CEE9F256} = {A9C75236-1DCD-4C2A-B975-9121CEE9F256}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mergepathstrings", "mergepathstrings\mergepathstrings.csproj", "{7B6158E7-D322-4F4E-B55D-65026A088410}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergePaths", "MergePaths\MergePaths.csproj", "{7B6158E7-D322-4F4E-B55D-65026A088410}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EnvUpdate", "EnvUpdate\EnvUpdate.vcxproj", "{039CD228-469B-45E4-80A8-D3432E07D3F6}"
 EndProject

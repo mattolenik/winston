@@ -158,9 +158,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mergepathstrings\mergepathstrings.csproj">
+    <ProjectReference Include="..\MergePaths\MergePaths.csproj">
       <Project>{7b6158e7-d322-4f4e-b55d-65026a088410}</Project>
-      <Name>mergepathstrings</Name>
+      <Name>MergePaths</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

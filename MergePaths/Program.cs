@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MergePathStrings
+namespace MergePaths
 {
     class PathComparer : IEqualityComparer<string>
     {

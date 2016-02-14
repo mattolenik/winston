@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("mergepathstrings")]
+[assembly: AssemblyTitle("MergePaths")]
 [assembly: AssemblyDescription("Prints combination of process, user, and machine PATH variables to stdout")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
