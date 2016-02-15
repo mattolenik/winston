@@ -85,7 +85,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheTest.cs" />
-    <Compile Include="InstallerTests.cs" />
+    <Compile Include="BootstrapTests.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="JsonConfig.cs" />
     <Compile Include="JunctionPointTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

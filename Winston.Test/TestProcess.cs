@@ -11,6 +11,13 @@ namespace Winston.Test
 
         public string StdErr { get; private set; }
 
+        public Process Process { get; private set; }
+
+        TestProcess(ProcessStartInfo info)
+        {
+            this.info = info;
+        }
+
         public TestProcess(string path, string arguments)
         {
             info = new ProcessStartInfo
@@ -24,18 +31,30 @@ namespace Winston.Test
             };
         }
 
-        public Process Run(TimeSpan timeout)
+        public static TestProcess Shell(string cmd)
         {
-            var process = new Process { StartInfo = info };
-            process.Start();
-            process.WaitForExit((int)timeout.TotalMilliseconds);
-            if (!process.HasExited)
+            return new TestProcess(new ProcessStartInfo
             {
-                process.Kill();
+                FileName = "cmd.exe",
+                Arguments = $"/c \"{cmd}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            });
+        }
+
+        public void Run(TimeSpan timeout)
+        {
+            Process = new Process { StartInfo = info };
+            Process.Start();
+            Process.WaitForExit((int)timeout.TotalMilliseconds);
+            if (!Process.HasExited)
+            {
+                Process.Kill();
             }
-            StdOut = process.StandardOutput.ReadToEnd();
-            StdErr = process.StandardError.ReadToEnd();
-            return process;
+            StdOut = Process.StandardOutput.ReadToEnd();
+            StdErr = Process.StandardError.ReadToEnd();
         }
     }
 }

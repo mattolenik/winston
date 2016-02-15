@@ -14,7 +14,7 @@ namespace Winston.Test
 
         public Winstall(string winstonSourceDir)
         {
-            winstonHome = new TempDirectory("winston-home-test");
+            winstonHome = new TempDirectory("winston-test");
             sourceDir = winstonSourceDir;
         }
 
@@ -22,10 +22,10 @@ namespace Winston.Test
         {
             var winstonExe = Path.Combine(sourceDir, "winston.exe");
             var process = new TestProcess(winstonExe, $"bootstrap \"{winstonHome.Path}\"");
-            var result = process.Run(timeout);
+            process.Run(timeout);
             Console.WriteLine(process.StdOut);
             Console.WriteLine(process.StdErr);
-            return result.ExitCode;
+            return process.Process.ExitCode;
         }
 
         public void Dispose()

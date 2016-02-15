@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,13 +8,11 @@ using Xunit;
 
 namespace Winston.Test
 {
-    public class InstallerTests
+    public class BootstrapTests : IDisposable
     {
         [Fact]
         public void BootstrapsCorrectly()
         {
-            var uri = new Uri(Assembly.GetExecutingAssembly().CodeBase);
-            var path = Paths.GetDirectory(Uri.UnescapeDataString(uri.AbsolutePath));
             var envPathBefore = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
             using (var installer = new Winstall(path))
             {
@@ -29,6 +28,32 @@ namespace Winston.Test
                     .And
                     .Match(p => Directory.GetFiles(p).Any(f => f.Contains("winston.exe")), "Must contain winston.exe");
             }
+        }
+
+        [Fact]
+        public void PackagesInstallCorrectly()
+        {
+            using (var installer = new Winstall(path))
+            {
+                var res = installer.Bootstrap(TimeSpan.FromSeconds(60));
+                res.Should().Be(0);
+                var p = TestProcess.Shell("winston.exe");
+                p.Run(TimeSpan.FromSeconds(60));
+                p.StdOut.Should().Contain("Winston v", "Expect Winston version string output");
+                var ver = Assembly.LoadFile(Path.Combine(path, "winston.exe")).GetName().Version.ToString();
+                p.StdOut.Should().Contain(ver, "Bootstrapped Winston version should equal build version");
+            }
+        }
+
+        readonly string path;
+
+        public BootstrapTests()
+        {
+            path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetAbsolutePath());
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
