@@ -61,8 +61,17 @@ namespace Winston.Packaging
 
         public override string ToString()
         {
-            var result = $"- Name: {Name}\n  URI: {Location}\n";
-            if (Version != null) result += $"Version: {Version}";
+            return $"Name: {Name}, Location: {Location}";
+        }
+
+        public string GetListing()
+        {
+            var result = $"- {Name} {Version}";
+            if (!string.IsNullOrWhiteSpace(Description))
+            {
+                result += $"\n  {Description}";
+            }
+            result += $"\n  From {Location}\n";
             return result;
         }
     }

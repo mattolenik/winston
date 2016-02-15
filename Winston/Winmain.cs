@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using fastJSON;
+using Microsoft.GotDotNet;
 using Winston.Cache;
 using Winston.Serialization;
 using Winston.User;
@@ -77,7 +78,7 @@ namespace Winston
                             var pkgs = await cache.SearchAsync(verbArgs.First());
                             foreach (var pkg in pkgs)
                             {
-                                Console.WriteLine(pkg.ToString());
+                                Console.WriteLine(pkg.GetListing());
                             }
                             break;
                         }
@@ -86,7 +87,7 @@ namespace Winston
                             var pkgs = await repo.ListAsync();
                             foreach (var pkg in pkgs)
                             {
-                                Console.WriteLine(pkg.ToString());
+                                Console.WriteLine(pkg.GetListing());
                             }
                             break;
                         }
@@ -95,7 +96,7 @@ namespace Winston
                             var pkgs = await cache.AllAsync();
                             foreach (var pkg in pkgs)
                             {
-                                Console.WriteLine(pkg.ToString());
+                                Console.WriteLine(pkg.GetListing());
                             }
                             break;
                         }

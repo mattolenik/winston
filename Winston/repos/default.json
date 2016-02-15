@@ -96,7 +96,7 @@
         {
             "Name": "aria2",
             "Description": "A multi-protocol & multi-source, cross platform download utility",
-            "Location": "http://downloads.sourceforge.net/project/aria2/stable/aria2-1.19.0/aria2-1.19.0-win-64bit-build1.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Faria2%2Ffiles%2Fstable%2Faria2-1.19.0%2F&ts=1440912523&use_mirror=iweb",
+            "Location": "http://downloads.sourceforge.net/project/aria2/stable/aria2-1.19.0/aria2-1.19.0-win-64bit-build1.zip",
             "Path": "aria2-1.19.0-win-64bit-build1"
         },
         {
