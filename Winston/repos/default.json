@@ -110,6 +110,11 @@
             "Description": "The Comprehensive Kerbal Archive Network",
             "FileType": "Binary",
             "Location": "https://github.com/KSP-CKAN/CKAN/releases/download/v1.16.0/ckan.exe"
+        },
+        {
+            "Name": "packer",
+            "Location": "https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_windows_amd64.zip",
+            "FileType": "Archive"
         }
     ]
 }
