@@ -212,3 +212,6 @@ FakesAssemblies/
 
 # SQLite browser files
 *.opendb
+
+# Vagrant
+.vagrant

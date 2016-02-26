@@ -5,7 +5,8 @@ Vagrant.require_version ">= 1.6.2"
 
 Vagrant.configure("2") do |config|
     config.vm.define "vagrant-windows-10-winston"
-    config.vm.box = "windows_10_virtualbox"
+    config.vm.box = ENV['BOX'] || "windows_10"
+    config.vm.box_url = ENV['BOX_URL'] || "https://onedrive.live.com/download?resid=ECC4D3AB87790CFF!52907&authkey=!ADsDV0CjfyzqJQU&ithint=file%2cbox"
     config.vm.communicator = "winrm"
 
     # Admin user name and password
@@ -19,9 +20,15 @@ Vagrant.configure("2") do |config|
     config.vm.network :forwarded_port, guest: 22, host: 2222, id: "ssh", auto_correct: true
 
     config.vm.provider :virtualbox do |v, override|
-        #v.gui = true
         v.customize ["modifyvm", :id, "--memory", 4096]
         v.customize ["modifyvm", :id, "--cpus", 2]
         v.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
+    end
+    if !ENV['NO_VIDEO']
+      config.vm.provider :virtualbox do |v, override|
+          v.customize ["modifyvm", :id, "--vram", 128]
+          v.customize ["modifyvm", :id, "--accelerate3d", "on"]
+          v.customize ["modifyvm", :id, "--accelerate2dvideo", "on"]
+      end
     end
 end
