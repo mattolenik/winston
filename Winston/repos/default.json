@@ -115,6 +115,12 @@
             "Name": "packer",
             "Location": "https://releases.hashicorp.com/packer/0.9.0/packer_0.9.0_windows_amd64.zip",
             "FileType": "Archive"
+        },
+        {
+            "Name": "curl",
+            "Location": "https://bintray.com/artifact/download/vszakats/generic/curl-7.47.1-win64-mingw.7z",
+            "FileType": "Archive",
+            "Path": "curl-7.47.1-win64-mingw/bin"
         }
     ]
 }

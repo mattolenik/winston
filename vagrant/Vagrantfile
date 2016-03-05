@@ -4,36 +4,40 @@
 Vagrant.require_version ">= 1.6.2"
 
 Vagrant.configure("2") do |config|
-    config.vm.define "vagrant-windows-10-winston"
-    config.vm.box = ENV['BOX'] || "windows_10"
-    config.vm.box_url = ENV['BOX_URL'] || "https://onedrive.live.com/download?resid=ECC4D3AB87790CFF!52907&authkey=!ADsDV0CjfyzqJQU&ithint=file%2cbox"
-    config.vm.communicator = "winrm"
-    
-    config.vm.synced_folder "..", "/winston"
+  config.vm.define "vagrant-windows-10-winston"
+  config.vm.box = ENV['BOX'] || "windows_10"
+  config.vm.box_url = ENV['BOX_URL'] || "https://onedrive.live.com/download?resid=ECC4D3AB87790CFF!52907&authkey=!ADsDV0CjfyzqJQU&ithint=file%2cbox"
+  config.vm.communicator = "winrm"
+  
+  config.vm.synced_folder "..", "/winston"
 
-    # Admin user name and password
-    config.winrm.username = "vagrant"
-    config.winrm.password = "vagrant"
+  # Admin user name and password
+  config.winrm.username = "vagrant"
+  config.winrm.password = "vagrant"
 
-    config.vm.guest = :windows
-    config.windows.halt_timeout = 15
+  config.vm.guest = :windows
+  config.windows.halt_timeout = 15
 
-    config.vm.network :forwarded_port, guest: 3389, host: 3399, id: "rdp", auto_correct: true
-    config.vm.network :forwarded_port, guest: 22, host: 2222, id: "ssh", auto_correct: true
+  config.vm.network :forwarded_port, guest: 3389, host: 3399, id: "rdp", auto_correct: true
+  config.vm.network :forwarded_port, guest: 22, host: 2222, id: "ssh", auto_correct: true
 
+  config.vm.provider :virtualbox do |v, override|
+    v.customize ["modifyvm", :id, "--cpus", 2]
+    v.customize ["modifyvm", :id, "--ostype", "Windows10_64"]
+    v.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
+  end
+  if ENV['CI']
     config.vm.provider :virtualbox do |v, override|
-        v.customize ["modifyvm", :id, "--memory", 4096]
-        v.customize ["modifyvm", :id, "--cpus", 2]
-        v.customize ["modifyvm", :id, "--ostype", "Windows10_64"]
-        v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
-        v.customize ["modifyvm", :id, "--draganddrop", "bidirectional"]
-        v.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
+      v.customize ["modifyvm", :id, "--memory", 2048]
     end
-    if !ENV['NO_VIDEO']
-      config.vm.provider :virtualbox do |v, override|
-          v.customize ["modifyvm", :id, "--vram", 128]
-          v.customize ["modifyvm", :id, "--accelerate3d", "on"]
-          v.customize ["modifyvm", :id, "--accelerate2dvideo", "on"]
-      end
+  else
+    config.vm.provider :virtualbox do |v, override|
+      v.customize ["modifyvm", :id, "--memory", 4096]
+      v.customize ["modifyvm", :id, "--vram", 128]
+      v.customize ["modifyvm", :id, "--accelerate3d", "on"]
+      v.customize ["modifyvm", :id, "--accelerate2dvideo", "on"]
+      v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      v.customize ["modifyvm", :id, "--draganddrop", "bidirectional"]
     end
+  end
 end
