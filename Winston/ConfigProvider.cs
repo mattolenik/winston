@@ -9,7 +9,22 @@ namespace Winston
         private Config Config;
 
         public string ResolvedWinstonDir
-            => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), Config.WinstonDir));
+        {
+            get
+            {
+                var configDir = Path.GetDirectoryName(configPath);
+                if (configDir == null)
+                {
+                    throw new InvalidOperationException($"{nameof(configDir)} should not be null");
+                }
+                var result = Path.GetFullPath(Path.Combine(configDir, Config.WinstonDir));
+                if (!Directory.Exists(result))
+                {
+                    throw new DirectoryNotFoundException($"{nameof(Config.WinstonDir)} did not resolve to a valid directory");
+                }
+                return result;
+            }
+        }
 
         public bool WriteRegistryPath => Config.WriteRegistryPath;
 
@@ -19,11 +34,11 @@ namespace Winston
             WriteRegistryPath = true
         };
 
-        readonly string path = Path.Combine(new Uri(Paths.ExecutingDir).LocalPath, "config.yml");
+        readonly string configPath = Path.Combine(new Uri(Paths.ExecutingDir).LocalPath, "config.yml");
 
         public ConfigProvider()
         {
-            if (!File.Exists(path))
+            if (!File.Exists(configPath))
             {
                 Config = Default;
                 return;
@@ -34,12 +49,12 @@ namespace Winston
             }
             catch (Exception e)
             {
-                throw new Exception($"Error reading configuration from '{path}'", e);
+                throw new Exception($"Error reading configuration from '{configPath}'", e);
             }
         }
         void LoadConfig()
         {
-            Config = Yml.Load<Config>(path);
+            Config = Yml.Load<Config>(configPath);
         }
     }
 }
