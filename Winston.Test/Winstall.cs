@@ -9,19 +9,19 @@ namespace Winston.Test
     /// </summary>
     public class Winstall : IDisposable
     {
-        readonly TempDirectory winstonHome;
+        public TempDirectory WinstonHome { get; }
         readonly string sourceDir;
 
         public Winstall(string winstonSourceDir)
         {
-            winstonHome = new TempDirectory("winston-test");
+            WinstonHome = new TempDirectory("winston-test");
             sourceDir = winstonSourceDir;
         }
 
         public int Bootstrap(TimeSpan timeout)
         {
             var winstonExe = Path.Combine(sourceDir, "winston.exe");
-            var process = new TestProcess(winstonExe, $"bootstrap \"{winstonHome.Path}\"");
+            var process = new SimpleProcess(winstonExe, $"bootstrap \"{WinstonHome.Path}\"");
             process.Run(timeout);
             Console.WriteLine(process.StdOut);
             Console.WriteLine(process.StdErr);
@@ -30,7 +30,7 @@ namespace Winston.Test
 
         public void Dispose()
         {
-            winstonHome.Dispose();
+            WinstonHome.Dispose();
         }
     }
 }

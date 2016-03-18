@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Winston.Test
 {
-    class TestProcess
+    public class SimpleProcess
     {
         readonly ProcessStartInfo info;
 
@@ -13,12 +13,12 @@ namespace Winston.Test
 
         public Process Process { get; private set; }
 
-        TestProcess(ProcessStartInfo info)
+        public SimpleProcess(ProcessStartInfo info)
         {
             this.info = info;
         }
 
-        public TestProcess(string path, string arguments)
+        public SimpleProcess(string path, string arguments)
         {
             info = new ProcessStartInfo
             {
@@ -31,20 +31,7 @@ namespace Winston.Test
             };
         }
 
-        public static TestProcess Shell(string cmd)
-        {
-            return new TestProcess(new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = $"/c \"{cmd}\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            });
-        }
-
-        public void Run(TimeSpan timeout)
+        public SimpleProcess Run(TimeSpan timeout)
         {
             Process = new Process { StartInfo = info };
             Process.Start();
@@ -55,6 +42,7 @@ namespace Winston.Test
             }
             StdOut = Process.StandardOutput.ReadToEnd();
             StdErr = Process.StandardError.ReadToEnd();
+            return this;
         }
     }
 }

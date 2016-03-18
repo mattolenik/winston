@@ -9,11 +9,22 @@ namespace Winston
     {
         public static string AppData => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-        public static string ExecutingDir => Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
+        public static Uri ExecutingDir { get; }
+
+        public static string ExecutingDirPath { get; }
+
+        static Paths()
+        {
+            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
+            var dirPath = Path.GetDirectoryName(codeBasePath);
+            ExecutingDir = new Uri(dirPath);
+            ExecutingDirPath = dirPath;
+        }
 
         public static string AppRelative(string path)
         {
-            var result = Path.Combine(ExecutingDir, path);
+            var result = Path.Combine(ExecutingDirPath, path);
             return result;
         }
 

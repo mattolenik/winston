@@ -34,7 +34,7 @@ namespace Winston
             WriteRegistryPath = true
         };
 
-        readonly string configPath = Path.Combine(new Uri(Paths.ExecutingDir).LocalPath, "config.yml");
+        readonly string configPath = Path.Combine(Paths.ExecutingDirPath, "config.yml");
 
         public ConfigProvider()
         {
