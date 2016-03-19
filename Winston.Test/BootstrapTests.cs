@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -18,38 +17,27 @@ namespace Winston.Test
         public void BootstrapsCorrectly()
         {
             var envPathBefore = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
-            using (var installer = new Winstall(path))
-            {
-                var res = installer.Bootstrap(TimeSpan.FromSeconds(60));
-                res.Should().Be(0);
-                var envPathAfter = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
-                envPathBefore.Should().NotBeSameAs(envPathAfter);
-                envPathAfter.Should().NotBeNullOrWhiteSpace();
-                envPathAfter?.Split(';')
-                    .First()
-                    .Should()
-                    .Match(p => Directory.Exists(p), "Injected path must exist")
-                    .And
-                    .Match(p => Directory.GetFiles(p).Any(f => f.Contains("winston.exe")), "Must contain winston.exe");
-            }
+            var envPathAfter = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+            envPathBefore.Should().NotBeSameAs(envPathAfter);
+            envPathAfter.Should().NotBeNullOrWhiteSpace();
+            envPathAfter?.Split(';')
+                .First()
+                .Should()
+                .Match(p => Directory.Exists(p), "Injected path must exist")
+                .And
+                .Match(p => Directory.GetFiles(p).Any(f => f.Contains("winston.exe")), "Must contain winston.exe");
         }
 
         [Fact]
-        public void PackagesInstallCorrectly()
+        public void SelfPackageInstallsCorrectly()
         {
-            using (var installer = new Winstall(path))
-            {
-                var res = installer.Bootstrap(TimeSpan.FromSeconds(60));
-                res.Should().Be(0);
+            var installedDir = Path.Combine(installer.WinstonHome.Path, "repo", "winston", "latest");
+            var winstonExe = Path.Combine(installedDir, "winston.exe");
+            var ver = AssemblyName.GetAssemblyName(winstonExe).Version.ToString();
+            var p = cmd("winston.exe", installedDir).Run(TimeSpan.FromSeconds(60));
 
-                var installedDir = Path.Combine(installer.WinstonHome.Path, "repo", "winston", "latest");
-                var winstonExe = Path.Combine(installedDir, "winston.exe");
-                var ver = AssemblyName.GetAssemblyName(winstonExe).Version.ToString();
-                var p = cmd("winston.exe", installedDir).Run(TimeSpan.FromSeconds(60));
-
-                p.StdOut.Should().Contain("Winston v", "Expect Winston version string output");
-                p.StdOut.Should().Contain(ver, "Bootstrapped Winston version should equal build version");
-            }
+            p.StdOut.Should().Contain("Winston v", "Expect Winston version string output");
+            p.StdOut.Should().Contain(ver, "Bootstrapped Winston version should equal build version");
         }
 
         [Fact]
@@ -63,21 +51,26 @@ namespace Winston.Test
             str.Should().Be("sdf");
         }
 
-        readonly string path;
-
         readonly IHttpServer server;
+
+        readonly Winstall installer;
 
         public BootstrapTests()
         {
-            path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetAbsolutePath());
             server = HttpMockRepository.At("http://localhost:9500");
             server.Stub(x => x.Get("/test.txt")).ReturnFile(Path.Combine(Paths.ExecutingDirPath, "testdata", "test.txt")).OK();
             server.Start();
+
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetAbsolutePath());
+            installer = new Winstall(path);
+            var res = installer.Bootstrap(TimeSpan.FromSeconds(60));
+            res.Should().Be(0);
         }
 
         public void Dispose()
         {
-            server?.Dispose();
+            server.Dispose();
+            installer.Dispose();
         }
     }
 }
