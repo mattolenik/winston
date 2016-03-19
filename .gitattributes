@@ -1,2 +1,3 @@
 *.h.tpl linguist-language=c++
 *.h linguist-language=c++
+* text eol=crlf
