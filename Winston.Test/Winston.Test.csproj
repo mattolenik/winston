@@ -103,7 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheTest.cs" />
-    <Compile Include="BootstrapTests.cs" />
+    <Compile Include="AcceptanceTests.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="JsonConfig.cs" />
     <Compile Include="JunctionPointTest.cs" />
@@ -126,11 +126,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="testdata\test.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

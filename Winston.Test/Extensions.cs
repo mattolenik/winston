@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using fastJSON;
 
 namespace Winston.Test
 {
@@ -8,6 +9,11 @@ namespace Winston.Test
         public static string GetAbsolutePath(this Assembly asm)
         {
             return new Uri(asm.CodeBase).LocalPath;
+        }
+
+        public static string ToJSON(this object obj)
+        {
+            return JSON.ToNiceJSON(obj, new JSONParameters { EnableAnonymousTypes = true });
         }
     }
 }

@@ -13,6 +13,8 @@ namespace Winston.Test
 
         public Process Process { get; private set; }
 
+        public int ExitCode { get; private set; }
+
         public SimpleProcess(ProcessStartInfo info)
         {
             this.info = info;
@@ -31,6 +33,11 @@ namespace Winston.Test
             };
         }
 
+        public SimpleProcess Run()
+        {
+            return Run(TimeSpan.FromMinutes(5));
+        }
+
         public SimpleProcess Run(TimeSpan timeout)
         {
             Process = new Process { StartInfo = info };
@@ -42,7 +49,8 @@ namespace Winston.Test
             }
             StdOut = Process.StandardOutput.ReadToEnd();
             StdErr = Process.StandardError.ReadToEnd();
+            ExitCode = Process.ExitCode;
             return this;
         }
-    }
+   }
 }

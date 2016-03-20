@@ -8,9 +8,9 @@
 
             public static readonly string CreateStatement = $@"
     CREATE TABLE IF NOT EXISTS `{name}` (
-	`Name`	TEXT NOT NULL,
-	`Description`	TEXT,
-	`PackageData`	TEXT NOT NULL,
+    `Name`	TEXT NOT NULL COLLATE NOCASE,
+    `Description`	TEXT,
+    `PackageData`	TEXT NOT NULL,
     PRIMARY KEY(Name)
 )";
 
@@ -21,10 +21,10 @@
         {
             static readonly string name = nameof(Sources);
 
-            public static readonly string CreateStatement =$@"
+            public static readonly string CreateStatement = $@"
     CREATE TABLE IF NOT EXISTS `{name}` (
-	`URI`	TEXT NOT NULL,
-	PRIMARY KEY(URI)
+    `Location`	TEXT NOT NULL,
+    PRIMARY KEY(Location)
 )";
 
             public static readonly string DeleteAllStatement = $@"delete from `{name}`";

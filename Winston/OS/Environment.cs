@@ -9,9 +9,7 @@ namespace Winston.OS
 {
     static class Environment
     {
-#pragma warning disable CC0021 // Use nameof
-        const string EnvironmentKey = "Environment";
-#pragma warning restore CC0021 // Use nameof
+        public static bool IsDebug => EnvExists("WINSTON_DEBUG");
 
         public static void AddToPath(string path, string scrub = null)
         {
@@ -85,5 +83,15 @@ namespace Winston.OS
                 Marshal.FreeHGlobal(lParamU);
             }
         }
+
+        public static bool EnvExists(string environmentVarName)
+        {
+            return !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable(environmentVarName));
+        }
+
+#pragma warning disable CC0021 // Use nameof
+        const string EnvironmentKey = "Environment";
+#pragma warning restore CC0021 // Use nameof
+
     }
 }

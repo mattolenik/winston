@@ -81,12 +81,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\Indexes.cs" />
-    <Compile Include="Cache\LocalFileRepo.cs" />
+    <Compile Include="Index\LocalFileIndex.cs" />
     <Compile Include="Cache\Tables.cs" />
     <Compile Include="ConfigProvider.cs" />
     <Compile Include="EnvUpdate.cs" />
     <Compile Include="ExitCodes.cs" />
     <Compile Include="IConfigProvider.cs" />
+    <Compile Include="Index\WebIndex.cs" />
     <Compile Include="Installers\HttpPackageInstaller.cs" />
     <Compile Include="Installers\IFileExtractor.cs" />
     <Compile Include="OS\Environment.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Packaging\PackageFileType.cs" />
     <Compile Include="Packaging\PackageType.cs" />
     <Compile Include="Packaging\Platform.cs" />
+    <Compile Include="Interpreter.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

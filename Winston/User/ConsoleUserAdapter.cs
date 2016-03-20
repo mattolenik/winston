@@ -14,13 +14,30 @@ namespace Winston.User
         readonly object progressLock = new object();
         int lastProgressRow;
         int lastPrintRow;
-        readonly int startRow;
+        int startRow;
+
+        /// <summary>
+        /// It seems to be impossible to predict whether or not the program runs in an actual
+        /// terminal window, so provide a wrapper for terminal-specific operations that will
+        /// fail when not inside a terminal. E.g. moving the cursor on screen for progress reporting.
+        /// </summary>
+        /// <param name="a">function to run</param>
+        static void Try(Action a)
+        {
+            try
+            {
+                a?.Invoke();
+            }
+#pragma warning disable CC0004 // Catch block cannot be empty
+            catch { }
+#pragma warning restore CC0004 // Catch block cannot be empty
+        }
 
         public ConsoleUserAdapter(TextWriter output, TextReader input)
         {
             this.output = output;
             this.input = input;
-            this.startRow = Console.CursorTop;
+            Try(() => this.startRow = Console.CursorTop);
         }
 
         public async Task<string> AskAsync(Question question) => await Task.Run(() =>
@@ -44,7 +61,7 @@ namespace Winston.User
 
         public void Message(string message)
         {
-            ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow);
+            Try(() => ConsoleEx.Move(0, startRow + lastPrintRow + lastProgressRow));
             output.WriteLine(message);
             lastPrintRow++;
         }
@@ -59,7 +76,7 @@ namespace Winston.User
                     var pos = RoundDotPos(p, result.ProgressPrefix);
                     for (int i = result.Last ?? 0; i < pos; i++)
                     {
-                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
+                        Try(() => ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, "."));
                     }
                     Console.Out.Flush();
                     result.Last = pos;
@@ -72,7 +89,7 @@ namespace Winston.User
                     var pos = RoundDotPos(p, result.ProgressPrefix);
                     for (int i = result.Last ?? 0; i < pos; i++)
                     {
-                        ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, ".");
+                        Try(() => ConsoleEx.WriteAt(result.ProgressPrefix.Length + i, result.Row, "."));
                     }
                     Console.Out.Flush();
                     result.Last = pos;
@@ -82,7 +99,7 @@ namespace Winston.User
             {
                 lock (progressLock)
                 {
-                    ConsoleEx.WriteAt(70, result.Row, "downloaded");
+                    Try(() => ConsoleEx.WriteAt(70, result.Row, "downloaded"));
                     Console.Out.Flush();
                 }
             };
@@ -90,14 +107,14 @@ namespace Winston.User
             {
                 lock (progressLock)
                 {
-                    ConsoleEx.WriteAt(70, result.Row, ".installed");
+                    Try(() => ConsoleEx.WriteAt(70, result.Row, ".installed"));
                     Console.Out.Flush();
                 }
             };
 
             result.Row = startRow + lastProgressRow;
             result.ProgressPrefix = result.Name + ": ";
-            ConsoleEx.WriteAt(0, result.Row, result.ProgressPrefix);
+            Try(() => ConsoleEx.WriteAt(0, result.Row, result.ProgressPrefix));
             lastProgressRow++;
             return result;
         }

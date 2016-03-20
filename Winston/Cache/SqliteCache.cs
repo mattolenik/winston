@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using fastJSON;
+using Winston.Index;
 using Winston.Packaging;
+using Environment = Winston.OS.Environment;
 
 namespace Winston.Cache
 {
@@ -18,7 +21,10 @@ namespace Winston.Cache
         SqliteCache(string dbPath)
         {
             this.dbPath = dbPath;
-            SQLiteConnection.CreateFile(dbPath);
+            if (!File.Exists(dbPath))
+            {
+                SQLiteConnection.CreateFile(dbPath);
+            }
         }
 
         public static async Task<SqliteCache> CreateAsync(string winstonDir)
@@ -76,44 +82,55 @@ namespace Winston.Cache
 
         public async Task AddRepoAsync(string uriOrPath)
         {
-            uriOrPath = new Uri(uriOrPath).AbsoluteUri;
-            var result = Db.Execute("insert or replace into Sources (URI) values (@URI)", new { URI = uriOrPath });
+            uriOrPath = new Uri(uriOrPath).AbsoluteUri.ToLowerInvariant().TrimEnd('/', '\\');
             await LoadRepoAsync(uriOrPath);
         }
 
         async Task LoadRepoAsync(string uriOrPath)
         {
-            // TODO: non-crash handling of missing or failed repos
-            if (!LocalFileRepo.CanLoad(uriOrPath))
-            {
-                throw new Exception("Can't load PackageSource " + uriOrPath);
-            }
-
             PackageSource r;
-            if (!LocalFileRepo.TryLoad(uriOrPath, out r))
+            if (LocalFileIndex.TryLoad(uriOrPath, out r))
             {
-                throw new Exception($"Unable to load repo with URI: {uriOrPath}");
+                await AddIndexToDbAsync(r);
+                return;
             }
+            r = await WebIndex.TryLoadAsync(uriOrPath);
+            if (r != null)
+            {
+                await AddIndexToDbAsync(r);
+                return;
+            }
+            throw new Exception($"Unable to load index at '{uriOrPath}'");
+        }
+
+        async Task AddIndexToDbAsync(PackageSource r)
+        {
             using (var t = Db.BeginTransaction())
             {
                 try
                 {
                     foreach (var pkg in r.Packages)
                     {
-                        var json = JSON.ToJSON(pkg, new JSONParameters {SerializeNullValues = false});
-                        await Db.ExecuteAsync(
+                        var json = JSON.ToJSON(pkg);
+                        var result = Db.Execute("insert or replace into Sources (Location) values (@Location)", new { Location = r.Location });
+                        result = await Db.ExecuteAsync(
                             @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
-                            new { Name = pkg.Name, Desc = pkg.Description, Data = json },
+                            new {Name = pkg.Name, Desc = pkg.Description, Data = json},
                             transaction: t);
-                        await Db.ExecuteAsync(
+                        result = await Db.ExecuteAsync(
                             @"insert or replace into PackageSearch (Name, Desc) values (@Name, @Desc)",
-                            new { Name = pkg.Name, Desc = pkg.Description },
+                            new {Name = pkg.Name, Desc = pkg.Description},
                             transaction: t);
                     }
                     t.Commit();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    // TODO: Log here
+                    if (Environment.IsDebug)
+                    {
+                        Console.Error.WriteLine(ex.ToString());
+                    }
                     t.Rollback();
                     throw;
                 }
@@ -122,7 +139,7 @@ namespace Winston.Cache
 
         public async Task RefreshAsync()
         {
-            var repos = await Db.QueryAsync<string>("select URI from Sources");
+            var repos = await Db.QueryAsync<string>("select Location from Sources");
             foreach (var repo in repos)
             {
                 await LoadRepoAsync(repo);

@@ -22,17 +22,13 @@ namespace Winston
 
         public string RepoPath { get; }
 
-        public string BinPath { get; }
-
         public Repo(UserProxy user, string root)
         {
             this.user = user;
             root = Path.GetFullPath(root);
             RepoPath = Path.Combine(root, @"repo\");
-            BinPath = Path.Combine(root, @"bin\");
             Path.GetTempPath();
             Directory.CreateDirectory(RepoPath);
-            Directory.CreateDirectory(BinPath);
         }
 
         public async Task<string> AddAsync(Package pkg, bool inject = true, bool writeRegistryPath = true)

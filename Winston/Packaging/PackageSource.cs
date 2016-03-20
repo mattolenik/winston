@@ -13,7 +13,7 @@ namespace Winston.Packaging
 
         public string Maintainer { get; set; }
 
-        public string Location { get; private set; }
+        public string Location { get; internal set; }
 
         public List<Package> Packages { get; set; }
 
@@ -28,14 +28,14 @@ namespace Winston.Packaging
 
         public override string ToString()
         {
-            return $"Name: {Name}, Description: {Description}, Maintainer: {Maintainer}, URL: {Location}";
+            return $"Name: {Name}, Description: {Description}, Maintainer: {Maintainer}, Location: {Location}";
         }
 
         public bool Equals(PackageSource other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Location, other.Location, StringComparison.InvariantCultureIgnoreCase);
+            return string.Equals(Location, other.Location, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)
