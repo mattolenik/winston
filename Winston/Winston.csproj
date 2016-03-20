@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <UsingTask AssemblyFile="$(SolutionDir)tasks\Winston.MSBuildTasks.dll" TaskName="TarTask" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -177,13 +178,16 @@
     <Dist>$(ProjectDir)bin\dist\</Dist>
     <DistTar>$(Dist)winston.tar</DistTar>
   </PropertyGroup>
+  <ItemGroup>
+    <DistFiles Include="$(OutputPath)\**\*" />
+  </ItemGroup>
   <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles">
     <Exec Command="del /F /Q &quot;$(DistTar)&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.pdb&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.xml&quot; 2&gt;nul" IgnoreExitCode="true" />
   </Target>
   <Target Name="Dist" AfterTargets="AfterBuild" DependsOnTargets="DistPrep">
-    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(ProjectDir)tools\7z.exe&quot; a -y -r -ttar &quot;$(DistTar)&quot; ." />
+    <TarTask TarFileName="$(DistTar)" Files="@(DistFiles)" RelativeTo="$(OutputPath)" />
     <Message Text="Building tar at $(DistTar)" />
   </Target>
   <Target Name="DistClean" AfterTargets="AfterClean">
