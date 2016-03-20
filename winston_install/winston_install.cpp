@@ -128,7 +128,7 @@ public:
 			pi,
 			elevateDll.c_str());
 
-		// If successful 
+		// If successful
 		if (setupSuccess)
 		{
 			IProgressObserver& observer = dynamic_cast<IProgressObserver&>(*this);
