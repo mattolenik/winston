@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -33,9 +32,10 @@ namespace Winston.MSBuildTasks
 
         static void AddDirectory(Stream tar, string baseDirectory, string directory)
         {
-            if (baseDirectory != directory)
+            var dirName = GetRelative(directory, baseDirectory);
+            // If dirName is empty, we are at the root
+            if (dirName != string.Empty)
             {
-                var dirName = GetRelative(directory, baseDirectory);
                 var header = new GobHeader(dirName, GobHeaderType.Directory);
                 header.CopyTo(tar);
             }
