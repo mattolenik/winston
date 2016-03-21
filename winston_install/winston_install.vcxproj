@@ -109,11 +109,11 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TempDirectory.h" />
     <ClInclude Include="winston_install.h" />
-    <ClInclude Include="winston_tar.bin.h" />
+    <ClInclude Include="winston_gob.bin.h" />
     <ClInclude Include="elevate.bin.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="winston_tar.h.tpl" />
+    <None Include="winston_gob.h.tpl" />
     <None Include="elevate.h.tpl" />
   </ItemGroup>
   <ItemGroup>
@@ -123,7 +123,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="winston_tar.bin.cpp" />
+    <ClCompile Include="winston_gob.bin.cpp" />
     <ClCompile Include="elevate_dll.bin.cpp" />
     <ClCompile Include="elevate_exe.bin.cpp" />
   </ItemGroup>
@@ -135,17 +135,17 @@
   </ImportGroup>
   <!-- Embedded files -->
   <PropertyGroup>
-    <WinstonTar>$(SolutionDir)winston\bin\dist\winston.tar</WinstonTar>
+    <WinstonGob>$(SolutionDir)winston\bin\dist\winston.gob</WinstonGob>
     <APPVEYOR_BUILD_VERSION Condition="'$(APPVEYOR_BUILD_VERSION)' == ''">9.9.9.9</APPVEYOR_BUILD_VERSION>
     <BuildVer>$(APPVEYOR_BUILD_VERSION)</BuildVer>
   </PropertyGroup>
   <!-- Embedding Winston -->
   <Target Name="EmbedWinston" BeforeTargets="PrepareForBuild">
-    <Exec Command="tools\xd.exe -dwinston_tar &quot;$(WinstonTar)&quot; &gt; winston_tar.bin.cpp" />
-    <GetFileSize FileName="$(WinstonTar)">
-      <Output TaskParameter="FileSize" PropertyName="TarSize" />
+    <Exec Command="tools\xd.exe -dwinston_gob &quot;$(WinstonGob)&quot; &gt; winston_gob.bin.cpp" />
+    <GetFileSize FileName="$(WinstonGob)">
+      <Output TaskParameter="FileSize" PropertyName="GobSize" />
     </GetFileSize>
-    <ReplaceInFile Source="winston_tar.h.tpl" Destination="winston_tar.bin.h" Old="_SIZE_" New="$(TarSize)" />
+    <ReplaceInFile Source="winston_gob.h.tpl" Destination="winston_gob.bin.h" Old="_SIZE_" New="$(GobSize)" />
   </Target>
   <!-- Clean -->
   <Target Name="CleanEmbed" AfterTargets="Clean">
