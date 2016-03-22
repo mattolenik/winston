@@ -165,6 +165,10 @@
       <Project>{7b6158e7-d322-4f4e-b55d-65026a088410}</Project>
       <Name>MergePaths</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MSBuildTasks\Winston.MSBuildTasks.csproj">
+      <Project>{b28094a3-0596-4b4d-ba27-1f6516ecc825}</Project>
+      <Name>Winston.MSBuildTasks</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\codecracker.CSharp.1.0.0-rc6\analyzers\dotnet\cs\CodeCracker.Common.dll" />
