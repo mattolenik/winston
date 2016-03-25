@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask AssemblyFile="$(SolutionDir)tasks\Winston.MSBuildTasks.dll" TaskName="Winston.MSBuildTasks.Gob" />
+  <!--
+    Normally, VS locks the output of the msbuild tasks project, making it
+    difficult to consume the output in the same solution. So the default is to
+    use a checked-in tasks assembly. CI will use the build output because of
+    AppVeyor issues when loading the checked-in assembly.
+  -->
+  <UsingTask
+    AssemblyFile="$(SolutionDir)tasks\Winston.MSBuildTasks.dll"
+    TaskName="Winston.MSBuildTasks.Gob"
+    Condition="'$(CI)' != 'True'" />
+  <!-- Set USE_TASK_BUILD to reference the latest built task assembly -->
+  <UsingTask
+    AssemblyFile="$(SolutionDir)MSBuildTasks\bin\$(Configuration)\Winston.MSBuildTasks.dll"
+    TaskName="Winston.MSBuildTasks.Gob"
+    Condition="'$(CI)' == 'True' or '$(USE_TASK_BUILD)' != ''" />
+
   <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
       <FileName Required="true" />
@@ -14,6 +29,7 @@ FileSize = fi.Length;
   ]]></Code>
     </Task>
   </UsingTask>
+
   <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
       <Address ParameterType="System.String" Required="true" />
@@ -29,6 +45,7 @@ FileSize = fi.Length;
         ]]></Code>
     </Task>
   </UsingTask>
+
   <UsingTask TaskName="ReplaceInFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
       <Source ParameterType="System.String" Required="true" />
