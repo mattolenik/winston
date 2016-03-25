@@ -175,7 +175,7 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   -->
   <PropertyGroup>
-    <Dist>$(ProjectDir)bin\dist\</Dist>
+    <Dist>$(ProjectDir)\bin\dist\$(Configuration)\</Dist>
     <DistGob>$(Dist)winston.gob</DistGob>
   </PropertyGroup>
   <ItemGroup>
@@ -188,7 +188,7 @@
   </Target>
   <Target Name="Dist" AfterTargets="AfterBuild" DependsOnTargets="DistPrep">
     <!-- An ad hoc format like tar, but simpler -->
-    <Gob Name="$(DistGob)" Directory="$(OutputPath)" />
+    <Gob OutputFile="$(DistGob)" SourceDirectory="$(OutputPath)" />
     <Message Text="Building gob at $(DistGob)" />
   </Target>
   <Target Name="DistClean" AfterTargets="AfterClean">

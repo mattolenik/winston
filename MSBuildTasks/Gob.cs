@@ -11,17 +11,19 @@ namespace Winston.MSBuildTasks
     public class Gob : Task
     {
         [Required]
-        public string Name { get; set; }
+        public string OutputFile { get; set; }
 
         [Required]
-        public string Directory { get; set; }
+        public string SourceDirectory { get; set; }
 
         public override bool Execute()
         {
-            var dir = Path.GetFullPath(Directory);
+            var outDir = Path.GetDirectoryName(OutputFile);
+            System.IO.Directory.CreateDirectory(outDir);
+            var dir = Path.GetFullPath(SourceDirectory);
             if (System.IO.Directory.Exists(dir))
             {
-                using (var tar = new FileStream(Name, FileMode.Create))
+                using (var tar = new FileStream(OutputFile, FileMode.Create))
                 {
                     AddDirectory(tar, dir, dir);
                 }

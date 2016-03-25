@@ -135,7 +135,7 @@
   </ImportGroup>
   <!-- Embedded files -->
   <PropertyGroup>
-    <WinstonGob>$(SolutionDir)winston\bin\dist\winston.gob</WinstonGob>
+    <WinstonGob>$(SolutionDir)winston\bin\dist\$(Configuration)\winston.gob</WinstonGob>
     <APPVEYOR_BUILD_VERSION Condition="'$(APPVEYOR_BUILD_VERSION)' == ''">9.9.9.9</APPVEYOR_BUILD_VERSION>
     <BuildVer>$(APPVEYOR_BUILD_VERSION)</BuildVer>
   </PropertyGroup>

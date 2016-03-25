@@ -210,7 +210,7 @@ namespace Winston.OS
             if (Directory.Exists(junctionPoint))
             {
                 if (!overwrite)
-                    throw new IOException("Directory already exists and overwrite parameter is false.");
+                    throw new IOException("SourceDirectory already exists and overwrite parameter is false.");
             }
             else
             {
