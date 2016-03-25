@@ -175,14 +175,14 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   -->
   <PropertyGroup>
-    <Dist>$(ProjectDir)\bin\dist\$(Configuration)\</Dist>
+    <Dist>$(ProjectDir)bin\dist\$(Configuration)\</Dist>
     <DistGob>$(Dist)winston.gob</DistGob>
   </PropertyGroup>
   <ItemGroup>
     <DistFiles Include="$(OutputPath)\**\*" />
   </ItemGroup>
   <Target Name="DistPrep" AfterTargets="AfterBuild" DependsOnTargets="CopySQLiteInteropFiles">
-    <Exec Command="del /F /Q &quot;$(DistGob)&quot; 2&gt;nul" IgnoreExitCode="true" />
+    <Exec Command="del /F /Q &quot;$(Dist)*.gob&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.pdb&quot; 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q &quot;$(OutputPath)*.xml&quot; 2&gt;nul" IgnoreExitCode="true" />
   </Target>
