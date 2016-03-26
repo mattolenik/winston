@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\Indexes.cs" />
+    <Compile Include="IExitCodeException.cs" />
     <Compile Include="Index\LocalFileIndex.cs" />
     <Compile Include="Cache\Tables.cs" />
     <Compile Include="ConfigProvider.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Installers\Content.cs" />
     <Compile Include="Installers\ExeExtractor.cs" />
     <Compile Include="Installers\IPackageInstaller.cs" />
+    <Compile Include="PackageNotFoundException.cs" />
     <Compile Include="Packaging\Package.cs" />
     <Compile Include="Packaging\PackageClient.cs" />
     <Compile Include="Packaging\PackageFileType.cs" />

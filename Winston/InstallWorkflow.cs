@@ -25,7 +25,7 @@ namespace Winston
             if (!pkgsList.Any())
             {
                 user.Message($"No packages found matching {string.Join(", ", appNames)}");
-                return;
+                throw new PackageNotFoundException();
             }
             var unique = pkgsList.Where(p => p.Variants.Count == 0);
             var ambiguous = pkgsList.Where(p => p.Variants.Count > 0);

@@ -17,11 +17,11 @@ namespace Winston
             {
                 case "install":
                     await InstallWorkflow.InstallPackagesAsync(repo, user, cache, verbArgs);
-                    return ExitCodes.OK;
+                    return ExitCodes.Ok;
 
                 case "uninstall":
                     await InstallWorkflow.UninstallPackagesAsync(repo, verbArgs);
-                    return ExitCodes.OK;
+                    return ExitCodes.Ok;
 
                 case "search":
                     {
@@ -78,7 +78,7 @@ namespace Winston
                 // TODO: finish this
                 case "restore":
                     await repo.RestoreAsync();
-                    return ExitCodes.OK;
+                    return ExitCodes.Ok;
 
                 case "add":
                     switch (verbArgs.First())

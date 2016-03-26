@@ -62,6 +62,14 @@ namespace Winston.Test
             p.StdOut.Should().Contain("FakePackage").And.Contain($"From {Prefix}/fake.exe");
         }
 
+        [Fact]
+        public void InstallReturnsErrorForNotFoundPackage()
+        {
+            var p = cmd("winston.exe install nonexistant", installDir).Run();
+            p.ExitCode.Should().Be(ExitCodes.PackageNotFound);
+            p.StdOut.Should().Contain("No packages found matching nonexistant");
+        }
+
         readonly IHttpServer server;
 
         readonly Winstall installer;

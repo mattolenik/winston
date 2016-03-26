@@ -72,7 +72,7 @@ namespace Winston
                 {
                     Console.Error.WriteLine(ex.StackTrace);
                 }
-                return ExitCodes.Exception;
+                return (ex as IExitCodeException)?.ErrorCode ?? ExitCodes.Exception;
             }
         }
     }
