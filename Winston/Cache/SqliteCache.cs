@@ -114,11 +114,11 @@ namespace Winston.Cache
                         var json = JSON.ToJSON(pkg);
                         var result = Db.Execute("insert or replace into Sources (Location) values (@Location)", new { Location = r.Location });
                         result = await Db.ExecuteAsync(
-                            @"insert or replace into Packages (ShortName, Description, PackageData) values (@ShortName, @Desc, @Data)",
+                            @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
                             new {Name = pkg.Name, Desc = pkg.Description, Data = json},
                             transaction: t);
                         result = await Db.ExecuteAsync(
-                            @"insert or replace into PackageSearch (ShortName, Desc) values (@ShortName, @Desc)",
+                            @"insert or replace into PackageSearch (Name, Desc) values (@Name, @Desc)",
                             new {Name = pkg.Name, Desc = pkg.Description},
                             transaction: t);
                     }
@@ -148,7 +148,7 @@ namespace Winston.Cache
 
         public async Task<Package> ByNameAsync(string pkgName)
         {
-            var result = await Db.QueryAsync<string>("select PackageData from Packages where ShortName = @ShortName", new { Name = pkgName });
+            var result = await Db.QueryAsync<string>("select PackageData from Packages where Name = @Name", new { Name = pkgName });
             var json = result.SingleOrDefault();
             if (json == null) return null;
             var pkg = JSON.ToObject<Package>(json);
@@ -173,14 +173,14 @@ namespace Winston.Cache
 
         public async Task<IList<Package>> SearchAsync(string query)
         {
-            var nameMatches = await Db.QueryAsync<string>("select distinct ShortName from PackageSearch where ShortName match @query", new { query });
-            var descMatches = await Db.QueryAsync<string>("select distinct ShortName from PackageSearch where Desc match @query", new { query });
+            var nameMatches = await Db.QueryAsync<string>("select distinct Name from PackageSearch where Name match @query", new { query });
+            var descMatches = await Db.QueryAsync<string>("select distinct Name from PackageSearch where Desc match @query", new { query });
             var names = nameMatches.Union(descMatches).Distinct();
             var result = new List<Package>();
             foreach (var name in names)
             {
                 var json =
-                    await Db.QueryAsync<string>("select PackageData from Packages where ShortName = @name", new { name });
+                    await Db.QueryAsync<string>("select PackageData from Packages where Name = @name", new { name });
                 var single = json.SingleOrDefault();
                 if (single != null)
                 {
