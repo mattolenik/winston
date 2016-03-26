@@ -26,6 +26,10 @@ namespace Winston
                 case "search":
                     {
                         var pkgs = await cache.SearchAsync(verbArgs.First());
+                        if (!pkgs.Any())
+                        {
+                            throw new PackageNotFoundException($"No packages found for query '{verbArgs.First()}'");
+                        }
                         foreach (var pkg in pkgs)
                         {
                             Console.WriteLine(pkg.GetListing());

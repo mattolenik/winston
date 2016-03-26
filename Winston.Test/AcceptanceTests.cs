@@ -70,6 +70,43 @@ namespace Winston.Test
             p.StdOut.Should().Contain("No packages found matching nonexistant");
         }
 
+        [Fact]
+        public void SearchReturnsPackage()
+        {
+            CanAddIndex();
+            var p = cmd("winston.exe search fakepackage", installDir).Run();
+            p.ExitCode.Should().Be(ExitCodes.Ok);
+            p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
+        }
+
+        [Fact]
+        public void SearchForNotFoundReturnsError()
+        {
+            CanAddIndex();
+            var p = cmd("winston.exe search nonexistant", installDir).Run();
+            p.ExitCode.Should().Be(ExitCodes.PackageNotFound);
+        }
+
+        [Fact]
+        public void ListAvailableShowsPackages()
+        {
+            CanAddIndex();
+            var p = cmd("winston.exe list available", installDir).Run();
+            p.ExitCode.Should().Be(ExitCodes.Ok);
+            p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
+            p.StdOut.Should().Contain("NothingPackage").And.Contain("nothing.zip");
+        }
+
+        [Fact]
+        public void ListInstalledShowsPackages()
+        {
+            CanInstallPackage();
+            var p = cmd("winston.exe list installed", installDir).Run();
+            p.ExitCode.Should().Be(ExitCodes.Ok);
+            p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
+            p.StdOut.Should().NotContain("NothingPackage").And.NotContain("nothing.zip");
+        }
+
         readonly IHttpServer server;
 
         readonly Winstall installer;
@@ -88,6 +125,12 @@ namespace Winston.Test
                     Location = $"{Prefix}/fake.exe",
                     Name = "FakePackage",
                     FileType = "Binary"
+                },
+                new
+                {
+                    Location = $"{Prefix}/nothing.zip",
+                    Name = "NothingPackage",
+                    FileType = "Archive"
                 }
             }
         }.ToJSON();
@@ -98,7 +141,6 @@ namespace Winston.Test
             server = HttpMockRepository.At(Prefix);
             StubRepo();
             server.Start();
-            //Thread.Sleep(TimeSpan.FromMinutes(5));
 
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetAbsolutePath());
             installer = new Winstall(path);
@@ -112,6 +154,7 @@ namespace Winston.Test
         {
             server.Stub(x => x.Get("/index.json")).Return(indexJSON).OK();
             server.Stub(x => x.Get("/fake.exe")).Return("").OK();
+            server.Stub(x => x.Get("/nothing.zip")).Return("").OK();
         }
 
         public void Dispose()
