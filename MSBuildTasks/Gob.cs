@@ -6,7 +6,7 @@ using Microsoft.Build.Utilities;
 namespace Winston.MSBuildTasks
 {
     /// <summary>
-    /// An ad hoc format like tar, but simpler
+    /// An ad hoc format like gob, but simpler
     /// </summary>
     public class Gob : Task
     {
@@ -23,39 +23,39 @@ namespace Winston.MSBuildTasks
             var dir = Path.GetFullPath(SourceDirectory);
             if (System.IO.Directory.Exists(dir))
             {
-                using (var tar = new FileStream(OutputFile, FileMode.Create))
+                using (var gob = new FileStream(OutputFile, FileMode.Create))
                 {
-                    AddDirectory(tar, dir, dir);
+                    AddDirectory(gob, dir, dir);
                 }
                 return true;
             }
             return false;
         }
 
-        static void AddDirectory(Stream tar, string baseDirectory, string directory)
+        static void AddDirectory(Stream gob, string baseDirectory, string directory)
         {
             var dirName = GetRelative(directory, baseDirectory);
             // If dirName is empty, we are at the root
             if (dirName != string.Empty)
             {
                 var header = new GobHeader(dirName, GobHeaderType.Directory);
-                header.CopyTo(tar);
+                header.CopyTo(gob);
             }
             var dirInfo = new DirectoryInfo(directory);
             foreach (var dir in dirInfo.GetDirectories())
             {
-                AddDirectory(tar, baseDirectory, dir.FullName);
+                AddDirectory(gob, baseDirectory, dir.FullName);
             }
             foreach (var file in dirInfo.GetFiles())
             {
                 var rel = GetRelative(file.FullName, baseDirectory);
                 var header = new GobHeader(rel, GobHeaderType.File, file.Length);
-                header.CopyTo(tar);
+                header.CopyTo(gob);
                 if (file.Length > 0)
                 {
                     using (var fileStream = File.OpenRead(file.FullName))
                     {
-                        fileStream.CopyTo(tar);
+                        fileStream.CopyTo(gob);
                     }
                 }
             }
