@@ -16,11 +16,11 @@ namespace Winston
             switch (verb)
             {
                 case "install":
-                    await InstallWorkflow.AddAppsAsync(repo, user, cache, verbArgs);
+                    await InstallWorkflow.InstallPackagesAsync(repo, user, cache, verbArgs);
                     return ExitCodes.OK;
 
                 case "uninstall":
-                    await InstallWorkflow.RemoveAppsAsync(repo, verbArgs);
+                    await InstallWorkflow.UninstallPackagesAsync(repo, verbArgs);
                     return ExitCodes.OK;
 
                 case "search":

@@ -15,10 +15,10 @@ namespace Winston
 {
     static class InstallWorkflow
     {
-        public static async Task AddAppsAsync(Repo repo, UserProxy user, SqliteCache cache, params string[] appNames)
-            => await AddAppsAsync(repo, user, cache, appNames as IEnumerable<string>);
+        public static async Task InstallPackagesAsync(Repo repo, UserProxy user, SqliteCache cache, params string[] appNames)
+            => await InstallPackagesAsync(repo, user, cache, appNames as IEnumerable<string>);
 
-        public static async Task AddAppsAsync(Repo repo, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
+        public static async Task InstallPackagesAsync(Repo repo, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
         {
             var pkgs = await cache.ByNamesAsync(appNames);
             var pkgsList = pkgs as List<Package> ?? pkgs.ToList();
@@ -36,9 +36,9 @@ namespace Winston
             await Task.WhenAll(ap);
         }
 
-        public static async Task RemoveAppsAsync(Repo repo, IEnumerable<string> apps) => await RemoveAppsAsync(repo, apps.ToArray());
+        public static async Task UninstallPackagesAsync(Repo repo, IEnumerable<string> apps) => await UninstallPackagesAsync(repo, apps.ToArray());
 
-        public static async Task RemoveAppsAsync(Repo repo, params string[] apps)
+        public static async Task UninstallPackagesAsync(Repo repo, params string[] apps)
         {
             await Task.WhenAll(apps.Select(async appName => await repo.RemoveAsync(appName)));
         }
