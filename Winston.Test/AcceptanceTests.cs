@@ -10,6 +10,7 @@ using static Winston.Test.SimpleProcessTools;
 
 namespace Winston.Test
 {
+    [Collection("Acceptance")]
     public class AcceptanceTests : IDisposable
     {
         [Fact]
@@ -32,7 +33,7 @@ namespace Winston.Test
         {
             var winstonExe = Path.Combine(installDir, "winston.exe");
             var ver = AssemblyName.GetAssemblyName(winstonExe).Version.ToString();
-            var p = cmd("winston.exe", installDir).Run();
+            var p = winst();
 
             p.StdOut.Should().Contain("Winston v", "Expect Winston version string output");
             p.StdOut.Should().Contain(ver, "Bootstrapped Winston version should equal build version");
@@ -41,7 +42,7 @@ namespace Winston.Test
         [Fact]
         public void CanAddIndex()
         {
-            var p = cmd("winston.exe add index http://localhost:9500/index.json", installDir).Run();
+            var p = winst("add index http://localhost:9500/index.json");
             p.ExitCode.Should().Be(0);
         }
 
@@ -50,7 +51,7 @@ namespace Winston.Test
         {
             CanAddIndex();
 
-            var p = cmd("winston.exe install FakePackage", installDir).Run();
+            var p = winst("install FakePackage");
             p.ExitCode.Should().Be(0);
 
             // TODO: rename "repo" path segment
@@ -65,7 +66,7 @@ namespace Winston.Test
         [Fact]
         public void InstallReturnsErrorForNotFoundPackage()
         {
-            var p = cmd("winston.exe install nonexistant", installDir).Run();
+            var p = winst("install nonexistant");
             p.ExitCode.Should().Be(ExitCodes.PackageNotFound);
             p.StdOut.Should().Contain("No packages found matching nonexistant");
         }
@@ -74,7 +75,7 @@ namespace Winston.Test
         public void SearchReturnsPackage()
         {
             CanAddIndex();
-            var p = cmd("winston.exe search fakepackage", installDir).Run();
+            var p = winst("search fakepackage");
             p.ExitCode.Should().Be(ExitCodes.Ok);
             p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
         }
@@ -83,7 +84,7 @@ namespace Winston.Test
         public void SearchForNotFoundReturnsError()
         {
             CanAddIndex();
-            var p = cmd("winston.exe search nonexistant", installDir).Run();
+            var p = winst("search nonexistant");
             p.ExitCode.Should().Be(ExitCodes.PackageNotFound);
         }
 
@@ -91,7 +92,7 @@ namespace Winston.Test
         public void ListAvailableShowsPackages()
         {
             CanAddIndex();
-            var p = cmd("winston.exe list available", installDir).Run();
+            var p = winst("list available");
             p.ExitCode.Should().Be(ExitCodes.Ok);
             p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
             p.StdOut.Should().Contain("NothingPackage").And.Contain("nothing.zip");
@@ -101,11 +102,13 @@ namespace Winston.Test
         public void ListInstalledShowsPackages()
         {
             CanInstallPackage();
-            var p = cmd("winston.exe list installed", installDir).Run();
+            var p = winst("list installed");
             p.ExitCode.Should().Be(ExitCodes.Ok);
             p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
             p.StdOut.Should().NotContain("NothingPackage").And.NotContain("nothing.zip");
         }
+
+        SimpleProcess winst(string arguments = "") => cmd($"winston.exe {arguments}", installDir).Run();
 
         readonly IHttpServer server;
 

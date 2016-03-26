@@ -13,6 +13,7 @@ using Winston.Packaging;
 
 namespace Winston.Test
 {
+    [Collection("Unit")]
     public class CacheFixture : IDisposable
     {
         public SqliteCache Cache { get; private set; }

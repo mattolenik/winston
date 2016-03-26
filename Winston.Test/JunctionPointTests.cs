@@ -6,11 +6,12 @@ using Xunit;
 
 namespace Winston.Test
 {
-    public class JunctionPointTest
+    [Collection("JunctionPoint")]
+    public class JunctionPointTests
     {
         string tempFolder;
 
-        public JunctionPointTest()
+        public JunctionPointTests()
         {
             tempFolder = Path.GetTempFileName();
             File.Delete(tempFolder);
