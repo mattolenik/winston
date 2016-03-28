@@ -99,6 +99,8 @@
     </ManifestResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="elevate.dll.bin.h" />
+    <ClInclude Include="elevate.exe.bin.h" />
     <ClInclude Include="Prereqs.h" />
     <ClInclude Include="DownloadStatus.h" />
     <ClInclude Include="export_types.h" />
@@ -108,24 +110,20 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TempDirectory.h" />
+    <ClInclude Include="winston.gob.bin.h" />
     <ClInclude Include="winston_install.h" />
-    <ClInclude Include="winston_gob.bin.h" />
     <ClInclude Include="elevate.bin.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="winston_gob.h.tpl" />
-    <None Include="elevate.h.tpl" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="elevate.dll.bin.cpp" />
+    <ClCompile Include="elevate.exe.bin.cpp" />
     <ClCompile Include="Prereqs.cpp" />
+    <ClCompile Include="winston.gob.bin.cpp" />
     <ClCompile Include="winston_install.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="winston_gob.bin.cpp" />
-    <ClCompile Include="elevate_dll.bin.cpp" />
-    <ClCompile Include="elevate_exe.bin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="winston_install.rc" />
@@ -141,30 +139,18 @@
   </PropertyGroup>
   <!-- Embedding Winston -->
   <Target Name="EmbedWinston" BeforeTargets="PrepareForBuild">
-    <Exec Command="tools\xd.exe -dwinston_gob &quot;$(WinstonGob)&quot; &gt; winston_gob.bin.cpp" />
-    <GetFileSize FileName="$(WinstonGob)">
-      <Output TaskParameter="FileSize" PropertyName="GobSize" />
-    </GetFileSize>
-    <ReplaceInFile Source="winston_gob.h.tpl" Destination="winston_gob.bin.h" Old="_SIZE_" New="$(GobSize)" />
+    <EmbedBin SourceFile="$(WinstonGob)" OutputCpp="winston.gob.bin.cpp" OutputH="winston.gob.bin.h" />
+  </Target>
+  <!-- Elevate embedding -->
+  <Target Name="EmbedElevate" BeforeTargets="PrepareForBuild">
+    <EmbedBin SourceFile="elevate.dll" OutputCpp="elevate.dll.bin.cpp" OutputH="elevate.dll.bin.h" />
+    <EmbedBin SourceFile="elevate.exe" OutputCpp="elevate.exe.bin.cpp" OutputH="elevate.exe.bin.h" />
   </Target>
   <!-- Clean -->
   <Target Name="CleanEmbed" AfterTargets="Clean">
     <Exec Command="del /F /Q *.bin.cpp 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q *.bin.h 2&gt;nul" IgnoreExitCode="true" />
     <Exec Command="del /F /Q $(NetFx) 2&gt;nul" IgnoreExitCode="true" />
-  </Target>
-  <!-- Elevate embedding -->
-  <Target Name="EmbedElevate" BeforeTargets="PrepareForBuild">
-    <Exec Command="tools\xd.exe -delevate_dll elevate.dll &gt; elevate_dll.bin.cpp" />
-    <Exec Command="tools\xd.exe -delevate_exe elevate.exe &gt; elevate_exe.bin.cpp" />
-    <GetFileSize FileName="elevate.dll">
-      <Output TaskParameter="FileSize" PropertyName="ElevateDllSize" />
-    </GetFileSize>
-    <GetFileSize FileName="elevate.exe">
-      <Output TaskParameter="FileSize" PropertyName="ElevateExeSize" />
-    </GetFileSize>
-    <ReplaceInFile Source="elevate.h.tpl" Destination="elevate.bin.h" Old="_DLL_SIZE_" New="$(ElevateDllSize)" />
-    <ReplaceInFile Source="elevate.bin.h" Destination="elevate.bin.h" Old="_EXE_SIZE_" New="$(ElevateExeSize)" />
   </Target>
   <Target Name="Compact" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' ">
     <Exec Command="tools\upx.exe --lzma &quot;$(OutputPath)winston_install.exe&quot;" />

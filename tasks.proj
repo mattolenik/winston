@@ -15,6 +15,15 @@
     AssemblyFile="$(SolutionDir)MSBuildTasks\bin\$(Configuration)\Winston.MSBuildTasks.dll"
     TaskName="Winston.MSBuildTasks.Gob"
     Condition="'$(CI)' == 'True' or '$(USE_TASK_BUILD)' != ''" />
+    
+  <UsingTask
+    AssemblyFile="$(SolutionDir)tasks\Winston.MSBuildTasks.dll"
+    TaskName="Winston.MSBuildTasks.EmbedBin"
+    Condition="'$(CI)' != 'True'" />
+  <UsingTask
+    AssemblyFile="$(SolutionDir)MSBuildTasks\bin\$(Configuration)\Winston.MSBuildTasks.dll"
+    TaskName="Winston.MSBuildTasks.EmbedBin"
+    Condition="'$(CI)' == 'True' or '$(USE_TASK_BUILD)' != ''" />
 
   <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
