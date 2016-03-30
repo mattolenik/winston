@@ -6,7 +6,7 @@ using Winston.User;
 
 namespace Winston.Test.User
 {
-    public class UserProxyTest : IDisposable
+    public class UserProxyTests : IDisposable
     {
         readonly UserProxy proxy;
         readonly TestAdapter adapter;
@@ -15,7 +15,7 @@ namespace Winston.Test.User
         {
             public string Answer;
 
-            public Task<string> Ask(Question question)
+            public Task<string> AskAsync(Question question)
             {
                 return Task.FromResult(Answer);
             }
@@ -30,7 +30,7 @@ namespace Winston.Test.User
             }
         }
 
-        public UserProxyTest()
+        public UserProxyTests()
         {
             adapter = new TestAdapter();
             proxy = new UserProxy(adapter);
@@ -45,12 +45,12 @@ namespace Winston.Test.User
         public void GetsAnAnswer()
         {
             adapter.Answer = "ans1";
-            var ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
+            var ans = Task.Run(() => proxy.AskAsync(new Question("what is the answer", "ans1", "ans2")));
             ans.Wait();
             ans.Result.Should().Be("ans1");
 
             adapter.Answer = "ans2";
-            ans = Task.Run(() => proxy.Ask(new Question("what is the answer", "ans1", "ans2")));
+            ans = Task.Run(() => proxy.AskAsync(new Question("what is the answer", "ans1", "ans2")));
             ans.Wait();
             ans.Result.Should().Be("ans2");
         }

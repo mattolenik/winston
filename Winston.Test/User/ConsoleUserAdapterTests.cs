@@ -6,12 +6,12 @@ using Winston.User;
 
 namespace Winston.Test.User
 {
-    public class ConsoleUserAdapterTest : IDisposable
+    public class ConsoleUserAdapterTests : IDisposable
     {
         readonly StringWriter writer;
         readonly ConsoleUserAdapter adapter;
 
-        public ConsoleUserAdapterTest()
+        public ConsoleUserAdapterTests()
         {
             writer = new StringWriter();
             var reader = new StringReader("ans1");
@@ -21,7 +21,7 @@ namespace Winston.Test.User
         [Fact]
         public async void AskAndAnswer()
         {
-            var answer = await adapter.Ask(new Question("", "Question", "ans1", "ans2"));
+            var answer = await adapter.AskAsync(new Question("", "Question", "ans1", "ans2"));
             answer.Should().Be("ans1");
         }
 

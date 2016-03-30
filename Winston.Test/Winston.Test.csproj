@@ -102,14 +102,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CacheTest.cs" />
-    <Compile Include="AcceptanceTests.cs" />
+    <Compile Include="Acceptance\AcceptanceCollection.cs" />
+    <Compile Include="Cache\CacheFixture.cs" />
+    <Compile Include="PortableInstallFixture.cs" />
+    <Compile Include="Acceptance\InstallAndBootstrap.cs" />
+    <Compile Include="Cache\Tests.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="JsonConfig.cs" />
-    <Compile Include="JunctionPointTests.cs" />
+    <Compile Include="JunctionPoint\Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleProcessTools.cs" />
     <Compile Include="SimpleProcess.cs" />
+    <Compile Include="User\ConsoleUserAdapterTests.cs" />
+    <Compile Include="User\UserProxyTests.cs" />
     <Compile Include="Winstall.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -121,9 +126,7 @@
       <Name>Winston</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="User\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
