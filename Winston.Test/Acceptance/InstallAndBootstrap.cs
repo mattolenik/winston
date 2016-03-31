@@ -106,6 +106,14 @@ namespace Winston.Test.Acceptance
         }
 
         [Fact]
+        public void ListNoArgsGetsHelpResponse()
+        {
+            var p = winst("list");
+            p.ExitCode.Should().Be(ExitCodes.InvalidArgument);
+            p.StdOut.Should().Contain("List what?");
+        }
+
+        [Fact]
         public void InfoShowsPackage()
         {
             var p = winst("info fakepackage");

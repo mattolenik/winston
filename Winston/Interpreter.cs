@@ -37,7 +37,7 @@ namespace Winston
                         break;
                     }
                 case "list":
-                    switch (verbArgs.First())
+                    switch (verbArgs.FirstOrDefault() ?? "")
                     {
                         case "installed":
                             {
@@ -66,6 +66,7 @@ namespace Winston
                             Console.WriteLine("List what? Winston can 'list' a few things:");
                             Console.WriteLine("winston list installed");
                             Console.WriteLine("winston list available");
+                            Console.WriteLine("winston list indexes");
                             return ExitCodes.InvalidArgument;
                     }
                     break;
