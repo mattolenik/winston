@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Winston.Serialization;
 
 namespace Winston.Packaging
 {
@@ -73,6 +74,11 @@ namespace Winston.Packaging
             }
             result += $"\n  From {Location}\n";
             return result;
+        }
+
+        public string GetInfo()
+        {
+            return Yml.Serialize(this);
         }
     }
 }

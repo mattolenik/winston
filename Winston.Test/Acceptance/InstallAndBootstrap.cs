@@ -15,6 +15,8 @@ namespace Winston.Test.Acceptance
         public InstallAndBootstrap(PortableInstallFixture fix)
         {
             this.fix = fix;
+            var p = winst("add index http://localhost:9500/index.json");
+            p.ExitCode.Should().Be(0);
         }
 
         SimpleProcess winst(string args = null) => fix.winst(args);
@@ -45,18 +47,10 @@ namespace Winston.Test.Acceptance
             p.StdOut.Should().Contain(ver, "Bootstrapped Winston version should equal build version");
         }
 
-        [Fact]
-        public void CanAddIndex()
-        {
-            var p = winst("add index http://localhost:9500/index.json");
-            p.ExitCode.Should().Be(0);
-        }
 
         [Fact]
         public void CanInstallPackage()
         {
-            CanAddIndex();
-
             var p = winst("install FakePackage");
             p.ExitCode.Should().Be(0);
 
@@ -80,7 +74,6 @@ namespace Winston.Test.Acceptance
         [Fact]
         public void SearchReturnsPackage()
         {
-            CanAddIndex();
             var p = winst("search fakepackage");
             p.ExitCode.Should().Be(ExitCodes.Ok);
             p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
@@ -89,7 +82,6 @@ namespace Winston.Test.Acceptance
         [Fact]
         public void SearchForNotFoundReturnsError()
         {
-            CanAddIndex();
             var p = winst("search nonexistant");
             p.ExitCode.Should().Be(ExitCodes.PackageNotFound);
         }
@@ -97,7 +89,6 @@ namespace Winston.Test.Acceptance
         [Fact]
         public void ListAvailableShowsPackages()
         {
-            CanAddIndex();
             var p = winst("list available");
             p.ExitCode.Should().Be(ExitCodes.Ok);
             p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
@@ -112,6 +103,26 @@ namespace Winston.Test.Acceptance
             p.ExitCode.Should().Be(ExitCodes.Ok);
             p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
             p.StdOut.Should().NotContain("NothingPackage").And.NotContain("nothing.zip");
+        }
+
+        [Fact]
+        public void InfoShowsPackage()
+        {
+            var p = winst("info fakepackage");
+            p.ExitCode.Should().Be(ExitCodes.Ok);
+            p.StdOut.Should()
+                .Contain("Name")
+                .And.Contain("FakePackage")
+                .And.Contain("Description")
+                .And.Contain("fake desc");
+        }
+
+        [Fact]
+        public void InfoForNotFoundReturnsError()
+        {
+            var p = winst("info nonexistant");
+            p.ExitCode.Should().Be(ExitCodes.PackageNotFound);
+            p.StdOut.Should().Contain("No package");
         }
     }
 }

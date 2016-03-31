@@ -29,12 +29,14 @@ namespace Winston.Test
                 {
                     Location = $"{Prefix}/fake.exe",
                     Name = "FakePackage",
+                    Description = "fake desc",
                     FileType = "Binary"
                 },
                 new
                 {
                     Location = $"{Prefix}/nothing.zip",
                     Name = "NothingPackage",
+                    Description = null as string,
                     FileType = "Archive"
                 }
             }

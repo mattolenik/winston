@@ -57,5 +57,14 @@ namespace Winston.Serialization
             serializer.RegisterTypeConverter(new YmlUriConverter());
             serializer.Serialize(writer, obj);
         }
+
+        public static string Serialize(object obj)
+        {
+            using (var sw = new StringWriter())
+            {
+                Serialize(sw, obj);
+                return sw.ToString();
+            }
+        }
     }
 }

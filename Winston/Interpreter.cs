@@ -72,7 +72,12 @@ namespace Winston
                 case "info":
                     {
                         var pkg = await cache.ByNameAsync(verbArgs.First());
-                        Console.WriteLine(JSON.ToNiceJSON(pkg, new JSONParameters { SerializeNullValues = false }));
+                        if (pkg == null)
+                        {
+                            Console.WriteLine($"No package '{verbArgs.First()}' found");
+                            return ExitCodes.PackageNotFound;
+                        }
+                        Console.WriteLine(pkg.GetInfo());
                         break;
                     }
                 case "refresh":
