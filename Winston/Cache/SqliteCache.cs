@@ -27,6 +27,13 @@ namespace Winston.Cache
             }
         }
 
+        public static async Task<SqliteCache> CreateAsync(string winstonDir, string defaultIndex)
+        {
+            var cache = await CreateAsync(winstonDir);
+            await cache.AddIndexAsync(defaultIndex);
+            return cache;
+        }
+
         public static async Task<SqliteCache> CreateAsync(string winstonDir)
         {
             var dbPath = Path.Combine(winstonDir, "cache.sqlite");

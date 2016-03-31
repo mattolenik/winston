@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +13,8 @@ namespace Winston
 {
     class Winmain
     {
+        const string SampleIndex = "https://raw.githubusercontent.com/mattolenik/winston-packages/master/sample.json";
+
         static int Main(string[] args)
         {
             JsonConfig.Init();
@@ -49,17 +50,9 @@ namespace Winston
                 Directory.CreateDirectory(cfg.ResolvedWinstonDir);
 
                 using (var user = new UserProxy(new ConsoleUserAdapter(Console.Out, Console.In)))
-                using (var cache = await SqliteCache.CreateAsync(cfg.ResolvedWinstonDir))
+                using (var cache = await SqliteCache.CreateAsync(cfg.ResolvedWinstonDir, SampleIndex))
                 {
                     var repo = new Repo(user, cfg.ResolvedWinstonDir);
-                    // TODO: find a better way to setup repos
-                    // Set up default repo
-                    if (verb != "selfinstall" && cache.Empty())
-                    {
-                        await cache.AddIndexAsync(Paths.AppRelative(@"repos\default.json"));
-                        await cache.RefreshAsync();
-                    }
-
                     return await Interpreter.RunCommandAsync(verb, verbArgs, user, repo, cache);
                 }
             }

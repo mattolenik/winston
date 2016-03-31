@@ -16,6 +16,7 @@ using static NativeInjector.Utils;
 
 namespace Winston
 {
+    // TODO: Find a better name, this sounds like a remote repo or package source
     public class Repo
     {
         readonly UserProxy user;
