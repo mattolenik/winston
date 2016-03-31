@@ -80,14 +80,10 @@ namespace Winston.Cache
             }
         }
 
-        public async Task AddRepoAsync(string uriOrPath)
+        public async Task AddIndexAsync(string uriOrPath)
         {
             uriOrPath = new Uri(uriOrPath).AbsoluteUri.ToLowerInvariant().TrimEnd('/', '\\');
-            await LoadRepoAsync(uriOrPath);
-        }
 
-        async Task LoadRepoAsync(string uriOrPath)
-        {
             PackageSource r;
             if (LocalFileIndex.TryLoad(uriOrPath, out r))
             {
@@ -101,6 +97,12 @@ namespace Winston.Cache
                 return;
             }
             throw new Exception($"Unable to load index at '{uriOrPath}'");
+        }
+
+        public async Task<IEnumerable<string>> GetIndexesAsync()
+        {
+            var indexes = await Db.QueryAsync<string>("select Location From Sources");
+            return indexes;
         }
 
         async Task AddIndexToDbAsync(PackageSource r)
@@ -142,7 +144,7 @@ namespace Winston.Cache
             var repos = await Db.QueryAsync<string>("select Location from Sources");
             foreach (var repo in repos)
             {
-                await LoadRepoAsync(repo);
+                await AddIndexAsync(repo);
             }
         }
 

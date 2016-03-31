@@ -60,6 +60,8 @@ namespace Winston
                         case "indexes":
                             {
                                 // TODO: implement list indexes
+                                var indexes = await cache.GetIndexesAsync();
+                                Console.WriteLine(string.Join(Environment.NewLine, indexes));
                                 break;
                             }
                         default:
@@ -94,7 +96,7 @@ namespace Winston
                     switch (verbArgs.First())
                     {
                         case "index":
-                            await cache.AddRepoAsync(verbArgs.Skip(1).First());
+                            await cache.AddIndexAsync(verbArgs.Skip(1).First());
                             break;
                         default:
                             Console.WriteLine("Add what? Winston can only 'add' one thing:");

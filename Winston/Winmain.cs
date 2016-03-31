@@ -56,7 +56,7 @@ namespace Winston
                     // Set up default repo
                     if (verb != "selfinstall" && cache.Empty())
                     {
-                        await cache.AddRepoAsync(Paths.AppRelative(@"repos\default.json"));
+                        await cache.AddIndexAsync(Paths.AppRelative(@"repos\default.json"));
                         await cache.RefreshAsync();
                     }
 
