@@ -35,7 +35,7 @@ namespace Winston.Test.Cache
                 RepoFile = new TempFile();
                 var json = JSON.ToJSON(PackageSource);
                 File.WriteAllText(RepoFile, json);
-                await Cache.AddIndexAsync(RepoFile);
+                await Cache.AddRepoAsync(RepoFile);
             }).Wait();
         }
 
