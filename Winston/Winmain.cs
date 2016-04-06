@@ -53,7 +53,7 @@ namespace Winston
                 using (var cache = await SqliteCache.CreateAsync(cfg.ResolvedWinstonDir, SampleIndex))
                 {
                     var repo = new Repo(user, cfg.ResolvedWinstonDir);
-                    return await Interpreter.RunCommandAsync(verb, verbArgs, user, repo, cache);
+                    return await Interpreter.RunCommandAsync(verb, verbArgs, user, repo, cache, cfg);
                 }
             }
             catch (Exception ex)

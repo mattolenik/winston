@@ -9,12 +9,12 @@ namespace Winston
 {
     class Interpreter
     {
-        public static async Task<int> RunCommandAsync(string verb, string[] verbArgs, UserProxy user, Repo repo, SqliteCache cache)
+        public static async Task<int> RunCommandAsync(string verb, string[] verbArgs, UserProxy user, Repo repo, SqliteCache cache, ConfigProvider cfg)
         {
             switch (verb)
             {
                 case "install":
-                    await InstallWorkflow.InstallPackagesAsync(repo, user, cache, verbArgs);
+                    await InstallWorkflow.InstallPackagesAsync(repo, user, cache, cfg, verbArgs);
                     return ExitCodes.Ok;
 
                 case "uninstall":

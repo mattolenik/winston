@@ -113,5 +113,13 @@ namespace Winston.Test.Acceptance
             p.StdOut.Should().Contain("FakePackage").And.Contain("fake.exe");
             p.StdOut.Should().NotContain("NothingPackage").And.NotContain("nothing.zip");
         }
+
+        [Fact]
+        public void BootstrapDoesNotWriteRegistry()
+        {
+            CanInstallPackage();
+            var userPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
+            userPath.Should().NotContainEquivalentOf(fixture.Installer.WinstonHome);
+        }
     }
 }

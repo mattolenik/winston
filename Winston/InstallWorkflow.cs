@@ -15,10 +15,10 @@ namespace Winston
 {
     static class InstallWorkflow
     {
-        public static async Task InstallPackagesAsync(Repo repo, UserProxy user, SqliteCache cache, params string[] appNames)
-            => await InstallPackagesAsync(repo, user, cache, appNames as IEnumerable<string>);
+        public static async Task InstallPackagesAsync(Repo repo, UserProxy user, SqliteCache cache, ConfigProvider cfg, IEnumerable<string> appNames)
+            => await InstallPackagesAsync(repo, user, cache, cfg, appNames.ToArray());
 
-        public static async Task InstallPackagesAsync(Repo repo, UserProxy user, SqliteCache cache, IEnumerable<string> appNames)
+        public static async Task InstallPackagesAsync(Repo repo, UserProxy user, SqliteCache cache, ConfigProvider cfg, params string[] appNames)
         {
             var pkgs = await cache.ByNamesAsync(appNames);
             var pkgsList = pkgs as List<Package> ?? pkgs.ToList();
@@ -32,7 +32,8 @@ namespace Winston
             var choiceTasks = ambiguous.Select(async choices => await DisambiguateAsync(user, SelectPlatform(choices)));
             var chosen = Task.WhenAll(choiceTasks).Result;
             // TODO: break this up
-            var ap = unique.Union(chosen).Select(async p => await repo.AddAsync(p));
+            var ap =
+                unique.Union(chosen).Select(async p => await repo.AddAsync(p, inject: true, writeRegistryPath: cfg.WriteRegistryPath));
             await Task.WhenAll(ap);
         }
 
