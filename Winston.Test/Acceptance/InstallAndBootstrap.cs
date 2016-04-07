@@ -10,11 +10,31 @@ namespace Winston.Test.Acceptance
     [Collection("Acceptance")]
     public class InstallAndBootstrap
     {
-        PortableInstallFixture fixture;
+        readonly PortableInstallFixture fixture;
+        readonly string altIndexJSON;
 
         public InstallAndBootstrap(PortableInstallFixture fixture)
         {
             this.fixture = fixture;
+            altIndexJSON = new
+            {
+                Name = "Test Index",
+                Packages = new[]
+                {
+                    new
+                    {
+                        Location = $"{fixture.Prefix}/fake.exe",
+                        Name = "AltFakePackage",
+                        FileType = "Binary"
+                    },
+                    new
+                    {
+                        Location = $"{fixture.Prefix}/nothing.zip",
+                        Name = "AltNothingPackage",
+                        FileType = "Archive"
+                    }
+                }
+            }.ToJSON();
         }
 
         SimpleProcess winst(string args = null) => fixture.winst(args);
@@ -48,8 +68,27 @@ namespace Winston.Test.Acceptance
         [Fact]
         public void CanAddIndex()
         {
-            var p = winst("add index http://localhost:9500/index.json");
-            p.ExitCode.Should().Be(0);
+            var p = winst($"add index {fixture.Prefix}/index.json");
+            p.ExitCode.Should().Be(ExitCodes.Ok);
+        }
+
+        [Fact]
+        public void CanAddIndexAndRefresh()
+        {
+            CanAddIndex();
+
+            var p = winst("list available");
+            var listing = p.StdOut;
+            fixture.IndexBody = altIndexJSON;
+            using (new Defer(() => fixture.RestoreIndex()))
+            {
+                p = winst("list available");
+                p.StdOut.Should().BeEquivalentTo(listing, "index should not change until refresh");
+                p = winst("refresh");
+                p.ExitCode.Should().Be(ExitCodes.Ok);
+                p = winst("list available");
+                p.StdOut.Should().NotContainEquivalentOf(listing, "index should have changed after refresh");
+            }
         }
 
         [Fact]
@@ -66,7 +105,7 @@ namespace Winston.Test.Acceptance
                 .BeTrue("Mock package should exist");
             p = SimpleProcessTools.cmd("winston.exe list installed", fixture.InstallDirectory).Run();
             p.ExitCode.Should().Be(0);
-            p.StdOut.Should().Contain("FakePackage").And.Contain($"From {PortableInstallFixture.Prefix}/fake.exe");
+            p.StdOut.Should().Contain("FakePackage").And.Contain($"From {fixture.Prefix}/fake.exe");
         }
 
         [Fact]

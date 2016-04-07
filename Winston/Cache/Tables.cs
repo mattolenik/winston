@@ -8,10 +8,11 @@
 
             public static readonly string CreateStatement = $@"
     CREATE TABLE IF NOT EXISTS `{name}` (
-    `Name`	TEXT NOT NULL COLLATE NOCASE,
+    `Name`          TEXT NOT NULL COLLATE NOCASE,
+    `SourceIndex`   TEXT NOT NULL COLLATE NOCASE,
     `Description`	TEXT,
     `PackageData`	TEXT NOT NULL,
-    PRIMARY KEY(Name)
+    PRIMARY KEY(Name, SourceIndex)
 )";
 
             public static readonly string DeleteAllStatement = $@"delete from `{name}`";

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Dapper;
 using fastJSON;
@@ -27,18 +27,15 @@ namespace Winston.Cache
             }
         }
 
-        public static async Task<SqliteCache> CreateAsync(string winstonDir, string defaultIndex)
-        {
-            var cache = await CreateAsync(winstonDir);
-            await cache.AddIndexAsync(defaultIndex);
-            return cache;
-        }
-
-        public static async Task<SqliteCache> CreateAsync(string winstonDir)
+        public static async Task<SqliteCache> CreateAsync(string winstonDir, string defaultIndex = null)
         {
             var dbPath = Path.Combine(winstonDir, "cache.sqlite");
             var cache = new SqliteCache(dbPath);
             await cache.LoadAsync();
+            if (defaultIndex != null)
+            {
+                await cache.AddIndexAsync(defaultIndex);
+            }
             return cache;
         }
 
@@ -87,51 +84,99 @@ namespace Winston.Cache
             }
         }
 
-        public async Task AddIndexAsync(string uriOrPath)
+        /// <summary>
+        /// Adds a local or remote index at the specified URI or path.
+        /// </summary>
+        /// <param name="uriOrPath">the index location</param>
+        /// <param name="forceRefresh">if the index is already present in the cache,
+        /// force it to be refreshed; otherwise, re-adding an index is a no-op</param>
+        /// <returns>an async task for this operation</returns>
+        public async Task<PackageChanges> AddIndexAsync(string uriOrPath, bool forceRefresh = false)
         {
             uriOrPath = new Uri(uriOrPath).AbsoluteUri.ToLowerInvariant().TrimEnd('/', '\\');
+
+            // If the index exists, don't re-add it unless requested
+            if (!forceRefresh)
+            {
+                var idexes = await GetIndexesAsync();
+                if (idexes.Contains(uriOrPath, StringComparer.OrdinalIgnoreCase))
+                {
+                    return new PackageChanges();
+                }
+            }
 
             PackageSource r;
             if (LocalFileIndex.TryLoad(uriOrPath, out r))
             {
-                await AddIndexToDbAsync(r);
-                return;
+                return await AddIndexToDbAsync(r);
             }
             r = await WebIndex.TryLoadAsync(uriOrPath);
             if (r != null)
             {
-                await AddIndexToDbAsync(r);
-                return;
+                return await AddIndexToDbAsync(r);
             }
             throw new Exception($"Unable to load index at '{uriOrPath}'");
         }
 
         public async Task<IEnumerable<string>> GetIndexesAsync()
         {
-            var indexes = await Db.QueryAsync<string>("select Location From Sources");
+            var indexes = await Db.QueryAsync<string>("select Location from Sources");
             return indexes;
         }
 
-        async Task AddIndexToDbAsync(PackageSource r)
+        async Task<PackageChanges> AddIndexToDbAsync(PackageSource r)
         {
             using (var t = Db.BeginTransaction())
             {
                 try
                 {
+                    var pkgs = await Db.QueryAsync<string>(
+                        "select Name from Packages where SourceIndex = @SourceIndex",
+                        new { SourceIndex = r.Location });
+                    var pkgsList = pkgs.ToList();
+                    var newPkgs = r.Packages.Select(p => p.Name).ToList();
+                    var removed = pkgsList.Except(newPkgs).ToList();
+                    var added = newPkgs.Except(pkgsList);
+
                     foreach (var pkg in r.Packages)
                     {
                         var json = JSON.ToJSON(pkg);
-                        var result = Db.Execute("insert or replace into Sources (Location) values (@Location)", new { Location = r.Location });
+                        var result = await Db.ExecuteAsync("insert or replace into Sources (Location) values (@Location)", new { Location = r.Location });
                         result = await Db.ExecuteAsync(
-                            @"insert or replace into Packages (Name, Description, PackageData) values (@Name, @Desc, @Data)",
-                            new {Name = pkg.Name, Desc = pkg.Description, Data = json},
+                            @"insert or replace into Packages (Name, SourceIndex, Description, PackageData) values (@Name, @SourceIndex, @Desc, @Data)",
+                            new
+                            {
+                                Name = pkg.Name,
+                                SourceIndex = r.Location,
+                                Desc = pkg.Description,
+                                Data = json
+                            },
                             transaction: t);
                         result = await Db.ExecuteAsync(
                             @"insert or replace into PackageSearch (Name, Desc) values (@Name, @Desc)",
-                            new {Name = pkg.Name, Desc = pkg.Description},
+                            new
+                            {
+                                Name = pkg.Name,
+                                Desc = pkg.Description
+                            },
                             transaction: t);
                     }
+
+                    foreach (var pkg in removed)
+                    {
+                        var result = await Db.ExecuteAsync(
+                            "delete from Packages where Name = @Name and SourceIndex = @SourceIndex",
+                            new
+                            {
+                                Name = pkg,
+                                SourceIndex = r.Location
+                            },
+                            transaction: t);
+                    }
+
                     t.Commit();
+
+                    return new PackageChanges { Added = added, Removed = removed };
                 }
                 catch (Exception ex)
                 {
@@ -151,7 +196,7 @@ namespace Winston.Cache
             var repos = await Db.QueryAsync<string>("select Location from Sources");
             foreach (var repo in repos)
             {
-                await AddIndexAsync(repo);
+                await AddIndexAsync(repo, forceRefresh: true);
             }
         }
 

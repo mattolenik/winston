@@ -4,7 +4,9 @@ using System.Linq;
 using System.Reflection;
 using FluentAssertions;
 using HttpMock;
+using Winston.OS;
 using static Winston.Test.SimpleProcessTools;
+using Environment = System.Environment;
 
 namespace Winston.Test
 {
@@ -18,30 +20,35 @@ namespace Winston.Test
 
         public readonly string InstallDirectory;
 
-        public const string Prefix = "http://localhost:9500";
+        public string Prefix => prefix;
 
-        readonly string indexJSON = new
+        static readonly string prefix = "http://localhost:9500";
+
+        public readonly string IndexJSON = new
         {
             Name = "Test Index",
             Packages = new[]
             {
                 new
                 {
-                    Location = $"{Prefix}/fake.exe",
+                    Location = $"{prefix}/fake.exe",
                     Name = "FakePackage",
                     FileType = "Binary"
                 },
                 new
                 {
-                    Location = $"{Prefix}/nothing.zip",
+                    Location = $"{prefix}/nothing.zip",
                     Name = "NothingPackage",
                     FileType = "Archive"
                 }
             }
         }.ToJSON();
 
+        public string IndexBody { get; set; }
+
         public PortableInstallFixture()
         {
+            RestoreIndex();
             Environment.SetEnvironmentVariable("WINSTON_DEBUG", "1");
             server = HttpMockRepository.At(Prefix);
             StubRepo();
@@ -57,15 +64,25 @@ namespace Winston.Test
 
         void StubRepo()
         {
-            server.Stub(x => x.Get("/index.json")).Return(indexJSON).OK();
+            server.Stub(x => x.Get("/index.json")).Return(() => IndexBody).OK();
             server.Stub(x => x.Get("/fake.exe")).Return("").OK();
             server.Stub(x => x.Get("/nothing.zip")).Return("").OK();
+        }
+
+        public IRequestStub Stub(Func<RequestHandlerFactory, IRequestStub> func)
+        {
+            return server.Stub(func);
         }
 
         public void Dispose()
         {
             server.Dispose();
             Installer.Dispose();
+        }
+
+        public void RestoreIndex()
+        {
+            IndexBody = IndexJSON;
         }
     }
 }

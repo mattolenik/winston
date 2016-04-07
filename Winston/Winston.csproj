@@ -78,6 +78,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\Indexes.cs" />
+    <Compile Include="Cache\PackageChanges.cs" />
+    <Compile Include="Defer.cs" />
     <Compile Include="IExitCodeException.cs" />
     <Compile Include="Index\LocalFileIndex.cs" />
     <Compile Include="Cache\Tables.cs" />

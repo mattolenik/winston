@@ -28,10 +28,13 @@ namespace Winston
 
         public bool WriteRegistryPath => Config.WriteRegistryPath;
 
+        public string DefaultIndex => Config.DefaultIndex;
+
         static readonly Config Default = new Config
         {
             WinstonDir = Path.Combine(Paths.AppData, @"winston\"),
-            WriteRegistryPath = true
+            WriteRegistryPath = true,
+            DefaultIndex = "https://raw.githubusercontent.com/mattolenik/winston-packages/master/sample.json"
         };
 
         readonly string configPath = Path.Combine(Paths.ExecutingDirPath, "config.yml");

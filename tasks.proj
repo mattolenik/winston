@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask
-    AssemblyFile="$(SolutionDir)tasks\Winston.MSBuildTasks.dll"
+    AssemblyFile="$(SolutionDir)lib\Winston.MSBuildTasks.dll"
     TaskName="Winston.MSBuildTasks.Gob" />
     
   <UsingTask
-    AssemblyFile="$(SolutionDir)tasks\Winston.MSBuildTasks.dll"
+    AssemblyFile="$(SolutionDir)lib\Winston.MSBuildTasks.dll"
     TaskName="Winston.MSBuildTasks.EmbedBin" />
 
   <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">

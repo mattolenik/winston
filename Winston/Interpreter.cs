@@ -9,6 +9,8 @@ namespace Winston
 {
     class Interpreter
     {
+        static readonly string nl = Environment.NewLine;
+
         public static async Task<int> RunCommandAsync(string verb, string[] verbArgs, UserProxy user, Repo repo, SqliteCache cache, ConfigProvider cfg)
         {
             switch (verb)
@@ -83,7 +85,7 @@ namespace Winston
                     }
                 case "refresh":
                     await cache.RefreshAsync();
-                    break;
+                    return ExitCodes.Ok;
 
                 // TODO: finish this
                 case "restore":
@@ -94,14 +96,31 @@ namespace Winston
                     switch (verbArgs.First())
                     {
                         case "index":
-                            await cache.AddIndexAsync(verbArgs.Skip(1).First());
-                            break;
+                            var changes = await cache.AddIndexAsync(verbArgs.Skip(1).First(), forceRefresh: true);
+                            if (changes.Added.Any())
+                            {
+                                var msg = $"Added:{nl}{string.Join(", ", changes.Added)}";
+                                user.Message(msg);
+                            }
+                            if (changes.Removed.Any())
+                            {
+                                var msg = $"Removed:{nl}{string.Join(", ", changes.Removed)}";
+                                user.Message(msg);
+                            }
+                            // TODO: implement change detection for updates
+                            if (changes.Updated.Any())
+                            {
+                                var msg = $"Updated:{nl}{string.Join(", ", changes.Updated)}";
+                                user.Message(msg);
+                            }
+                            return ExitCodes.Ok;
                         default:
-                            Console.WriteLine("Add what? Winston can only 'add' one thing:");
-                            Console.WriteLine("winston add index <urlOrFile>");
+                        {
+                            var msg = $"Add what? Winston can 'add' one thing:{nl}winston add index <urlOrFile>";
+                            user.Message(msg);
                             return ExitCodes.InvalidArgument;
+                        }
                     }
-                    break;
 
                 case "help":
                     return PrintUsage();
@@ -113,7 +132,7 @@ namespace Winston
                 default:
                     return PrintUsage();
             }
-            return 0;
+            return ExitCodes.Ok;
         }
 
         public static int PrintUsage()

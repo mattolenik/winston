@@ -14,5 +14,7 @@ namespace Winston
         /// Usually false for bootstrapped/embedded installations.
         /// </summary>
         public bool WriteRegistryPath { get; set; }
+
+        public string DefaultIndex { get; set; }
     }
 }
