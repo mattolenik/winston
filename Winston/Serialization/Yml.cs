@@ -34,11 +34,12 @@ namespace Winston.Serialization
         public static bool TryLoad<T>(string path, out T result, Func<T> defaultVal)
         {
             var success = TryLoad(path, out result);
-            if (!success)
+            if (success) { return true; }
+            if (defaultVal != null)
             {
                 result = defaultVal();
             }
-            return success;
+            throw new ArgumentNullException(nameof(defaultVal));
         }
 
         public static void Save(object obj, string path)
