@@ -90,7 +90,8 @@
     <Compile Include="IConfigProvider.cs" />
     <Compile Include="Index\WebIndex.cs" />
     <Compile Include="Installers\HttpPackageInstaller.cs" />
-    <Compile Include="Installers\IFileExtractor.cs" />
+    <Compile Include="Installers\IPackageExtractor.cs" />
+    <Compile Include="Installers\MsiExtractor.cs" />
     <Compile Include="OS\Environment.cs" />
     <Compile Include="OS\JunctionPoint.cs" />
     <Compile Include="OS\FS.cs" />
@@ -102,6 +103,8 @@
     <Compile Include="Installers\Content.cs" />
     <Compile Include="Installers\ExeExtractor.cs" />
     <Compile Include="Installers\IPackageInstaller.cs" />
+    <Compile Include="OS\SimpleProcess.cs" />
+    <Compile Include="OS\SimpleProcessException.cs" />
     <Compile Include="PackageNotFoundException.cs" />
     <Compile Include="Packaging\Package.cs" />
     <Compile Include="Packaging\PackageClient.cs" />

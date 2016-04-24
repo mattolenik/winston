@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
+using Winston.OS;
 using Xunit;
+using Environment = System.Environment;
 
 namespace Winston.Test.Acceptance
 {
@@ -103,7 +105,7 @@ namespace Winston.Test.Acceptance
             File.Exists(Path.Combine(fixture.Installer.WinstonHome.Path, "repo", "FakePackage", "latest", "fake.exe"))
                 .Should()
                 .BeTrue("Mock package should exist");
-            p = SimpleProcessTools.cmd("winston.exe list installed", fixture.InstallDirectory).Run();
+            p = SimpleProcess.Cmd("winston.exe list installed", fixture.InstallDirectory).Run();
             p.ExitCode.Should().Be(0);
             p.StdOut.Should().Contain("FakePackage").And.Contain($"From {fixture.Prefix}/fake.exe");
         }

@@ -9,6 +9,8 @@ namespace Winston.OS
 {
     static class Environment
     {
+        public static string NewLine => System.Environment.NewLine;
+
         public static bool IsDebug => EnvExists("WINSTON_DEBUG");
 
         public static void AddToPath(string path, string scrub = null)
@@ -53,7 +55,7 @@ namespace Winston.OS
         public static void BroadcastSettingsChange()
         {
             // Send WM_SETTINGCHANGE message to all windows. Explorer will pick this up and new
-            // cmd processes will see the new PATH variable.
+            // Cmd processes will see the new PATH variable.
             var lParamA = Marshal.StringToHGlobalAnsi(EnvironmentKey);
             var lParamU = Marshal.StringToHGlobalUni(EnvironmentKey);
             try

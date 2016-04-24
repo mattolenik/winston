@@ -111,8 +111,6 @@
     <Compile Include="JsonConfig.cs" />
     <Compile Include="JunctionPoint\Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleProcessTools.cs" />
-    <Compile Include="SimpleProcess.cs" />
     <Compile Include="User\ConsoleUserAdapterTests.cs" />
     <Compile Include="User\UserProxyTests.cs" />
     <Compile Include="Winstall.cs" />

@@ -34,7 +34,5 @@ namespace Winston.Installers
         {
             return Task.FromResult(null as Exception);
         }
-
-        public void Dispose() { }
     }
 }

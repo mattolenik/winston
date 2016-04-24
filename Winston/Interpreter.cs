@@ -11,19 +11,21 @@ namespace Winston
     {
         static readonly string nl = Environment.NewLine;
 
-        public static async Task<int> RunCommandAsync(string verb, string[] verbArgs, UserProxy user, Repo repo, SqliteCache cache, ConfigProvider cfg)
+        public static async Task<int> RunCommandAsync(string verb, string[] verbArgs, UserProxy user, Repo repo, ConfigProvider cfg)
         {
-            switch (verb)
+            using (var cache = await SqliteCache.CreateAsync(cfg.ResolvedWinstonDir, cfg.DefaultIndex))
             {
-                case "install":
-                    await InstallWorkflow.InstallPackagesAsync(repo, user, cache, cfg, verbArgs);
-                    return ExitCodes.Ok;
+                switch (verb)
+                {
+                    case "install":
+                        await InstallWorkflow.InstallPackagesAsync(repo, user, cache, cfg, verbArgs);
+                        return ExitCodes.Ok;
 
-                case "uninstall":
-                    await InstallWorkflow.UninstallPackagesAsync(repo, verbArgs);
-                    return ExitCodes.Ok;
+                    case "uninstall":
+                        await InstallWorkflow.UninstallPackagesAsync(repo, verbArgs);
+                        return ExitCodes.Ok;
 
-                case "search":
+                    case "search":
                     {
                         var pkgs = await cache.SearchAsync(verbArgs.First());
                         if (!pkgs.Any())
@@ -36,10 +38,10 @@ namespace Winston
                         }
                         break;
                     }
-                case "list":
-                    switch (verbArgs.FirstOrDefault() ?? "")
-                    {
-                        case "installed":
+                    case "list":
+                        switch (verbArgs.FirstOrDefault() ?? "")
+                        {
+                            case "installed":
                             {
                                 var pkgs = await repo.ListAsync();
                                 foreach (var pkg in pkgs)
@@ -48,7 +50,7 @@ namespace Winston
                                 }
                                 break;
                             }
-                        case "available":
+                            case "available":
                             {
                                 var pkgs = await cache.AllAsync();
                                 foreach (var pkg in pkgs)
@@ -57,22 +59,22 @@ namespace Winston
                                 }
                                 break;
                             }
-                        case "indexes":
+                            case "indexes":
                             {
                                 // TODO: implement list indexes
                                 var indexes = await cache.GetIndexesAsync();
                                 Console.WriteLine(string.Join(Environment.NewLine, indexes));
                                 break;
                             }
-                        default:
-                            Console.WriteLine("List what? Winston can 'list' a few things:");
-                            Console.WriteLine("winston list installed");
-                            Console.WriteLine("winston list available");
-                            Console.WriteLine("winston list indexes");
-                            return ExitCodes.InvalidArgument;
-                    }
-                    break;
-                case "info":
+                            default:
+                                Console.WriteLine("List what? Winston can 'list' a few things:");
+                                Console.WriteLine("winston list installed");
+                                Console.WriteLine("winston list available");
+                                Console.WriteLine("winston list indexes");
+                                return ExitCodes.InvalidArgument;
+                        }
+                        break;
+                    case "info":
                     {
                         var pkg = await cache.ByNameAsync(verbArgs.First());
                         if (pkg == null)
@@ -83,56 +85,53 @@ namespace Winston
                         Console.WriteLine(pkg.GetInfo());
                         break;
                     }
-                case "refresh":
-                    await cache.RefreshAsync();
-                    return ExitCodes.Ok;
+                    case "refresh":
+                        await cache.RefreshAsync();
+                        return ExitCodes.Ok;
 
-                // TODO: finish this
-                case "restore":
-                    await repo.RestoreAsync();
-                    return ExitCodes.Ok;
+                    // TODO: finish this
+                    case "restore":
+                        await repo.RestoreAsync();
+                        return ExitCodes.Ok;
 
-                case "add":
-                    switch (verbArgs.First())
-                    {
-                        case "index":
-                            var changes = await cache.AddIndexAsync(verbArgs.Skip(1).First(), forceRefresh: true);
-                            if (changes.Added.Any())
-                            {
-                                var msg = $"Added:{nl}{string.Join(", ", changes.Added)}";
-                                user.Message(msg);
-                            }
-                            if (changes.Removed.Any())
-                            {
-                                var msg = $"Removed:{nl}{string.Join(", ", changes.Removed)}";
-                                user.Message(msg);
-                            }
-                            // TODO: implement change detection for updates
-                            if (changes.Updated.Any())
-                            {
-                                var msg = $"Updated:{nl}{string.Join(", ", changes.Updated)}";
-                                user.Message(msg);
-                            }
-                            return ExitCodes.Ok;
-                        default:
+                    case "add":
+                        switch (verbArgs.First())
                         {
-                            var msg = $"Add what? Winston can 'add' one thing:{nl}winston add index <urlOrFile>";
-                            user.Message(msg);
-                            return ExitCodes.InvalidArgument;
+                            case "index":
+                                var changes = await cache.AddIndexAsync(verbArgs.Skip(1).First(), forceRefresh: true);
+                                if (changes.Added.Any())
+                                {
+                                    var msg = $"Added:{nl}{string.Join(", ", changes.Added)}";
+                                    user.Message(msg);
+                                }
+                                if (changes.Removed.Any())
+                                {
+                                    var msg = $"Removed:{nl}{string.Join(", ", changes.Removed)}";
+                                    user.Message(msg);
+                                }
+                                // TODO: implement change detection for updates
+                                if (changes.Updated.Any())
+                                {
+                                    var msg = $"Updated:{nl}{string.Join(", ", changes.Updated)}";
+                                    user.Message(msg);
+                                }
+                                return ExitCodes.Ok;
+                            default:
+                            {
+                                var msg = $"Add what? Winston can 'add' one thing:{nl}winston add index <urlOrFile>";
+                                user.Message(msg);
+                                return ExitCodes.InvalidArgument;
+                            }
                         }
-                    }
 
-                case "help":
-                    return PrintUsage();
+                    case "help":
+                        return PrintUsage();
 
-                case "selfinstall":
-                    await InstallWorkflow.SelfInstallAsync(repo, verbArgs.FirstOrDefault() ?? ".");
-                    break;
-
-                default:
-                    return PrintUsage();
+                    default:
+                        return PrintUsage();
+                }
+                return ExitCodes.Ok;
             }
-            return ExitCodes.Ok;
         }
 
         public static int PrintUsage()

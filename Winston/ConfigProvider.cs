@@ -12,6 +12,7 @@ namespace Winston
         {
             get
             {
+                // This resolves even if configPath doesn't exist
                 var configDir = Path.GetDirectoryName(configPath);
                 if (configDir == null)
                 {
@@ -32,7 +33,7 @@ namespace Winston
 
         static readonly Config Default = new Config
         {
-            WinstonDir = Path.Combine(Paths.AppData, @"winston\"),
+            WinstonDir = Path.Combine(Paths.AppData, "winston"),
             WriteRegistryPath = true,
             DefaultIndex = "https://raw.githubusercontent.com/mattolenik/winston-packages/master/sample.json"
         };

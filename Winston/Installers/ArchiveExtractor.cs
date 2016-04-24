@@ -8,9 +8,9 @@ using Winston.Packaging;
 
 namespace Winston.Installers
 {
-    class ArchiveExtractor : IFileExtractor
+    class ArchiveExtractor : IPackageExtractor
     {
-        string appDir;
+        string installDir;
         string packageFile;
         string filename;
         static readonly TimeSpan ExtractionTimeout = TimeSpan.FromMinutes(20);
@@ -32,11 +32,11 @@ namespace Winston.Installers
             "zip", "7z", "exe", "xz", "bz2", "gz", "tar", "cab", "lzh", "lha", "rar", "xar", "z"
         };
 
-        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile,
+        public static IPackageExtractor TryCreate(Package pkg, string installDir, string packageFile,
             NameValueCollection headers, Uri uri)
         {
-            var result = new ArchiveExtractor { appDir = appDir, packageFile = packageFile, filename = pkg.Filename };
-            if (Content.ContentTypeMatches(headers, MatchingMimeTypes))
+            var result = new ArchiveExtractor { installDir = installDir, packageFile = packageFile, filename = pkg.Filename };
+            if (Content.MatchContentType(headers, MatchingMimeTypes))
             {
                 return result;
             }
@@ -57,20 +57,20 @@ namespace Winston.Installers
 
         public async Task<string> InstallAsync(Progress progress)
         {
-            await ExtractAsync(packageFile, appDir, progress);
-            return Path.Combine(appDir, filename ?? "");
+            await ExtractAsync(packageFile, installDir, progress);
+            return Path.Combine(installDir, filename ?? "");
         }
 
-        public static Task<Exception> ValidateAsync()
+        public static async Task<Exception> ValidateAsync()
         {
             // TODO: verify all files get extracted by comparing them to the ZIP header?
-            return Task.FromResult<Exception>(null);
+            return await Task.FromResult<Exception>(null);
         }
 
         static async Task ExtractAsync(string filename, string destination, Progress progress)
         {
             Directory.Delete(destination, true);
-            var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var workingDir = Paths.ExecutingDirPath;
             var args = $"x \"{filename}\" -o\"{destination}\" -y";
             var si = new ProcessStartInfo(@"tools\7z.exe", args)
             {

@@ -1,18 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using FluentAssertions;
 using HttpMock;
 using Winston.OS;
-using static Winston.Test.SimpleProcessTools;
 using Environment = System.Environment;
 
 namespace Winston.Test
 {
     public class PortableInstallFixture : IDisposable
     {
-        public SimpleProcess winst(string arguments = "") => cmd($"winston.exe {arguments}", InstallDirectory).Run();
+        public SimpleProcess winst(string arguments = "") => SimpleProcess.Cmd($"winston.exe {arguments}", InstallDirectory).Run();
 
         readonly IHttpServer server;
 

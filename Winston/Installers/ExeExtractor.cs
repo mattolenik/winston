@@ -6,12 +6,12 @@ using Winston.Packaging;
 
 namespace Winston.Installers
 {
-    class ExeExtractor : IFileExtractor
+    class ExeExtractor : IPackageExtractor
     {
         string packageFile;
         string exePath;
 
-        public static IFileExtractor TryCreate(Package pkg, string appDir, string packageFile, NameValueCollection headers, Uri uri)
+        public static IPackageExtractor TryCreate(Package pkg, string installDir, string packageFile, NameValueCollection headers, Uri uri)
         {
             var result = new ExeExtractor { packageFile = packageFile };
             var cdFilename = Content.MatchContentDispositionFileExt(headers, "exe");
@@ -22,7 +22,7 @@ namespace Winston.Installers
             {
                 return null;
             }
-            result.exePath = Path.Combine(appDir, filename);
+            result.exePath = Path.Combine(installDir, filename);
             return result;
         }
 

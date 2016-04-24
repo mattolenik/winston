@@ -21,7 +21,7 @@ namespace Winston.Installers
             return extensions.Any(ext => cd.FileName.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase)) ? cd.FileName : null;
         }
 
-        public static bool ContentTypeMatches(NameValueCollection headers, params string[] contentTypes)
+        public static bool MatchContentType(NameValueCollection headers, params string[] contentTypes)
         {
             var ct = headers["Content-Type"] ?? "";
             return contentTypes.Any(contentType => string.Equals(ct, contentType, StringComparison.OrdinalIgnoreCase));

@@ -14,7 +14,6 @@ namespace Winston.Installers
     {
         readonly Package pkg;
         readonly string pkgDir;
-        readonly TempFile tmpFile;
 
         public static IPackageInstaller TryCreate(Package pkg, string pkgDir)
         {
@@ -29,21 +28,23 @@ namespace Winston.Installers
         {
             this.pkg = pkg;
             this.pkgDir = pkgDir;
-            tmpFile = new TempFile();
         }
 
         public async Task<DirectoryInfo> InstallAsync(Progress progress)
         {
-            using (var webClient = new WebClient())
+            var actualLocation = pkg.Location;
+            var headReq = WebRequest.Create(pkg.Location) as HttpWebRequest;
+            headReq.Method = "HEAD";
+            var headRes = (await headReq.GetResponseAsync()) as HttpWebResponse;
+            if (headRes.ResponseUri != null)
             {
-                var actualLocation = pkg.Location;
-                var headReq = WebRequest.Create(pkg.Location) as HttpWebRequest;
-                headReq.Method = "HEAD";
-                var headRes = (await headReq.GetResponseAsync()) as HttpWebResponse;
-                if (headRes.StatusCode == HttpStatusCode.Moved)
-                {
-                    actualLocation = new Uri(headRes.Headers["Location"]);
-                }
+                actualLocation = headRes.ResponseUri;
+            }
+            var ext = Path.GetExtension(actualLocation.AbsolutePath);
+
+            using (var webClient = new WebClient())
+            using (var tmpFile = new TempFile(ext))
+            {
                 webClient.DownloadProgressChanged += (sender, args) => progress.UpdateDownload(args.ProgressPercentage);
                 await webClient.DownloadFileTaskAsync(actualLocation, tmpFile);
                 progress.CompletedDownload();
@@ -66,29 +67,29 @@ namespace Winston.Installers
                 var installDir = Path.Combine(pkgDir, version);
                 Directory.CreateDirectory(installDir);
 
-                IFileExtractor archive;
+                IPackageExtractor extractor;
 
                 switch (pkg?.FileType)
                 {
                     case PackageFileType.Archive:
-                        archive =
+                        extractor =
                             ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location) ??
                             MsiExtractor.TryCreate(pkg, installDir, tmpFile);
                         break;
 
                     case PackageFileType.Binary:
-                        archive = ExeExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location);
+                        extractor = ExeExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location);
                         break;
 
                     default:
-                        archive = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location) ??
+                        extractor = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location) ??
                                       ExeExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location);
                         break;
                 }
 
-                if (archive != null)
+                if (extractor != null)
                 {
-                    var p = await archive.InstallAsync(progress);
+                    var p = await extractor.InstallAsync(progress);
                     progress.CompletedInstall();
                 }
                 else
@@ -104,7 +105,5 @@ namespace Winston.Installers
         {
             return await Task.FromResult(null as Exception);
         }
-
-        public void Dispose() => tmpFile?.Dispose();
     }
 }

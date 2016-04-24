@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Winston.Installers
 {
-    interface IFileExtractor
+    interface IPackageExtractor
     {
         Task<string> InstallAsync(Progress progress);
     }

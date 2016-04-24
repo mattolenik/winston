@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Winston.Installers
 {
-    public interface IPackageInstaller : IDisposable
+    public interface IPackageInstaller
     {
         Task<DirectoryInfo> InstallAsync(Progress progress );
         Task<Exception> ValidateAsync();

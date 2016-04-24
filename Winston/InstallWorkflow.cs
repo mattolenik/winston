@@ -84,8 +84,9 @@ namespace Winston
             return choicesArray[ansInt];
         }
 
-        public static async Task<string> SelfInstallAsync(Repo repo, string installFromDir)
+        public static async Task<string> SelfInstallAsync(UserProxy user, string installFromDir)
         {
+            var repo = new Repo(user, Path.Combine(Paths.AppData, "winston"));
             var fullDir = Path.GetFullPath(installFromDir);
             var winstonExe = Path.Combine(fullDir, "winston.exe");
             var ver = FileVersionInfo.GetVersionInfo(winstonExe);
