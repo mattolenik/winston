@@ -34,12 +34,19 @@ namespace Winston.Installers
         {
             var actualLocation = pkg.Location;
             // Do an HTTP HEAD request and follow any 301 redirect
-            var headReq = WebRequest.Create(pkg.Location) as HttpWebRequest;
-            headReq.Method = "HEAD";
-            var headRes = (await headReq.GetResponseAsync()) as HttpWebResponse;
-            if (headRes.ResponseUri != null)
+            using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
+            using (var client = new HttpClient(handler))
+            using (var req = new HttpRequestMessage(HttpMethod.Head, pkg.Location))
             {
-                actualLocation = headRes.ResponseUri;
+                var res = await client.SendAsync(req);
+                if (res.StatusCode == HttpStatusCode.Moved)
+                {
+                    if (res.Headers.Location == null)
+                    {
+                        throw new InvalidOperationException($"No Location header found in HEAD request to {pkg.Location}");
+                    }
+                    actualLocation = res.Headers.Location;
+                }
             }
             var ext = Path.GetExtension(actualLocation.AbsolutePath);
 
