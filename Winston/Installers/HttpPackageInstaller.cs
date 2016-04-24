@@ -33,6 +33,7 @@ namespace Winston.Installers
         public async Task<DirectoryInfo> InstallAsync(Progress progress)
         {
             var actualLocation = pkg.Location;
+            // Do an HTTP HEAD request and follow any 301 redirect
             var headReq = WebRequest.Create(pkg.Location) as HttpWebRequest;
             headReq.Method = "HEAD";
             var headRes = (await headReq.GetResponseAsync()) as HttpWebResponse;
@@ -82,8 +83,9 @@ namespace Winston.Installers
                         break;
 
                     default:
-                        extractor = ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location) ??
-                                      ExeExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location);
+                        extractor =
+                            ArchiveExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location) ??
+                            ExeExtractor.TryCreate(pkg, installDir, tmpFile, webClient.ResponseHeaders, pkg.Location);
                         break;
                 }
 
