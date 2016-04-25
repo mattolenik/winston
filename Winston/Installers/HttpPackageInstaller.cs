@@ -57,7 +57,7 @@ namespace Winston.Installers
                 await webClient.DownloadFileTaskAsync(actualLocation, tmpFile);
                 progress.CompletedDownload();
 
-                var hash = await FS.GetSHA1Async(tmpFile);
+                var hash = await FileSystem.GetSha1Async(tmpFile);
                 // Only check when Sha1 is specified in the package metadata
                 if (!string.IsNullOrWhiteSpace(pkg.Sha1) &&
                     !string.Equals(hash, pkg.Sha1, StringComparison.OrdinalIgnoreCase))

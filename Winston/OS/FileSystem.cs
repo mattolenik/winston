@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Winston.OS
 {
-    static class FS
+    static class FileSystem
     {
         // From http://stackoverflow.com/questions/677221/copy-folders-in-c-sharp-using-system-io
         //
@@ -50,15 +50,15 @@ namespace Winston.OS
             CopyDir(source, destination, progress, total, ref current);
         });
 
-        public static async Task<string> GetSHA1Async(string file) => await Task.Run(() =>
+        public static async Task<string> GetSha1Async(string file) => await Task.Run(() =>
         {
             using (var f = File.OpenRead(file))
             {
-                return GetSHA1(f);
+                return GetSha1(f);
             }
         });
 
-        public static string GetSHA1(Stream stream)
+        public static string GetSha1(Stream stream)
         {
             using (var sha = new SHA1CryptoServiceProvider())
             {

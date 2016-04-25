@@ -96,7 +96,7 @@
     <Compile Include="Installers\MsiExtractor.cs" />
     <Compile Include="OS\Environment.cs" />
     <Compile Include="OS\JunctionPoint.cs" />
-    <Compile Include="OS\FS.cs" />
+    <Compile Include="OS\FileSystem.cs" />
     <Compile Include="Installers\LocalDirectoryInstaller.cs" />
     <Compile Include="InstallWorkflow.cs" />
     <Compile Include="Config.cs" />

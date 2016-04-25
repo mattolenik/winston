@@ -19,7 +19,7 @@ namespace Winston.OS
             {
                 var env = cu.OpenSubKey(EnvironmentKey, true);
                 var pathVar = env.GetValue("PATH", "") as string;
-                var paths = FS.ParsePaths(pathVar);
+                var paths = FileSystem.ParsePaths(pathVar);
 
                 if (scrub != null)
                 {
@@ -31,7 +31,7 @@ namespace Winston.OS
                 {
                     paths.Insert(0, path);
                 }
-                var newPath = FS.BuildPathVar(paths);
+                var newPath = FileSystem.BuildPathVar(paths);
                 env.SetValue("PATH", newPath);
                 BroadcastSettingsChange();
             }
@@ -43,10 +43,10 @@ namespace Winston.OS
             {
                 var env = cu.OpenSubKey(EnvironmentKey, true);
                 var pathVar = env.GetValue("PATH", "", RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
-                var paths = FS.ParsePaths(pathVar);
+                var paths = FileSystem.ParsePaths(pathVar);
                 var without =
                     paths.Where(p => !(Paths.NormalizedPathComparer.Equals(path, p) || p.ContainsInvIgnoreCase(path)));
-                var newPath = FS.BuildPathVar(without);
+                var newPath = FileSystem.BuildPathVar(without);
                 env.SetValue("PATH", newPath);
                 BroadcastSettingsChange();
             }
