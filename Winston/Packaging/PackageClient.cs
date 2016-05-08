@@ -1,8 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Winston.Installers;
+using fastJSON;
+using Winston.Extractors;
+using Winston.Fetchers;
+using Winston.OS;
 
 namespace Winston.Packaging
 {
@@ -10,6 +13,21 @@ namespace Winston.Packaging
     {
         readonly Package pkg;
         readonly string pkgDir;
+
+        readonly IPackageFetcher[] fetchers =
+        {
+
+            new LocalDirectoryFetcher(),
+            new HttpFetcher()
+        };
+
+        readonly IPackageExtractor[] extractors =
+        {
+            new ExeExtractor(),
+            new ArchiveExtractor(),
+            new MsiExtractor(),
+            new LocalDirectoryExtractor()
+        };
 
         public PackageClient(Package pkg, string pkgDir)
         {
@@ -19,20 +37,42 @@ namespace Winston.Packaging
 
         public async Task<DirectoryInfo> InstallAsync(Progress progress)
         {
-            var installer = LocalDirectoryInstaller.TryCreate(pkg, pkgDir) ??
-                            HttpPackageInstaller.TryCreate(pkg, pkgDir);
+            var fetcher = fetchers.FirstOrDefault(f => f.IsMatch(pkg));
+            if (fetcher == null)
+            {
+                throw new NotSupportedException($"Could not fetch package '{pkg}'");
+            }
+            var tmpPkg = await fetcher.FetchAsync(pkg, progress);
+            string hash = null;
+            if (tmpPkg.PackageItem is TempFile)
+            {
+                hash = await FileSystem.GetSha1Async(tmpPkg.PackageItem.Path);
+            }
+            // Only check when Sha1 is specified in the package metadata
+            if (!string.IsNullOrWhiteSpace(pkg.Sha1) &&
+                !string.Equals(hash, pkg.Sha1, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException($"SHA1 hash of remote file {pkg.Location} did not match {pkg.Sha1}");
+            }
+            var version = pkg.ResolveVersion() ?? hash ?? "default";
 
-            if (installer == null)
+            // Save package information to disk first. Other actions can use this
+            // to interact with a package without having to load whole repos into memory.
+            Directory.CreateDirectory(pkgDir);
+            File.WriteAllText(Path.Combine(pkgDir, "pkg.json"), JSON.ToJSON(pkg));
+
+            // TODO: replace hash with version resolution
+            var installDir = Path.Combine(pkgDir, version);
+            Directory.CreateDirectory(installDir);
+
+            var extractor = extractors.FirstOrDefault(e => e.IsMatch(tmpPkg));
+            if (extractor == null)
             {
-                throw new InvalidOperationException($"Could not find suitable installer for package {pkg}");
+                throw new NotSupportedException($"Could not extract package '{pkg}'");
             }
-            var installPath = await installer.InstallAsync(progress);
-            var error = await installer.ValidateAsync();
-            if (error != null)
-            {
-                throw error;
-            }
-            return installPath;
+            await extractor.ExtractAsync(tmpPkg, installDir, progress);
+            progress.CompletedInstall();
+            return new DirectoryInfo(installDir);
         }
     }
 }

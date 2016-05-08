@@ -20,7 +20,7 @@ namespace Winston.Test.Cache
         {
             Task.Run(async () =>
             {
-                Dir = new TempDirectory("winston-test-");
+                Dir = TempDirectory.New("winston-test-");
                 Cache = await SqliteCache.CreateAsync(Dir);
                 PackageSource = new PackageSource("test")
                 {

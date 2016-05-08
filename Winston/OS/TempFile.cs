@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Winston.OS
 {
-    public sealed class TempFile : IDisposable
+    public sealed class TempFile : ITempItem
     {
         static readonly Encoding utf8bomless = new UTF8Encoding(false);
 

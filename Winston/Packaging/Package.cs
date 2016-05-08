@@ -62,7 +62,7 @@ namespace Winston.Packaging
 
         public override string ToString()
         {
-            return $"Name: {Name}, Location: {Location}";
+            return $"{Name}@{Location}";
         }
 
         public string GetListing()

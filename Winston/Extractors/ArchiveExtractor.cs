@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 using System.Threading.Tasks;
-using Winston.Packaging;
+using Winston.Fetchers;
 
-namespace Winston.Installers
+namespace Winston.Extractors
 {
-    class ArchiveExtractor : IPackageExtractor
+    public class ArchiveExtractor : IPackageExtractor
     {
-        string installDir;
-        string packageFile;
-        string filename;
         static readonly TimeSpan ExtractionTimeout = TimeSpan.FromMinutes(20);
 
         static readonly string[] MatchingMimeTypes =
@@ -32,33 +28,16 @@ namespace Winston.Installers
             "zip", "7z", "exe", "xz", "bz2", "gz", "tar", "cab", "lzh", "lha", "rar", "xar", "z"
         };
 
-        public static IPackageExtractor TryCreate(Package pkg, string installDir, string packageFile,
-            NameValueCollection headers, Uri uri)
+        public bool IsMatch(TempPackage package)
         {
-            var result = new ArchiveExtractor { installDir = installDir, packageFile = packageFile, filename = pkg.Filename };
-            if (Content.MatchContentType(headers, MatchingMimeTypes))
-            {
-                return result;
-            }
-            var filename = Content.MatchContentDispositionFileExt(headers, MatchingExtensions);
-            if (!string.IsNullOrWhiteSpace(filename))
-            {
-                result.filename = filename;
-                return result;
-            }
-            filename = Content.MatchUriFileExt(uri, MatchingExtensions);
-            if (!string.IsNullOrWhiteSpace(filename))
-            {
-                result.filename = filename;
-                return result;
-            }
-            return null;
+            return MatchingMimeTypes.Any(t => t.Equals(package.MimeType, StringComparison.InvariantCultureIgnoreCase)) ||
+                   MatchingExtensions.Any(
+                       ext => package.FileName?.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase) ?? false);
         }
 
-        public async Task<string> InstallAsync(Progress progress)
+        public async Task ExtractAsync(TempPackage package, string destination, Progress progress)
         {
-            await ExtractAsync(packageFile, installDir, progress);
-            return Path.Combine(installDir, filename ?? "");
+            await ExtractAsync(package.PackageItem.Path, destination, progress);
         }
 
         public static async Task<Exception> ValidateAsync()

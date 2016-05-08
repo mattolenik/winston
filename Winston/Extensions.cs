@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Winston
@@ -19,6 +20,11 @@ namespace Winston
         public static async Task<bool> WaitForExitAsync(this Process process, TimeSpan timeout)
         {
             return await Task.Run(() => process.WaitForExit((int)timeout.TotalMilliseconds));
+        }
+
+        public static string FileName(this Uri uri)
+        {
+            return uri?.Segments.Last();
         }
     }
 }
