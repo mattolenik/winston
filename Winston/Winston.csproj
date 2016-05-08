@@ -98,7 +98,8 @@
     <Compile Include="Extractors\IPackageExtractor.cs" />
     <Compile Include="Extractors\MsiExtractor.cs" />
     <Compile Include="OS\Environment.cs" />
-    <Compile Include="OS\ITempItem.cs" />
+    <Compile Include="OS\ExistingPathItem.cs" />
+    <Compile Include="OS\IDisposablePathItem.cs" />
     <Compile Include="OS\JunctionPoint.cs" />
     <Compile Include="OS\FileSystem.cs" />
     <Compile Include="InstallWorkflow.cs" />

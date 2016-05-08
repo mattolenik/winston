@@ -2,13 +2,14 @@
 
 namespace Winston.OS
 {
-    public sealed class TempDirectory : ITempItem
+    public sealed class TempDirectory : IDisposablePathItem
     {
         public string Path { get; }
 
-        TempDirectory(string path)
+        public TempDirectory(string prefix = "")
         {
-            Path = path;
+            Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), prefix + System.IO.Path.GetRandomFileName());
+            Directory.CreateDirectory(Path);
         }
 
         public void Dispose()
@@ -44,16 +45,9 @@ namespace Winston.OS
 
         public static implicit operator string(TempDirectory value) => value?.Path;
 
-        public static TempDirectory New(string prefix = "")
+        public override string ToString()
         {
-            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), prefix + System.IO.Path.GetRandomFileName());
-            Directory.CreateDirectory(path);
-            return new TempDirectory(path);
-        }
-
-        public static TempDirectory FromExisting(string directory)
-        {
-            return new TempDirectory(directory);
+            return Path;
         }
     }
 }

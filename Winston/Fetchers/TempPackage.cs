@@ -7,7 +7,7 @@ namespace Winston.Fetchers
     public class TempPackage : IDisposable
     {
         public Package Package { get; set; }
-        public ITempItem PackageItem { get; set; }
+        public IDisposablePathItem PackageItem { get; set; }
         public string FileName { get; set; }
         public string MimeType { get; set; }
 

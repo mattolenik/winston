@@ -14,7 +14,7 @@ namespace Winston.Test
 
         public Winstall(string winstonSourceDir)
         {
-            WinstonHome = TempDirectory.New("winston-test");
+            WinstonHome = new TempDirectory("winston-test");
             sourceDir = winstonSourceDir;
         }
 

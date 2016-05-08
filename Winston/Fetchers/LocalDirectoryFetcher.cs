@@ -9,12 +9,11 @@ namespace Winston.Fetchers
     {
         public async Task<TempPackage> FetchAsync(Package pkg, Progress progress)
         {
-            var tempDir = TempDirectory.FromExisting(pkg.Location.LocalPath);
             var result = new TempPackage
             {
                 FileName = Path.GetFileName(pkg.Location.LocalPath),
                 Package = pkg,
-                PackageItem = tempDir
+                PackageItem = new ExistingPathItem(pkg.Location.LocalPath)
             };
             return await Task.FromResult(result);
         }

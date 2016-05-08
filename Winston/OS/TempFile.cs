@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Winston.OS
 {
-    public sealed class TempFile : ITempItem
+    public sealed class TempFile : IDisposablePathItem
     {
         static readonly Encoding utf8bomless = new UTF8Encoding(false);
 
@@ -30,6 +30,11 @@ namespace Winston.OS
         public void WriteAllText(string text, Encoding encoding = null)
         {
             File.WriteAllText(Path, text, encoding ?? utf8bomless);
+        }
+
+        public override string ToString()
+        {
+            return Path;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Winston.OS
 {
-    public interface ITempItem : IDisposable
+    public interface IDisposablePathItem : IDisposable
     {
         string Path { get; }
     }
