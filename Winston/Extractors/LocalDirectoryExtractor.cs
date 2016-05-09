@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using Winston.Fetchers;
 using Winston.OS;
 
@@ -13,7 +14,7 @@ namespace Winston.Extractors
 
         public bool IsMatch(TempPackage package)
         {
-            return package.PackageItem is TempDirectory;
+            return Directory.Exists(package.PackageItem.Path);
         }
     }
 }

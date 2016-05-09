@@ -22,7 +22,7 @@ namespace Winston
             return await Task.Run(() => process.WaitForExit((int)timeout.TotalMilliseconds));
         }
 
-        public static string FileName(this Uri uri)
+        public static string LastSegment(this Uri uri)
         {
             return uri?.Segments.Last();
         }

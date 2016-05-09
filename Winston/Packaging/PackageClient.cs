@@ -23,10 +23,10 @@ namespace Winston.Packaging
 
         readonly IPackageExtractor[] extractors =
         {
+            new LocalDirectoryExtractor(),
             new ExeExtractor(),
             new ArchiveExtractor(),
-            new MsiExtractor(),
-            new LocalDirectoryExtractor()
+            new MsiExtractor()
         };
 
         public PackageClient(Package pkg, string pkgDir)
