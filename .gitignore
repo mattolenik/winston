@@ -217,3 +217,5 @@ FakesAssemblies/
 
 # Vagrant
 .vagrant
+
+*.iso
