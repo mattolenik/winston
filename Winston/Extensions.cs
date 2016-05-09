@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Winston
@@ -25,6 +26,11 @@ namespace Winston
         public static string LastSegment(this Uri uri)
         {
             return uri?.Segments.Last();
+        }
+
+        public static string RealVersion(this Assembly asm)
+        {
+            return AssemblyName.GetAssemblyName(asm.Location).Version.ToString();
         }
     }
 }

@@ -16,9 +16,9 @@ namespace Winston.Packaging
 
         readonly IPackageFetcher[] fetchers =
         {
-
             new LocalDirectoryFetcher(),
-            new HttpFetcher()
+            new HttpFetcher(),
+            new GithubFetcher()
         };
 
         readonly IPackageExtractor[] extractors =

@@ -136,8 +136,7 @@ namespace Winston
 
         public static int PrintUsage()
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var ver = AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+            var ver = Assembly.GetExecutingAssembly().RealVersion();
             var message = $@"
 To install a package:                  winston install <package>
 To remove a package:                   winston uninstall <package>
