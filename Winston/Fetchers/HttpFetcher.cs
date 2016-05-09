@@ -48,7 +48,7 @@ namespace Winston.Fetchers
                 {
                     throw new InvalidDataException($"SHA1 hash of remote file {pkg.Location} did not match {pkg.Sha1}");
                 }
-                result.FileName = FileNameFromHeader(webClient.ResponseHeaders) ?? pkg.Location?.LastSegment() ?? pkg.Filename;
+                result.FileName = FileNameFromHeader(webClient.ResponseHeaders) ?? actualLocation.LastSegment() ?? pkg.Filename;
                 result.MimeType = webClient.ResponseHeaders["Extensions-Type"];
             }
             return result;
