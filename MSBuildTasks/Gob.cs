@@ -6,7 +6,14 @@ using Microsoft.Build.Utilities;
 namespace Winston.MSBuildTasks
 {
     /// <summary>
-    /// An ad hoc format like tar, but simpler
+    /// An ad hoc format like tar, but simpler. It consists of GobHeader structs
+    /// followed by data, repeating over and over.
+    /// GobHeader for a.zip
+    /// [data of a.zip]
+    /// GobHeader for b.txt
+    /// [data of b.txt]
+    /// This is simpler and easier than tar, which comes with its own complexities.
+    /// Also, being of internal use, using a standard that others understand provides little benefit.
     /// </summary>
     public class Gob : Task
     {
