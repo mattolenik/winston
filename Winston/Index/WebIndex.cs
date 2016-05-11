@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using fastJSON;
+using Winston.Net;
 using Winston.Packaging;
 using Environment = Winston.OS.Environment;
 
@@ -26,7 +27,7 @@ namespace Winston.Index
 
             try
             {
-                using (var client = new HttpClient())
+                using (var client = NetUtils.HttpClient())
                 {
                     var res = await client.GetAsync(uri);
                     var json = await res.Content.ReadAsStringAsync();

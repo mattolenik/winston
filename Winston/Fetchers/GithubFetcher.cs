@@ -1,6 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -68,7 +66,7 @@ namespace Winston.Fetchers
                 {
                     var pattern = query[key];
                     var value = asset[key] as string;
-                    if(value.Like(pattern))
+                    if(!value.Like(pattern))
                     {
                         match = false;
                         break;
