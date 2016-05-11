@@ -6,7 +6,7 @@ using Microsoft.Build.Utilities;
 namespace Winston.MSBuildTasks
 {
     /// <summary>
-    /// An ad hoc format like gob, but simpler
+    /// An ad hoc format like tar, but simpler
     /// </summary>
     public class Gob : Task
     {
