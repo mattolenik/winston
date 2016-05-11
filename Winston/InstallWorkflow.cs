@@ -96,7 +96,7 @@ namespace Winston
                 Name = ver.ProductName,
                 Description = ver.Comments,
                 Location = new Uri(fullDir),
-                Type = PackageType.Shell,
+                Type = PackageType.LocalDirectory,
                 Version = asmVersion,
             };
             return await repo.AddAsync(pkg);
@@ -113,7 +113,7 @@ namespace Winston
                 Name = ver.ProductName,
                 Description = ver.Comments,
                 Location = new Uri(installSourceFull),
-                Type = PackageType.Shell,
+                Type = PackageType.LocalDirectory,
                 Version = asmVersion
             };
             var repo = new Repo(new UserProxy(new HeadlessUserAdapter()), destination);

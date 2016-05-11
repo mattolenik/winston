@@ -22,8 +22,6 @@ namespace Winston.Packaging
 
         public PackageType Type { get; set; }
 
-        public PackageFileType FileType { get; set; }
-
         public List<string> Preserve { get; set; } = new List<string>();
 
         public List<string> Ignore { get; set; } = new List<string>();
@@ -36,7 +34,6 @@ namespace Winston.Packaging
 
         public string ResolveVersion()
         {
-            // TODO: check if null check is sufficient or if IsNullOrWhitespace is needed. Depends on serialization behavior.
             return Version ?? Sha1;
         }
 
@@ -51,7 +48,6 @@ namespace Winston.Packaging
                 Filename = Filename ?? other.Filename,
                 Path = Path ?? other.Path,
                 Type = Type != PackageType.Nil ? Type : other.Type,
-                FileType = FileType != PackageFileType.Nil ? FileType : other.FileType,
                 Preserve = Preserve ?? other.Preserve,
                 Ignore = Ignore ?? other.Ignore,
                 Platform = Platform != Platform.Nil ? Platform : other.Platform,

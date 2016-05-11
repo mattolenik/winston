@@ -31,13 +31,13 @@ namespace Winston.Test
                 {
                     Location = $"{prefix}/fake.exe",
                     Name = "FakePackage",
-                    FileType = "Binary"
+                    Type = "Binary"
                 },
                 new
                 {
                     Location = $"{prefix}/nothing.zip",
                     Name = "NothingPackage",
-                    FileType = "Archive"
+                    Type = "Archive"
                 }
             }
         }.ToJSON();

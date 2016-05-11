@@ -113,7 +113,6 @@
     <Compile Include="Extractors\LocalDirectoryExtractor.cs" />
     <Compile Include="Packaging\Package.cs" />
     <Compile Include="Packaging\PackageClient.cs" />
-    <Compile Include="Packaging\PackageFileType.cs" />
     <Compile Include="Packaging\PackageType.cs" />
     <Compile Include="Packaging\Platform.cs" />
     <Compile Include="Interpreter.cs" />

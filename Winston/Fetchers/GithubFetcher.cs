@@ -1,4 +1,8 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,7 +17,7 @@ namespace Winston.Fetchers
         public async Task<TempPackage> FetchAsync(Package pkg, Progress progress)
         {
             var user = pkg.Location.Host;
-            var project = pkg.Location.Segments.Skip(1).SingleOrDefault();
+            var project = pkg.Location.Segments.Skip(1).SingleOrDefault()?.Trim('/');
             var props = pkg.Location.ParseQueryString();
             var url = $"https://api.github.com/repos/{user}/{project}/releases/latest";
 
@@ -22,8 +26,10 @@ namespace Winston.Fetchers
             {
                 var content = await httpClient.GetStringAsync(url);
 
-                var json = fastJSON.JSON.ToDynamic(content);
-                var pkgUrlString = json.assets[0].browser_download_url as string;
+                var json = fastJSON.JSON.Parse(content) as IDictionary<string, object>;
+                var assets = json["assets"] as IList<object>;
+                var asset = NarrowAssets(assets, props);
+                var pkgUrlString = asset["browser_download_url"] as string;
                 Uri pkgUri;
                 if (!Uri.TryCreate(pkgUrlString, UriKind.Absolute, out pkgUri))
                 {
@@ -46,6 +52,42 @@ namespace Winston.Fetchers
         public bool IsMatch(Package pkg)
         {
             return pkg.Location.Scheme == "github";
+        }
+
+        static IDictionary<string, object> NarrowAssets(IList<object> assets, NameValueCollection query)
+        {
+            if (assets.Count == 1)
+            {
+                return assets[0] as IDictionary<string, object>;
+            }
+            var matches = new List<IDictionary<string, object>>();
+            foreach (var asset in assets.Cast<IDictionary<string, object>>())
+            {
+                var match = true;
+                foreach (var key in query.AllKeys)
+                {
+                    var pattern = query[key];
+                    var value = asset[key] as string;
+                    if(value.Like(pattern))
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                {
+                    matches.Add(asset);
+                }
+            }
+            if (matches.Count > 1)
+            {
+                throw new Exception("Could not decide from available assets, add a filter");
+            }
+            if (matches.Count == 0)
+            {
+                throw new Exception("Expected to find at least one asset");
+            }
+            return matches[0];
         }
     }
 }

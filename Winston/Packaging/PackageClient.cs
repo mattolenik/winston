@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,18 +22,24 @@ namespace Winston.Packaging
             new GithubFetcher()
         };
 
-        readonly IPackageExtractor[] extractors =
-        {
-            new LocalDirectoryExtractor(),
-            new ExeExtractor(),
-            new ArchiveExtractor(),
-            new MsiExtractor()
-        };
+        readonly IDictionary<PackageType, IEnumerable<IPackageExtractor>> extractors;
 
         public PackageClient(Package pkg, string pkgDir)
         {
             this.pkg = pkg;
             this.pkgDir = pkgDir;
+            var archive = new ArchiveExtractor();
+            var exe = new ExeExtractor();
+            var msi = new MsiExtractor();
+            var localDir = new LocalDirectoryExtractor();
+            extractors = new Dictionary<PackageType, IEnumerable<IPackageExtractor>>
+            {
+                {PackageType.Archive, new[] {archive}},
+                {PackageType.Binary, new[] {exe}},
+                {PackageType.Setup, new[] {msi}},
+                {PackageType.LocalDirectory, new[] {localDir}},
+                {PackageType.Nil, new IPackageExtractor[] {localDir, exe, archive, msi}}
+            };
         }
 
         public async Task<DirectoryInfo> InstallAsync(Progress progress)
@@ -56,8 +63,7 @@ namespace Winston.Packaging
             }
             var version = pkg.ResolveVersion() ?? hash ?? "default";
 
-            // Save package information to disk first. Other actions can use this
-            // to interact with a package without having to load whole repos into memory.
+            // Save package information to disk first
             Directory.CreateDirectory(pkgDir);
             File.WriteAllText(Path.Combine(pkgDir, "pkg.json"), JSON.ToJSON(pkg));
 
@@ -65,7 +71,7 @@ namespace Winston.Packaging
             var installDir = Path.Combine(pkgDir, version);
             Directory.CreateDirectory(installDir);
 
-            var extractor = extractors.FirstOrDefault(e => e.IsMatch(tmpPkg));
+            var extractor = extractors[pkg.Type].FirstOrDefault(e => e.IsMatch(tmpPkg));
             if (extractor == null)
             {
                 throw new NotSupportedException($"Could not extract package '{pkg}'");
