@@ -9,7 +9,6 @@ using NativeInjector;
 using Winston.OS;
 using Winston.Packaging;
 using Winston.User;
-using YamlDotNet.Serialization;
 using Environment = Winston.OS.Environment;
 using static NativeInjector.Utils;
 
@@ -115,10 +114,10 @@ namespace Winston
             var pkgFiles = Directory.GetFiles(RepoPath, "pkg.json", SearchOption.AllDirectories);
             var tasks = pkgFiles.Select(async p => await Task.Run(() =>
             {
-                var deserializer = new Deserializer();
                 using (var reader = new StreamReader(p))
                 {
-                    return deserializer.Deserialize<Package>(reader);
+                    var json = reader.ReadToEnd();
+                    return JSON.ToObject<Package>(json);
                 }
             }));
             var res = await Task.WhenAll(tasks);

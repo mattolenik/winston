@@ -7,6 +7,7 @@ using fastJSON;
 using Winston.Extractors;
 using Winston.Fetchers;
 using Winston.OS;
+using Winston.Serialization;
 
 namespace Winston.Packaging
 {
@@ -65,7 +66,7 @@ namespace Winston.Packaging
 
             // Save package information to disk first
             Directory.CreateDirectory(pkgDir);
-            File.WriteAllText(Path.Combine(pkgDir, "pkg.json"), JSON.ToJSON(pkg));
+            Json.Save(pkg, Path.Combine(pkgDir, "pkg.json"), true);
 
             // TODO: replace hash with version resolution
             var installDir = Path.Combine(pkgDir, version);

@@ -7,8 +7,7 @@ namespace Winston.Serialization
     {
         public static void Init()
         {
-            JSON.Parameters.SerializeNullValues = false;
-            JSON.Parameters.UseExtensions = false;
+            JSON.Parameters = Json.Parameters;
             JSON.Manager.OverrideConverter<Uri>(new UriConverter());
         }
     }

@@ -72,10 +72,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="YamlDotNet, Version=3.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YamlDotNet.3.8.0\lib\net35\YamlDotNet.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\Indexes.cs" />
@@ -125,8 +121,8 @@
     </Compile>
     <Compile Include="Cache\SqliteCache.cs" />
     <Compile Include="Repo.cs" />
+    <Compile Include="Serialization\Json.cs" />
     <Compile Include="Serialization\JsonConfig.cs" />
-    <Compile Include="Serialization\YmlUriConverter.cs" />
     <Compile Include="OS\TempDirectory.cs" />
     <Compile Include="User\ConsoleUserAdapter.cs" />
     <Compile Include="User\HeadlessUserAdapter.cs" />
@@ -140,7 +136,6 @@
     <Compile Include="WinApi.cs" />
     <Compile Include="Winmain.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Serialization\Yml.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

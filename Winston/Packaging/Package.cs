@@ -74,7 +74,7 @@ namespace Winston.Packaging
 
         public string GetInfo()
         {
-            return Yml.Serialize(this);
+            return Json.ToJson(this, true);
         }
     }
 }

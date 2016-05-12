@@ -38,7 +38,7 @@ namespace Winston
             DefaultIndex = "https://raw.githubusercontent.com/mattolenik/winston-packages/master/sample.json"
         };
 
-        readonly string configPath = Path.Combine(Paths.ExecutingDirPath, "config.yml");
+        readonly string configPath = Path.Combine(Paths.ExecutingDirPath, "winston.cfg");
 
         public ConfigProvider()
         {
@@ -58,7 +58,7 @@ namespace Winston
         }
         void LoadConfig()
         {
-            Config = Yml.Load<Config>(configPath);
+            Config = Json.Load<Config>(configPath);
         }
     }
 }

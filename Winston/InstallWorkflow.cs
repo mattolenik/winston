@@ -125,8 +125,8 @@ namespace Winston
                 WriteRegistryPath = false
             };
             Directory.CreateDirectory(pkgDir);
-            var cfgFile = Path.Combine(pkgDir, "config.yml");
-            Yml.Save(cfg, cfgFile);
+            var cfgFile = Path.Combine(pkgDir, "winston.cfg");
+            Json.Save(cfg, cfgFile, true);
             return pkgDir;
         }
     }
