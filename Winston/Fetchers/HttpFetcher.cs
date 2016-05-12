@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -33,18 +32,26 @@ namespace Winston.Fetchers
                     actualLocation = res.Headers.Location;
                 }
             }
-            var ext = Path.GetExtension(actualLocation.AbsolutePath);
 
             using (var webClient = NetUtils.WebClient())
             {
-                result.FileName = actualLocation.LastSegment() ?? pkg.Filename ?? "package";
-
+                var tmp = Path.GetTempFileName();
                 webClient.DownloadProgressChanged += (sender, args) => progress?.UpdateDownload(args.ProgressPercentage);
-                await webClient.DownloadFileTaskAsync(actualLocation, result.FullPath);
+                await webClient.DownloadFileTaskAsync(actualLocation, tmp);
 
                 progress?.CompletedDownload();
 
                 result.MimeType = webClient.ResponseHeaders["Content-Type"];
+
+                // Try to get the right file name to give hints about the file type to the extractor
+                result.FileName = FileNameFromHeader(webClient.ResponseHeaders) ??
+                                  actualLocation.LastSegment() ??
+                                  pkg.Filename ??
+                                  "package";
+
+                // It's hard to get the response headers without just waiting for the GET on the package to complete,
+                // so just download to a temp file and move to the proper name when done.
+                File.Move(tmp, result.FullPath);
 
                 var hash = await FileSystem.GetSha1Async(result.FullPath);
                 // Only check when Sha1 is specified in the package metadata
@@ -62,7 +69,7 @@ namespace Winston.Fetchers
             return pkg.Location.Scheme == "http" || pkg.Location.Scheme == "https";
         }
 
-        static string FileNameFromHeader(NameValueCollection headers)
+        static string FileNameFromHeader(WebHeaderCollection headers)
         {
             var disposition = headers?["Content-Disposition"] ?? "-";
             var cd = new ContentDisposition(disposition);
