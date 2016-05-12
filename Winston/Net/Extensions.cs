@@ -22,12 +22,12 @@ namespace Winston.Net
                 var singlePair = Regex.Split(vp, "=");
                 if (singlePair.Length == 2)
                 {
-                    result.Add(singlePair[0], singlePair[1]);
+                    result.Add(Uri.UnescapeDataString(singlePair[0]), Uri.UnescapeDataString(singlePair[1]));
                 }
                 else
                 {
                     // only one key with no value specified in query string
-                    result.Add(singlePair[0], string.Empty);
+                    result.Add(Uri.UnescapeDataString(singlePair[0]), string.Empty);
                 }
             }
 
