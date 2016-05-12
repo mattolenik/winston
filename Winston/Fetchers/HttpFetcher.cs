@@ -15,7 +15,7 @@ namespace Winston.Fetchers
     {
         public async Task<TempPackage> FetchAsync(Package pkg, Progress progress)
         {
-            var result = new TempPackage();
+            var result = new TempPackage { WorkDirectory = new TempDirectory() };
             var actualLocation = pkg.Location;
             // Do an HTTP HEAD request and follow any 301 redirect
             using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
@@ -29,28 +29,30 @@ namespace Winston.Fetchers
                     {
                         throw new InvalidOperationException($"No Location header found in HEAD request to {pkg.Location}");
                     }
+                    // TODO: handle multiple levels of redirect (rare?)
                     actualLocation = res.Headers.Location;
                 }
             }
             var ext = Path.GetExtension(actualLocation.AbsolutePath);
 
-            var tmpFile = new TempFile(ext);
-            result.PackageItem = tmpFile;
             using (var webClient = NetUtils.WebClient())
             {
-                webClient.DownloadProgressChanged += (sender, args) => progress.UpdateDownload(args.ProgressPercentage);
-                await webClient.DownloadFileTaskAsync(actualLocation, tmpFile);
-                progress.CompletedDownload();
+                result.FileName = actualLocation.LastSegment() ?? pkg.Filename ?? "package";
 
-                var hash = await FileSystem.GetSha1Async(tmpFile);
+                webClient.DownloadProgressChanged += (sender, args) => progress?.UpdateDownload(args.ProgressPercentage);
+                await webClient.DownloadFileTaskAsync(actualLocation, result.FullPath);
+
+                progress?.CompletedDownload();
+
+                result.MimeType = webClient.ResponseHeaders["Content-Type"];
+
+                var hash = await FileSystem.GetSha1Async(result.FullPath);
                 // Only check when Sha1 is specified in the package metadata
                 if (!string.IsNullOrWhiteSpace(pkg.Sha1) &&
                     !string.Equals(hash, pkg.Sha1, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new InvalidDataException($"SHA1 hash of remote file {pkg.Location} did not match {pkg.Sha1}");
                 }
-                result.FileName = FileNameFromHeader(webClient.ResponseHeaders) ?? actualLocation.LastSegment() ?? pkg.Filename;
-                result.MimeType = webClient.ResponseHeaders["Extensions-Type"];
             }
             return result;
         }
@@ -62,7 +64,7 @@ namespace Winston.Fetchers
 
         static string FileNameFromHeader(NameValueCollection headers)
         {
-            var disposition = headers?["Extensions-Disposition"] ?? "-";
+            var disposition = headers?["Content-Disposition"] ?? "-";
             var cd = new ContentDisposition(disposition);
             return cd.FileName;
         }

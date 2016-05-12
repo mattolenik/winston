@@ -37,7 +37,7 @@ namespace Winston.Extractors
 
         public async Task ExtractAsync(TempPackage package, string destination, Progress progress)
         {
-            await ExtractAsync(package.PackageItem.Path, destination, progress);
+            await ExtractAsync(package.FullPath, destination, progress);
         }
 
         public static async Task<Exception> ValidateAsync()
@@ -49,6 +49,7 @@ namespace Winston.Extractors
         static async Task ExtractAsync(string filename, string destination, Progress progress)
         {
             Directory.Delete(destination, true);
+            Directory.CreateDirectory(destination);
             var workingDir = Paths.ExecutingDirPath;
             var args = $"x \"{filename}\" -o\"{destination}\" -y";
             var si = new ProcessStartInfo(@"tools\7z.exe", args)

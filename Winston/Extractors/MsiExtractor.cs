@@ -15,7 +15,7 @@ namespace Winston.Extractors
 
         public async Task ExtractAsync(TempPackage package, string destination, Progress progress)
         {
-            var p = await SimpleProcess.Cmd($"msiexec /a {package.PackageItem.Path} /qn TARGETDIR=\"{destination}\"").RunAsync();
+            var p = await SimpleProcess.Cmd($"msiexec /a {package.FullPath} /qn TARGETDIR=\"{destination}\"").RunAsync();
             if (p.ExitCode != 0)
             {
                 throw p.GetException();

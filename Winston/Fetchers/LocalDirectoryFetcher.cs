@@ -13,7 +13,7 @@ namespace Winston.Fetchers
             {
                 FileName = Path.GetFileName(pkg.Location.LocalPath),
                 Package = pkg,
-                PackageItem = new ExistingPathItem(pkg.Location.LocalPath)
+                WorkDirectory = new NonTempItem(pkg.Location.LocalPath)
             };
             return await Task.FromResult(result);
         }

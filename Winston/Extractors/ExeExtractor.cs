@@ -18,7 +18,7 @@ namespace Winston.Extractors
             await Task.Run(() =>
             {
                 File.Delete(exePath);
-                File.Move(package.PackageItem.Path, exePath);
+                File.Move(package.FullPath, exePath);
             });
         }
     }

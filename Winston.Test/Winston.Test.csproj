@@ -106,6 +106,7 @@
     <Compile Include="Cache\CacheFixture.cs" />
     <Compile Include="Fetchers\HttpFetcherTests.cs" />
     <Compile Include="Fetchers\GithubFetcherTests.cs" />
+    <Compile Include="Fetchers\HttpPackageFixture.cs" />
     <Compile Include="PortableInstallFixture.cs" />
     <Compile Include="Acceptance\InstallAndBootstrap.cs" />
     <Compile Include="Cache\Tests.cs" />

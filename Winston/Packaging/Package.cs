@@ -14,6 +14,11 @@ namespace Winston.Packaging
 
         public Uri Location { get; set; }
 
+        /// <summary>
+        /// The name of the actual file of the package, in case it cannot
+        /// be determined from the Location or during download (rare to need this).
+        /// <example>Filename = "mypackage.zip"</example>
+        /// </summary>
         public string Filename { get; set; }
 
         public string Sha1 { get; set; }

@@ -1,33 +1,22 @@
 ﻿using System;
 using System.IO;
-using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
-using HttpMock;
 using Winston.Extractors;
-using Xunit;
 using Winston.Fetchers;
 using Winston.OS;
 using Winston.Packaging;
+using Xunit;
 
 namespace Winston.Test.Fetchers
 {
-    public class HttpFetcherTests : IDisposable
+    public class HttpFetcherTests : IClassFixture<HttpPackageFixture>
     {
-        readonly IHttpServer server;
-        readonly string prefix = "http://localhost:9510";
+        readonly HttpPackageFixture fixture;
 
-        public HttpFetcherTests()
+        public HttpFetcherTests(HttpPackageFixture fixture)
         {
-            server = HttpMockRepository.At(prefix);
-            server.Start();
-            var path = Path.Combine(Assembly.GetExecutingAssembly().Directory(), "testdata", "test-0.5.zip");
-            server.Stub(x => x.Get("/realpkg")).ReturnFile(path);
-            server.Stub(x => x.Head("/redirectedpkg"))
-                .Return("")
-                .AddHeader("Location", "/realpkg")
-                .WithStatus(HttpStatusCode.Moved);
+            this.fixture = fixture;
         }
 
         [Theory]
@@ -39,7 +28,7 @@ namespace Winston.Test.Fetchers
             var pkg = new Package
             {
                 Name = "Test",
-                Location = new Uri(prefix + uri)
+                Location = new Uri(fixture.Prefix + uri)
             };
             var tmpPkg = await fetcher.FetchAsync(pkg, null);
             var ext = new ArchiveExtractor();
@@ -48,11 +37,6 @@ namespace Winston.Test.Fetchers
                 await ext.ExtractAsync(tmpPkg, tmpDir, null);
                 Directory.GetFiles(tmpDir).Should().Contain(f => f.Contains("test.exe"));
             }
-        }
-
-        public void Dispose()
-        {
-            server.Dispose();
         }
     }
 }

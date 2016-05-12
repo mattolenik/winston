@@ -95,8 +95,8 @@
     <Compile Include="Net\Extensions.cs" />
     <Compile Include="Net\NetUtils.cs" />
     <Compile Include="OS\Environment.cs" />
-    <Compile Include="OS\ExistingPathItem.cs" />
-    <Compile Include="OS\IDisposablePathItem.cs" />
+    <Compile Include="OS\NonTempItem.cs" />
+    <Compile Include="OS\ITempItem.cs" />
     <Compile Include="OS\JunctionPoint.cs" />
     <Compile Include="OS\FileSystem.cs" />
     <Compile Include="InstallWorkflow.cs" />

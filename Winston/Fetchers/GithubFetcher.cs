@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -36,12 +37,12 @@ namespace Winston.Fetchers
                 var result = new TempPackage
                 {
                     Package = pkg,
-                    PackageItem = new TempFile(pkg.Name),
+                    WorkDirectory = new TempDirectory(),
                     FileName = pkgUri.LastSegment()
                 };
 
                 webClient.DownloadProgressChanged += (sender, args) => progress?.UpdateDownload(args.ProgressPercentage);
-                await webClient.DownloadFileTaskAsync(pkgUri, result.PackageItem.Path);
+                await webClient.DownloadFileTaskAsync(pkgUri, result.FullPath);
                 progress?.CompletedDownload();
                 return result;
             }

@@ -52,9 +52,10 @@ namespace Winston.Packaging
             }
             var tmpPkg = await fetcher.FetchAsync(pkg, progress);
             string hash = null;
-            if (tmpPkg.PackageItem is TempFile)
+            if (File.Exists(tmpPkg.FullPath))
             {
-                hash = await FileSystem.GetSha1Async(tmpPkg.PackageItem.Path);
+                // FullPath exists in most cases, but is absent for directory install
+                hash = await FileSystem.GetSha1Async(tmpPkg.FullPath);
             }
             // Only check when Sha1 is specified in the package metadata
             if (!string.IsNullOrWhiteSpace(pkg.Sha1) &&

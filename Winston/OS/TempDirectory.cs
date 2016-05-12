@@ -2,7 +2,7 @@
 
 namespace Winston.OS
 {
-    public sealed class TempDirectory : IDisposablePathItem
+    public sealed class TempDirectory : ITempItem
     {
         public string Path { get; }
 

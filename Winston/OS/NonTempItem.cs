@@ -1,12 +1,16 @@
 ﻿namespace Winston.OS
 {
-    class ExistingPathItem : IDisposablePathItem
+    /// <summary>
+    /// Sort of a no-op temporary path item, for special cases when temporary
+    /// behavior is unwanted.
+    /// </summary>
+    class NonTempItem : ITempItem
     {
         public void Dispose() { }
 
         public string Path { get; }
 
-        public ExistingPathItem(string path)
+        public NonTempItem(string path)
         {
             Path = path;
         }

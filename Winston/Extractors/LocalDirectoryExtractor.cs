@@ -9,12 +9,12 @@ namespace Winston.Extractors
     {
         public async Task ExtractAsync(TempPackage package, string destination, Progress progress)
         {
-            await FileSystem.CopyDirectoryAsync(package.PackageItem.Path, destination, progress);
+            await FileSystem.CopyDirectoryAsync(package.WorkDirectory.Path, destination, progress);
         }
 
         public bool IsMatch(TempPackage package)
         {
-            return Directory.Exists(package.PackageItem.Path);
+            return Directory.Exists(package.WorkDirectory.Path);
         }
     }
 }
