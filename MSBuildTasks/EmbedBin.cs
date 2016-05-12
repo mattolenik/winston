@@ -31,11 +31,7 @@ namespace Winston.MSBuildTasks
 
         void WriteCpp()
         {
-            if (File.Exists(OutputCpp))
-            {
-                File.Delete(OutputCpp);
-            }
-            using (var cppFile = new StreamWriter(File.OpenWrite(OutputCpp), Encoding.UTF8))
+            using (var cppFile = new StreamWriter(File.Open(OutputCpp, FileMode.Create, FileAccess.ReadWrite), Encoding.UTF8))
             using (var file = File.OpenRead(SourceFile))
             {
                 cppFile.WriteLine($"unsigned char {sourceName}[] = {{"); // Double { is escaping for string interp
