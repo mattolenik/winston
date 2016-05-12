@@ -32,7 +32,7 @@ namespace Winston.Test.Fetchers
             };
             var tmpPkg = await fetcher.FetchAsync(pkg, null);
             var ext = new ArchiveExtractor();
-            using (var tmpDir = new TempDirectory())
+            using (var tmpDir = new TempDirectory("winston-test-"))
             {
                 await ext.ExtractAsync(tmpPkg, tmpDir, null);
                 Directory.GetFiles(tmpDir).Should().Contain(f => f.Contains("test.exe"));
