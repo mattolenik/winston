@@ -10,9 +10,9 @@ namespace Winston.Net
         static readonly string Version = Assembly.GetExecutingAssembly().RealVersion();
         static readonly string UserAgent = $"winston/{Version}";
 
-        public static HttpClient HttpClient()
+        public static HttpClient HttpClient(HttpClientHandler handler = null)
         {
-            var c = new HttpClient();
+            var c = new HttpClient(handler ?? new HttpClientHandler());
             c.DefaultRequestHeaders.Add("User-Agent", UserAgent);
             return c;
         }

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using Winston.Net;
 using Winston.OS;
 using Winston.Packaging;
 
@@ -18,7 +19,7 @@ namespace Winston.Fetchers
             var actualLocation = pkg.Location;
             // Do an HTTP HEAD request and follow any 301 redirect
             using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
-            using (var client = new HttpClient(handler))
+            using (var client = NetUtils.HttpClient(handler))
             using (var req = new HttpRequestMessage(HttpMethod.Head, pkg.Location))
             {
                 var res = await client.SendAsync(req);
@@ -35,7 +36,7 @@ namespace Winston.Fetchers
 
             var tmpFile = new TempFile(ext);
             result.PackageItem = tmpFile;
-            using (var webClient = new WebClient())
+            using (var webClient = NetUtils.WebClient())
             {
                 webClient.DownloadProgressChanged += (sender, args) => progress.UpdateDownload(args.ProgressPercentage);
                 await webClient.DownloadFileTaskAsync(actualLocation, tmpFile);
