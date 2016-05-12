@@ -104,6 +104,7 @@
   <ItemGroup>
     <Compile Include="Acceptance\AcceptanceCollection.cs" />
     <Compile Include="Cache\CacheFixture.cs" />
+    <Compile Include="Fetchers\GithubFetcherTests.cs" />
     <Compile Include="PortableInstallFixture.cs" />
     <Compile Include="Acceptance\InstallAndBootstrap.cs" />
     <Compile Include="Cache\Tests.cs" />

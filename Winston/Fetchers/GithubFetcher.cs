@@ -40,9 +40,9 @@ namespace Winston.Fetchers
                     FileName = pkgUri.LastSegment()
                 };
 
-                webClient.DownloadProgressChanged += (sender, args) => progress.UpdateDownload(args.ProgressPercentage);
+                webClient.DownloadProgressChanged += (sender, args) => progress?.UpdateDownload(args.ProgressPercentage);
                 await webClient.DownloadFileTaskAsync(pkgUri, result.PackageItem.Path);
-                progress.CompletedDownload();
+                progress?.CompletedDownload();
                 return result;
             }
         }
