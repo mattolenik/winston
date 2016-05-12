@@ -37,7 +37,24 @@ namespace Winston
             var progress = user.NewProgress(pkg.Name);
             var installDir = await client.InstallAsync(progress);
             var junctionPath = CreateCurrentJunction(pkgDir, installDir.FullName);
-            var path = Path.Combine(junctionPath, pkg.Path ?? "");
+            var path = UpdatePaths(pkg, inject, writeRegistryPath, junctionPath);
+            progress.CompletedInstall();
+            return path;
+        }
+
+        static string UpdatePaths(Package pkg, bool inject, bool writeRegistryPath, string junctionPath)
+        {
+            var matches = Paths.ResolveGlobPath(junctionPath, pkg.Path);
+            if (matches.Count() > 1)
+            {
+                throw new NotSupportedException("Only globbing which results in a single path result is supported at this time");
+            }
+            var path = matches.SingleOrDefault();
+            if (path == null)
+            {
+                throw new ArgumentException("Package path did not resolve to any path on disk");
+            }
+            // resolve wildcard here
             if (writeRegistryPath)
             {
                 UpdateRegistryPath(path);
@@ -46,7 +63,6 @@ namespace Winston
             {
                 InjectPathIntoParent(path);
             }
-            progress.CompletedInstall();
             return path;
         }
 

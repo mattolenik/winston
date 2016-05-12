@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace Winston
@@ -77,6 +78,41 @@ namespace Winston
             var path2 = new Uri(to);
             var diff = path1.MakeRelativeUri(path2);
             return diff.OriginalString.Replace('/', '\\');
+        }
+
+        public static IEnumerable<string> ResolveGlobPath(string relativeTo, string glob)
+        {
+            if (string.IsNullOrWhiteSpace(glob))
+            {
+                yield return relativeTo;
+                yield break;
+            }
+            if(Path.IsPathRooted(glob))
+            {
+                throw new NotSupportedException("Rooted paths not supported");
+            }
+            var parts = glob.Split(new[] {"/", "\\"}, StringSplitOptions.RemoveEmptyEntries);
+            if (!parts.Any())
+            {
+                yield return relativeTo;
+                yield break;
+            }
+            var pattern = parts.First();
+            var nextPattern = parts.Skip(1).FirstOrDefault();
+            foreach (var dir in Directory.GetDirectories(relativeTo, pattern))
+            {
+                if (nextPattern != null)
+                {
+                    foreach (var match in ResolveGlobPath(dir, nextPattern))
+                    {
+                        yield return match;
+                    }
+                }
+                else
+                {
+                    yield return dir;
+                }
+            }
         }
     }
 }

@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Winston.Net
 {
     static class Extensions
     {
-        public static NameValueCollection ParseQueryString(this Uri uri)
+        public static IList<Tuple<string,string>> ParseQueryString(this Uri uri)
         {
-            var result = new NameValueCollection();
+            var result = new List<Tuple<string, string>>();
             var query = uri.Query;
 
             // remove anything other than query string from url
@@ -22,12 +22,12 @@ namespace Winston.Net
                 var singlePair = Regex.Split(vp, "=");
                 if (singlePair.Length == 2)
                 {
-                    result.Add(Uri.UnescapeDataString(singlePair[0]), Uri.UnescapeDataString(singlePair[1]));
+                    result.Add(Tuple.Create(Uri.UnescapeDataString(singlePair[0]), Uri.UnescapeDataString(singlePair[1])));
                 }
                 else
                 {
                     // only one key with no value specified in query string
-                    result.Add(Uri.UnescapeDataString(singlePair[0]), string.Empty);
+                    result.Add(Tuple.Create(Uri.UnescapeDataString(singlePair[0]), string.Empty));
                 }
             }
 

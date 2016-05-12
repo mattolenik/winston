@@ -52,7 +52,7 @@ namespace Winston.Fetchers
             return pkg.Location.Scheme == "github";
         }
 
-        static IDictionary<string, object> NarrowAssets(IList<object> assets, NameValueCollection query)
+        static IDictionary<string, object> NarrowAssets(IList<object> assets, IList<Tuple<string,string>>  query)
         {
             if (assets.Count == 1)
             {
@@ -62,15 +62,23 @@ namespace Winston.Fetchers
             foreach (var asset in assets.Cast<IDictionary<string, object>>())
             {
                 var match = true;
-                foreach (var key in query.AllKeys)
+                foreach (var pair in query)
                 {
-                    var pattern = query[key];
-                    var value = asset[key] as string;
-                    if(!value.Like(pattern))
+                    var pattern = pair.Item2;
+
+                    var inverted = false;
+                    if (pattern.StartsWith("!"))
                     {
-                        match = false;
-                        break;
+                        pattern = pattern.Substring(1);
+                        inverted = true;
                     }
+                    var value = asset[pair.Item1] as string;
+                    var isLike = value.Like(pattern);
+                    if (inverted)
+                    {
+                        isLike = !isLike;
+                    }
+                    match = match && isLike;
                 }
                 if (match)
                 {
