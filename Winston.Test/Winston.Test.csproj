@@ -104,6 +104,7 @@
   <ItemGroup>
     <Compile Include="Acceptance\AcceptanceCollection.cs" />
     <Compile Include="Cache\CacheFixture.cs" />
+    <Compile Include="Fetchers\HttpFetcherTests.cs" />
     <Compile Include="Fetchers\GithubFetcherTests.cs" />
     <Compile Include="PortableInstallFixture.cs" />
     <Compile Include="Acceptance\InstallAndBootstrap.cs" />
@@ -119,6 +120,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <Content Include="testdata\test-0.5.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Winston\Winston.csproj">

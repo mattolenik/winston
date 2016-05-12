@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -32,6 +33,11 @@ namespace Winston
         public static string RealVersion(this Assembly asm)
         {
             return AssemblyName.GetAssemblyName(asm.Location).Version.ToString();
+        }
+
+        public static string Directory(this Assembly asm)
+        {
+            return Path.GetDirectoryName(new Uri(asm.CodeBase).LocalPath);
         }
 
         /// <summary>
