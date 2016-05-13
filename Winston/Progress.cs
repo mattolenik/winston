@@ -22,7 +22,7 @@ namespace Winston
 
         public void Report(double value)
         {
-            UpdateInstall((int)Math.Round(value));
+            UpdateInstall?.Invoke((int)Math.Round(value));
         }
     }
 }
