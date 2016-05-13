@@ -36,7 +36,7 @@ namespace Winston.Fetchers
                     result.MimeType = response.Content.Headers.ContentType?.MediaType;
 
                     // Try to get the right file name to give hints about the file type to the extractor
-                    result.FileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('\"', '\\') ??
+                    result.FileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('\"', '\\', '\'') ??
                                       actualLocation.LastSegment() ??
                                       pkg.Filename ??
                                       "package";
