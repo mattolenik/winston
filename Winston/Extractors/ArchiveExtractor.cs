@@ -73,7 +73,7 @@ namespace Winston.Extractors
                 {
                     // TODO: better exception type
                     throw new Exception(
-                        $"Failed to extract archive '{filename}'. 7zip exit code: {proc.ExitCode}");
+                        $"Failed to extract archive '{filename}'. 7zip exit code: {proc.ExitCode}\n{proc.StandardOutput.ReadToEnd()}\n{proc.StandardError.ReadToEnd()}");
                 }
                 progress?.CompletedInstall();
             }

@@ -21,7 +21,6 @@ namespace Winston.Fetchers
             var url = $"https://api.github.com/repos/{user}/{project}/releases/latest";
 
             using (var httpClient = NetUtils.HttpClient())
-            using (var webClient = NetUtils.WebClient())
             {
                 var content = await httpClient.GetStringAsync(url);
 
@@ -41,8 +40,10 @@ namespace Winston.Fetchers
                     FileName = pkgUri.LastSegment()
                 };
 
-                webClient.DownloadProgressChanged += (sender, args) => progress?.UpdateDownload(args.ProgressPercentage);
-                await webClient.DownloadFileTaskAsync(pkgUri, result.FullPath);
+                using (var download = File.Open(result.FullPath, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    await httpClient.DownloadFileAsync(pkgUri, download, progress);
+                }
                 progress?.CompletedDownload();
                 return result;
             }

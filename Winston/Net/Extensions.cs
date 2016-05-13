@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Winston.Net
 {
@@ -32,6 +35,40 @@ namespace Winston.Net
             }
 
             return result;
+        }
+
+        public static async Task DownloadFileAsync(this HttpClient client, Uri url, Stream output, IProgress<double> progress)
+        {
+            using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"The request returned with HTTP status code {response.StatusCode}");
+                }
+                var total = response.Content.Headers.ContentLength ?? -1L;
+
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                {
+                    var totalRead = 0L;
+                    var buffer = new byte[81920]; // Default size from .NET docs on CopyTo
+                    while (true)
+                    {
+                        var read = await stream.ReadAsync(buffer, 0, buffer.Length);
+                        if (read == 0)
+                        {
+                            break;
+                        }
+                        await output.WriteAsync(buffer, 0, read);
+                        totalRead += read;
+                        // Can't report progress if there was no Content-Length
+                        if (total > 0)
+                        {
+                            progress?.Report(totalRead * 1d / (total * 1d) * 100);
+                        }
+                    }
+                    progress?.Report(100);
+                }
+            }
         }
     }
 }

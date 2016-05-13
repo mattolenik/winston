@@ -2,7 +2,7 @@ using System;
 
 namespace Winston
 {
-    public class Progress
+    public class Progress : IProgress<double>
     {
         public Action<int> UpdateInstall { get; set; } = _ => { };
 
@@ -19,5 +19,10 @@ namespace Winston
         internal int? Last { get; set; }
 
         internal string ProgressPrefix { get; set; }
+
+        public void Report(double value)
+        {
+            UpdateInstall((int)Math.Round(value));
+        }
     }
 }
