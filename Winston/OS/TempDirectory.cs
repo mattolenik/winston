@@ -6,7 +6,7 @@ namespace Winston.OS
     {
         public string Path { get; }
 
-        public TempDirectory(string prefix = "")
+        public TempDirectory(string prefix)
         {
             Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), prefix + System.IO.Path.GetRandomFileName());
             Directory.CreateDirectory(Path);

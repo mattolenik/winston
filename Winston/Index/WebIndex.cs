@@ -21,7 +21,6 @@ namespace Winston.Index
             var scheme = uri.Scheme.ToLowerInvariant();
             if (scheme != "http" && scheme != "https")
             {
-                // TODO: log here
                 return null;
             }
 

@@ -36,7 +36,7 @@ namespace Winston.Fetchers
                 var result = new TempPackage
                 {
                     Package = pkg,
-                    WorkDirectory = new TempDirectory(),
+                    WorkDirectory = new TempDirectory("winston"),
                     FileName = pkgUri.LastSegment()
                 };
 
