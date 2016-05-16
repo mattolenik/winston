@@ -14,16 +14,15 @@ namespace Winston.Fetchers
         public async Task<TempPackage> FetchAsync(Package pkg, Progress progress)
         {
             var result = new TempPackage { WorkDirectory = new TempDirectory("winston") };
-            var actualLocation = pkg.Location;
             using (var handler = new HttpClientHandler { AllowAutoRedirect = true })
             using (var client = NetUtils.HttpClient(handler))
-            using (var response = await client.GetAsync(actualLocation, HttpCompletionOption.ResponseHeadersRead))
+            using (var response = await client.GetAsync(pkg.Location, HttpCompletionOption.ResponseHeadersRead))
             {
                 result.MimeType = response.Content.Headers.ContentType?.MediaType;
 
                 // Try to get the right file name to give hints about the file type to the extractor
                 result.FileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('\"', '\\', '\'') ??
-                                  actualLocation.LastSegment() ??
+                                  pkg.Location.LastSegment() ??
                                   pkg.Filename ??
                                   "package";
 
