@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Winston
 {
-    public class Defer : IDisposable
+    public sealed class Defer : IDisposable
     {
         readonly Action action;
 

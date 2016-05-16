@@ -62,20 +62,20 @@ namespace Winston.OS
             {
                 // Be sure to send both Unicode and ANSI messages
                 IntPtr result;
-                WinApi.SendMessageTimeout(
-                    WinApi.HWND_BROADCAST,
-                    WinApi.WM_SETTINGCHANGE,
+                NativeMethods.SendMessageTimeout(
+                    NativeMethods.HWND_BROADCAST,
+                    NativeMethods.WM_SETTINGCHANGE,
                     UIntPtr.Zero,
                     lParamA,
-                    WinApi.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
+                    NativeMethods.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
                     50,
                     out result);
-                WinApi.SendMessageTimeout(
-                    WinApi.HWND_BROADCAST,
-                    WinApi.WM_SETTINGCHANGE,
+                NativeMethods.SendMessageTimeout(
+                    NativeMethods.HWND_BROADCAST,
+                    NativeMethods.WM_SETTINGCHANGE,
                     UIntPtr.Zero,
                     lParamU,
-                    WinApi.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
+                    NativeMethods.SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
                     50,
                     out result);
             }

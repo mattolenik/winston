@@ -2,7 +2,7 @@
 {
     public interface IConfigProvider
     {
-        string ResolvedWinstonDir { get; }
+        string GetWinstonDir();
         bool WriteRegistryPath { get; }
     }
 }

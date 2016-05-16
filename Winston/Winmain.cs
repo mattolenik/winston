@@ -52,10 +52,11 @@ namespace Winston
                             await BootstrapAsync(source, dest);
                             return 0;
                     }
-                    Directory.CreateDirectory(cfg.ResolvedWinstonDir);
+                    var winstonDir = cfg.GetWinstonDir();
+                    Directory.CreateDirectory(winstonDir);
 
-                    UniqifyWinstonDir(cfg.ResolvedWinstonDir);
-                    var repo = new Repo(user, cfg.ResolvedWinstonDir);
+                    UniqifyWinstonDir(winstonDir);
+                    var repo = new Repo(user, winstonDir);
                     return await Interpreter.RunCommandAsync(verb, verbArgs, user, repo, cfg);
                 }
             }

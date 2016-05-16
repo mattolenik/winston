@@ -13,7 +13,7 @@ namespace Winston
 
         public static async Task<int> RunCommandAsync(string verb, string[] verbArgs, UserProxy user, Repo repo, ConfigProvider cfg)
         {
-            using (var cache = await SqliteCache.CreateAsync(cfg.ResolvedWinstonDir, cfg.DefaultIndex))
+            using (var cache = await SqliteCache.CreateAsync(cfg.GetWinstonDir(), cfg.DefaultIndex))
             {
                 switch (verb)
                 {

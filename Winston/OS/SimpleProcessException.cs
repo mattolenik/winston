@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 
 namespace Winston.OS
 {
+    [Serializable]
     public class SimpleProcessException : Exception
     {
         static readonly string nl = Environment.NewLine;

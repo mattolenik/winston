@@ -5,7 +5,7 @@ using Winston.Packaging;
 
 namespace Winston.Fetchers
 {
-    public class TempPackage : IDisposable
+    public sealed class TempPackage : IDisposable
     {
         public Package Package { get; set; }
         public ITempItem WorkDirectory { get; set; }

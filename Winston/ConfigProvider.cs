@@ -8,23 +8,20 @@ namespace Winston
     {
         private Config Config;
 
-        public string ResolvedWinstonDir
+        public string GetWinstonDir()
         {
-            get
+            // This resolves even if configPath doesn't exist
+            var configDir = Path.GetDirectoryName(configPath);
+            if (configDir == null)
             {
-                // This resolves even if configPath doesn't exist
-                var configDir = Path.GetDirectoryName(configPath);
-                if (configDir == null)
-                {
-                    throw new InvalidOperationException($"{nameof(configDir)} should not be null");
-                }
-                var result = Path.GetFullPath(Path.Combine(configDir, Config.WinstonDir));
-                if (!Directory.Exists(result))
-                {
-                    throw new DirectoryNotFoundException($"{nameof(Config.WinstonDir)} did not resolve to a valid directory");
-                }
-                return result;
+                throw new InvalidOperationException($"{nameof(configDir)} should not be null");
             }
+            var result = Path.GetFullPath(Path.Combine(configDir, Config.WinstonDir));
+            if (!Directory.Exists(result))
+            {
+                throw new DirectoryNotFoundException($"{nameof(Config.WinstonDir)} did not resolve to a valid directory");
+            }
+            return result;
         }
 
         public bool WriteRegistryPath => Config.WriteRegistryPath;

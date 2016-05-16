@@ -48,10 +48,11 @@ namespace Winston
         /// <returns><c>true</c> if the string matches the given pattern; otherwise <c>false</c>.</returns>
         public static bool Like(this string str, string pattern)
         {
-            return new Regex(
+            return Regex.IsMatch(
+                str,
                 "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline
-            ).IsMatch(str);
+                );
         }
     }
 }
