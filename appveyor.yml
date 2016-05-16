@@ -24,13 +24,4 @@ test_script:
 artifacts:
 - path: winston_install\*\winston_install.exe
   name: Installer
-deploy:
-- provider: GitHub
-  tag: v$(appveyor_build_version)
-  release: Winston v$(appveyor_build_version)
-  auth_token:
-    secure: w+t0wzywwZ+lkCEM0C02sbug8hyng0w4vm5DLUhYu7eKI2ysVEC5pmhNAk5dLMsT
-  artifact: winston_install\Release\winston_install.exe
-  draft: true
-  prerelease: true
-  force_update: true
+deploy: off
