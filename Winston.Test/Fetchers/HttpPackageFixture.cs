@@ -16,6 +16,8 @@ namespace Winston.Test.Fetchers
             server = HttpMockRepository.At(new Uri(Prefix));
             var path = Path.Combine(Assembly.GetExecutingAssembly().Directory(), "testdata", "test-0.5.zip");
             server.Stub(x => x.Get("/realpkg")).AddHeader("Content-Disposition", "attachment; filename=test-0.5.zip").ReturnFile(path).OK();
+            server.Stub(x => x.Get("/realpkgnotype")).ReturnFile(path).OK();
+            server.Stub(x => x.Get("/test-0.5.zip")).ReturnFile(path).OK();
             server.Stub(x => x.Head("/realpkg")).Return("").OK();
             server.Stub(x => x.Get("/redirectedpkg"))
                 .Return("")

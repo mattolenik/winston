@@ -20,9 +20,11 @@ namespace Winston.Test.Fetchers
         }
 
         [Theory]
-        [InlineData("/realpkg")]
-        [InlineData("/redirectedpkg")]
-        public async Task CanFetch(string uri)
+        [InlineData("/realpkg", "test-0.5.zip")]
+        [InlineData("/redirectedpkg", "test-0.5.zip")]
+        [InlineData("/realpkgnotype", "package")]
+        [InlineData("/test-0.5.zip", "test-0.5.zip")]
+        public async Task CanFetch(string uri, string expectedFileName)
         {
             var fetcher = new HttpFetcher();
             var pkg = new Package
@@ -31,9 +33,10 @@ namespace Winston.Test.Fetchers
                 Location = new Uri(fixture.Prefix + uri)
             };
             var tmpPkg = await fetcher.FetchAsync(pkg, null);
-            var ext = new ArchiveExtractor();
+            tmpPkg.FileName.Should().Be(expectedFileName, "should have been inferred from content-disposition header");
             using (var tmpDir = new TempDirectory("winston-test-"))
             {
+                var ext = new ArchiveExtractor();
                 await ext.ExtractAsync(tmpPkg, tmpDir, null);
                 Directory.GetFiles(tmpDir).Should().Contain(f => f.Contains("test.exe"));
             }

@@ -20,10 +20,15 @@ namespace Winston.Fetchers
             {
                 result.MimeType = response.Content.Headers.ContentType?.MediaType;
 
+                var uriFileName = pkg.Location.LastSegment();
+                // Heuristic: assume the last path segment is a file name if it contains a dot for the file extension
+                if (!uriFileName.Contains('.'))
+                {
+                    uriFileName = null;
+                }
                 // Try to get the right file name to give hints about the file type to the extractor
                 result.FileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('\"', '\\', '\'') ??
-                                  pkg.Location.LastSegment() ??
-                                  pkg.Filename ??
+                                  uriFileName ??
                                   "package";
 
                 var total = response.Content.Headers.ContentLength ?? -1L;
