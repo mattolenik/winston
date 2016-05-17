@@ -33,7 +33,7 @@ namespace Winston.Test.Fetchers
                 Location = new Uri(fixture.Prefix + uri)
             };
             var tmpPkg = await fetcher.FetchAsync(pkg, null);
-            tmpPkg.FileName.Should().Be(expectedFileName, "should have been inferred from content-disposition header");
+            tmpPkg.FileName.Should().Be(expectedFileName, "should have been inferred from content-disposition header or URL");
             using (var tmpDir = new TempDirectory("winston-test-"))
             {
                 var ext = new ArchiveExtractor();
