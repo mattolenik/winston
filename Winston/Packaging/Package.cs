@@ -44,7 +44,7 @@ namespace Winston.Packaging
                 Maintainer = Maintainer ?? other.Maintainer,
                 Location = Location ?? other.Location,
                 Path = Path ?? other.Path,
-                Type = Type != PackageType.Nil ? Type : other.Type,
+                Type = Type != PackageType.Unspecified ? Type : other.Type,
                 Preserve = Preserve ?? other.Preserve,
                 Ignore = Ignore ?? other.Ignore,
                 Platform = Platform != Platform.Nil ? Platform : other.Platform,

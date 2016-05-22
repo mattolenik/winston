@@ -2,7 +2,7 @@ namespace Winston.Packaging
 {
     public enum PackageType
     {
-        Nil = -1,
+        Unspecified = 0,
         Archive,
         Binary,
         Setup,

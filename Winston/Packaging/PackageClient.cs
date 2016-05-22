@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using fastJSON;
 using Winston.Extractors;
 using Winston.Fetchers;
 using Winston.OS;
@@ -23,24 +22,20 @@ namespace Winston.Packaging
             new GithubFetcher()
         };
 
-        readonly IDictionary<PackageType, IEnumerable<IPackageExtractor>> extractors;
+        readonly Dictionary<PackageType, IPackageExtractor[]> extractors = new Dictionary<PackageType, IPackageExtractor[]>
+        {
+            {PackageType.Archive, new IPackageExtractor[] {new ArchiveExtractor()}},
+            {PackageType.Binary, new IPackageExtractor[] {new ExeExtractor()}},
+            {PackageType.Setup, new IPackageExtractor[] {new MsiExtractor()}},
+            {PackageType.LocalDirectory, new IPackageExtractor[] {new LocalDirectoryExtractor()}},
+            {PackageType.Unspecified, new IPackageExtractor[] {new ExeExtractor(), new ArchiveExtractor(), new MsiExtractor()}}
+        };
+
 
         public PackageClient(Package pkg, string pkgDir)
         {
             this.pkg = pkg;
             this.pkgDir = pkgDir;
-            var archive = new ArchiveExtractor();
-            var exe = new ExeExtractor();
-            var msi = new MsiExtractor();
-            var localDir = new LocalDirectoryExtractor();
-            extractors = new Dictionary<PackageType, IEnumerable<IPackageExtractor>>
-            {
-                {PackageType.Archive, new[] {archive}},
-                {PackageType.Binary, new[] {exe}},
-                {PackageType.Setup, new[] {msi}},
-                {PackageType.LocalDirectory, new[] {localDir}},
-                {PackageType.Nil, new IPackageExtractor[] {localDir, exe, archive, msi}}
-            };
         }
 
         public async Task<DirectoryInfo> InstallAsync(Progress progress)
