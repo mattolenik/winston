@@ -26,8 +26,7 @@ namespace Winston.Fetchers
                 var assets = json["assets"] as IList<object>;
                 var asset = NarrowAssets(assets, props);
                 var pkgUrlString = asset["browser_download_url"] as string;
-                Uri pkgUri;
-                if (!Uri.TryCreate(pkgUrlString, UriKind.Absolute, out pkgUri))
+                if (!Uri.TryCreate(pkgUrlString, UriKind.Absolute, out Uri pkgUri))
                 {
                     throw new UriFormatException($"Could not parse output from Github API, failed to parse URI: '{pkgUrlString}'");
                 }
