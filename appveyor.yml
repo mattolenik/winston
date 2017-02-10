@@ -1,5 +1,5 @@
 version: 0.1.0.{build}
-image: Visual Studio 2015
+image: Visual Studio 2017 RC
 configuration:
 - Release
 - Debug
@@ -12,7 +12,7 @@ assembly_info:
   assembly_informational_version: '{version}'
 before_build:
 - cmd: >-
-    set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
+    set PATH=C:\Program Files (x86)\MSBuild\15.0\Bin;%PATH%
 
     nuget restore
 build:
